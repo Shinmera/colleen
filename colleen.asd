@@ -38,3 +38,8 @@
                :lquery
                :alexandria
                :usocket))
+
+(defsystem colleen-doc
+  :name "Colleen Doc"
+  :components ((:file "documentation"))
+  :depends-on (:colleen :lquery-doc))
