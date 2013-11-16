@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.essentials
-  (:use :cl :colleen)
+  (:use :cl :colleen :local-time)
   (:shadowing-import-from :colleen :restart)
   (:shadow :shutdown))
 (in-package :org.tymoonnext.colleen.mod.essentials)
@@ -32,20 +32,14 @@
         (irc:send-raw msg))
     (error (err) (respond event "~a: Error during IRC command: ~a" (nick event) err))))
 
-(defcommand error (user channel args)
-  (error "Condition as per error function initiated by ~a in ~a with ~a" user channel args))
+(define-command (make-error error) essentials () ()
+  (error "Condition as per error function initiated by ~a in ~a." (nick event) (channel event)))
 
-(defcommand echo (user channel args)
-  (send-message channel (format nil "~{~a ~}" args)))
+(define-command echo essentials (&rest args) ()
+  (respond event "~{~a ~}" args))
 
-(defcommand time (user channel)
-  (multiple-value-bind
-	(second minute hour date month year day-of-week dst-p tz)
-	(get-decoded-time)
-    (declare (ignore dst-p))
-    (send-message channel 
-     (format nil "~a: It is now ~2,'0d:~2,'0d:~2,'0d, ~a the ~2,'0d/~2,'0d/~d (GMT~@d)"
-             user hour minute second
-             (nth day-of-week '("Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"))
-             year month date (- tz)))))
+(define-command (send-time time) essentials () ()
+  (respond event "~a: It is now ~a" (nick event)
+           (format-timestring NIL (now) :format 
+                              '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space :hour #\: :min #\: :sec #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
 
