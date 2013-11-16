@@ -31,7 +31,7 @@
                         :components ((:file "authenticate"))))
   :depends-on (:bordeaux-threads
                :drakma
-               :cl-json
+               :cl-json :yason
                :verbose
                :split-sequence
                :local-time
