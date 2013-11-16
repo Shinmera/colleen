@@ -85,6 +85,7 @@
    :active
    :start
    :stop
+   :get-module
    :add-command
    :add-handler
    :dispatch
