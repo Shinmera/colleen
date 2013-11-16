@@ -53,6 +53,7 @@
 
 (defun process-event (event)
   (loop for module being the hash-values of *bot-modules*
+     if (active module)
      do (dispatch module event))
 
   (labels ((make-command (message prefix)
@@ -77,11 +78,12 @@
         (when event
           (v:debug (name (server event)) "Received command: ~a ~a" (command event) (arguments event))
           (unless (loop for module being the hash-values of *bot-modules*
-                     for result = (dispatch module event)
+                     for result = (when (active module) (dispatch module event))
                      if result do (return T))
             (respond event (fstd-message event :no-command))))))))
 
 (define-module core () ())
+(start (get-module :core))
 
 (define-handler welcome core (welcome-event event)
   (let ((nickservpw (server-config (name (server event)) :nickservpw)))
