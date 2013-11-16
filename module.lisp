@@ -18,11 +18,15 @@
 (defmethod start :after ((module module))
   (setf (active module) T))
 
+(defmethod start ((module module)))
+
 (defgeneric stop (module)
   (:documentation "Stop the module and clean everything up."))
 
 (defmethod stop :before ((module module))
   (setf (active module) NIL))
+
+(defmethod stop ((module module)))
 
 (defgeneric add-command (module command method)
   (:documentation "Add a new command to the module."))
@@ -50,6 +54,9 @@
       (funcall handler module event)
       T)))
 
+(defun get-module (modulename)
+  (gethash modulename *bot-modules*))
+
 (defmacro define-module (name direct-superclasses direct-slots &rest options)
   "Define a new module."
   `(progn 
@@ -59,31 +66,36 @@
         (%commands :initform (make-hash-table :test 'equal) :reader commands :allocation :class)
         ,@direct-slots)
        ,@options)
-     (setf (gethash ',name *bot-modules*)
+     (setf (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*)
            (make-instance ',name))))
 
 (defmacro define-command (name module (&rest args) (&key (eventvar 'event) authorization) &body body)
   "Define a new command for a module."
-  (destructuring-bind (class &optional (varname class) (instance `(gethash ',class *bot-modules*))) (if (listp module) module (list module))
-    `(progn
-       (defmethod ,name ((,varname ,class) ,eventvar)
-         ,(when authorization
-            `(unless (auth-p (nick ,eventvar))
-               (error 'not-authorized :event ,eventvar)))
-         (handler-case
-             (destructuring-bind (,@args) (cmd-args ,eventvar)
-               ,@body)
-           ((or sb-kernel::arg-count-error 
-             sb-kernel::defmacro-lambda-list-broken-key-list-error
-             end-of-file) (err)
-             (declare (ignore err))
-             (error 'invalid-arguments :command ',name :argslist ',args))))
-       (add-command ,instance ',name #',name))))
+  (destructuring-bind (method &optional (command method)) (if (listp name) name (list name))
+    (destructuring-bind (class &optional (varname class) (instance `(get-module ,(find-symbol (string-upcase module) "KEYWORD")))) 
+        (if (listp module) module (list module))
+      `(progn
+         (defgeneric ,method (,class event))
+         (defmethod ,method ((,varname ,class) ,eventvar)
+           ,(when authorization
+                  `(unless (auth-p (nick ,eventvar))
+                     (error 'not-authorized :event ,eventvar)))
+           (handler-case
+               (destructuring-bind (,@args) (cmd-args ,eventvar)
+                 ,@body)
+             ((or sb-kernel::arg-count-error 
+               sb-kernel::defmacro-lambda-list-broken-key-list-error
+               end-of-file) (err)
+               (declare (ignore err))
+              (error 'invalid-arguments :command ',command :argslist ',args))))
+         (add-command ,instance ',command #',method)))))
 
 (defmacro define-handler (name module (event-type eventvar) &body body)
   "Define a new event handler for a module."
-  (destructuring-bind (class &optional (varname class) (instance `(gethash ',class *bot-modules*))) (if (listp module) module (list module))
+  (destructuring-bind (class &optional (varname class) (instance `(get-module ,(find-symbol (string-upcase module) "KEYWORD")))) 
+      (if (listp module) module (list module))
     `(progn
+       (defgeneric ,name (,class event))
        (defmethod ,name ((,varname ,class) ,eventvar)
          ,@body)
        (add-handler ,instance ',event-type #',name))))
