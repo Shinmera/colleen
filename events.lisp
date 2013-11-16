@@ -53,15 +53,15 @@
        ,(when event-or-code
               `(setf (gethash ,event-or-code *event-map*) ',name))
        ,(when structure
-          `(defmethod initialize-instance :after ((,eventvar ,name) &rest ,restvar)
-             (declare (ignore ,restvar))
-             (arguments-bind (,@structure) (arguments ,eventvar)
-               ,@(loop for var in varlist
-                    collect `(setf (slot-value ,eventvar ',(find-symbol (format NIL "%~a" var))) ,var))))
-          `(defmethod print-object ((,eventvar ,name) stream)
-             (print-unreadable-object (,eventvar stream :type T)
-               (format stream ,(format NIL "~{~a: ~~a~^ ~}" varlist)
-                       ,@(mapcar #'(lambda (var) `(,var ,eventvar)) varlist))))))))
+          `(progn (defmethod initialize-instance :after ((,eventvar ,name) &rest ,restvar)
+                    (declare (ignore ,restvar))
+                    (arguments-bind (,@structure) (arguments ,eventvar)
+                      ,@(loop for var in varlist
+                           collect `(setf (slot-value ,eventvar ',(find-symbol (format NIL "%~a" var))) ,var))))
+                  (defmethod print-object ((,eventvar ,name) stream)
+                    (print-unreadable-object (,eventvar stream :type T)
+                      (format stream ,(format NIL "~{~a: ~~a~^ ~}" varlist)
+                              ,@(mapcar #'(lambda (var) `(,var ,eventvar)) varlist)))))))))
 
 (defclass user-event (event)
     ((%username :initarg :username :reader username)
@@ -79,6 +79,10 @@
     (setf (slot-value event '%username) (prefix event)
           (slot-value event '%hostmask) (prefix event)
           (slot-value event '%nickname) (prefix event))))
+
+(defmethod print-object ((event user-event) stream)
+  (print-unreadable-object (event stream :type T)
+    (format stream "NICK: ~a USER: ~a HOST: ~a" (nick event) (username event) (hostmask event))))
 
 (define-event channel-event NIL (user-event)
     (channel)
@@ -118,6 +122,14 @@
 (define-event privmsg-event :PRIVMSG (channel-event)
     (channel message)
     (:documentation "Privmsg event."))
+
+(defmethod initialize-instance :after ((event privmsg-event) &rest rest)
+  (declare (ignore rest))
+  (with-slots ((channel %channel) (message %message)) event
+    (setf channel (first (arguments event))
+          message (second (arguments event)))
+    (unless (char= (aref channel 0) #\#)
+      (setf channel (nick event)))))
 
 (define-event join-event :JOIN (channel-event) ()
     (:documentation "User join event."))
