@@ -18,6 +18,8 @@
    :invalid-arguments
    :disconnect
    :connection-failed
+   :nickname-in-use
+   :not-authorized
    ;; REPLY-CODES
    :reply->keyword
    ;; CONFIG

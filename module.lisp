@@ -62,11 +62,14 @@
      (setf (gethash ',name *bot-modules*)
            (make-instance ',name))))
 
-(defmacro define-command (name module (eventvar &rest args) &body body)
+(defmacro define-command (name module (&rest args) (&key (eventvar 'event) authorization) &body body)
   "Define a new command for a module."
   (destructuring-bind (class &optional (varname class) (instance `(gethash ',class *bot-modules*))) (if (listp module) module (list module))
     `(progn
        (defmethod ,name ((,varname ,class) ,eventvar)
+         ,(when authorization
+            `(unless (auth-p (nick ,eventvar))
+               (error 'not-authorized :event ,eventvar)))
          (handler-case
              (destructuring-bind (,@args) (cmd-args ,eventvar)
                ,@body)

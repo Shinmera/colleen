@@ -14,28 +14,23 @@
 (define-module essentials ()
   ())
 
-(define-command reload essentials (event)
+(define-command reload essentials () (:authorization T)
   (when (auth-p (nick event))
     (respond event (fstd-message event :config-reload "Reloading configuration."))
     (load-config)))
 
-(define-command shutdown essentials (event)
+(define-command shutdown essentials () (:authorization T)
   (when (auth-p (nick event))
-    (broadcast (fstd-message event :shutdown))
+    (irc:broadcast (fstd-message event :shutdown))
     (loop for server being the hash-keys of *servers*
        do (disconnect server))))
 
-(defcommand restart (user channel)
-  (log:info "Restarting as per command...")
-  (standard-message channel :restart)
-  (error 'restart-error))
-
-(defcommand irc (user channel (action &rest args))
+(define-command irc essentials (action &rest args) (:authorization T)
   (handler-case 
       (let ((msg (format nil "~a~{ ~a~}" action args)))
-        (log:info "Sending raw IRC message: ~a" msg)
-        (trivial-irc:send-raw-message *con* msg))
-    (error (err) (send-message channel "~a: Error during IRC command: ~a" user err))))
+        (v:info :essentials "Sending raw IRC message: ~a" msg)
+        (irc:send-raw msg))
+    (error (err) (respond event "~a: Error during IRC command: ~a" (nick event) err))))
 
 (defcommand error (user channel args)
   (error "Condition as per error function initiated by ~a in ~a with ~a" user channel args))

@@ -89,16 +89,18 @@
      (%cmd-args :initarg :cmd-args :accessor cmd-args))
     (:documentation "Event for commands."))
 
-(defgeneric respond (event message)
+(defgeneric respond (event message &rest format-args)
   (:documentation "Respond to an event origin with the given message."))
 
-(defmethod respond ((event user-event) message)
-  (v:debug (name (server event)) "Replying to ~a: ~a" event message)
-  (privmsg (nick event) message :server (server event)))
+(defmethod respond ((event user-event) message &rest format-args)
+  (let ((message (apply #'format NIL message format-args)))
+    (v:debug (name (server event)) "Replying to ~a: ~a" event message)
+    (irc:privmsg (nick event) message :server (server event))))
 
-(defmethod respond ((event channel-event) message)
-  (v:debug (name (server event)) "Replying to ~a: ~a" event message)
-  (privmsg (channel event) message :server (server event)))
+(defmethod respond ((event channel-event) message &rest format-args)
+  (let ((message (apply #'format NIL message format-args)))
+    (v:debug (name (server event)) "Replying to ~a: ~a" event message)
+    (irc:privmsg (channel event) message :server (server event))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

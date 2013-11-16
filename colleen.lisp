@@ -42,9 +42,12 @@
           (process-event event)
         (disconnect (err)
           (error err))
+        (not-authorized (err)
+          (v:warn (name *current-server*) "User ~a attempted to execute ~a, but is not authorized!" (nick (event err)) (command (event err)))
+          (respond (event err) (fstd-message (event err) :not-authorized)))
         (invalid-arguments (err)
           (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
-          (respond event (format NIL "Invalid arguments. Expected: ~a" (argslist err))))
+          (respond event "Invalid arguments. Expected: ~a" (argslist err)))
         #|(error (err)
           (v:warn (name *current-server*) "Unhandled condition: ~a" err))|#))))
 

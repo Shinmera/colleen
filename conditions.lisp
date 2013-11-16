@@ -18,3 +18,10 @@
 (define-condition connection-failed (error)
   ((%server :initarg :server :reader failed-server)
    (%error :initarg :error :reader initial-error)))
+
+(define-condition nickname-in-use (error)
+  ((%server :initarg :server :reader failed-server)
+   (%nick :initarg :nick :reader nick)))
+
+(define-condition not-authorized (error)
+  ((%event :initarg :event :reader event)))

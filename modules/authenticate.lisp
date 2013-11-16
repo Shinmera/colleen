@@ -20,16 +20,18 @@
             (cons newnick (delete prevnick (auth-users (server event)) :test #'string=))))))
 
 (define-handler part-remove auth (part-event event)
-  (remove-from-auth (nick event) "PART"))
+  (when (auth-p (nick event))
+    (remove-from-auth (nick event) "PART")))
 
 (define-handler quit-remove auth (quit-event event)
-  (remove-from-auth (nick event) "QUIT"))
+  (when (auth-p (nick event))
+    (remove-from-auth (nick event) "QUIT")))
 
 (define-handler kick-remove auth (kick-event event)
-  (remove-from-auth (nick event) "KICK"))
+  (when (auth-p (nick event))
+    (remove-from-auth (nick event) "KICK")))
 
-
-(define-command logout auth (event)
+(define-command logout auth () ()
   (if (auth-p (nick event))
       (progn
         (remove-from-auth (nick event) "logout command")
@@ -39,7 +41,7 @@
 (defvar *pending-nickserv-auth* ())
 (defvar *nickserv-status-regex* (cl-ppcre:create-scanner "STATUS (.+) ([0-3])"))
 
-(define-command login auth (event &rest pw)
+(define-command login auth (&rest pw) ()
   (handler-case 
       (if (auth-p (nick event))
           (respond event (fstd-message event :auth-already))
