@@ -102,16 +102,17 @@
 
 (defun reconnect-loop (&optional (server *current-server*))
   "Handles disconnection conditions and automatically attempts to reconnect."
-  (handler-case 
-      (handler-bind
-          ((usocket:ns-try-again-condition 
-            #'(lambda (err)
-                (v:warn (name server) "Error encountered: ~a" err)
-                (reconnect server))))
-        (receive-loop server))
-    (disconnect (e)
-      (declare (ignore e))
-      (v:warn (name server) "Leaving reconnect-loop due to disconnect condition...")))
+  (flet ((on-error (err)
+           (v:warn (name server) "Error encountered: ~a" err)
+           (reconnect server)))
+    (handler-case 
+        (handler-bind
+            ((usocket:ns-try-again-condition #'on-error)
+             (cl:end-of-file #'on-error))
+          (receive-loop server))
+      (disconnect (e)
+        (declare (ignore e))
+        (v:warn (name server) "Leaving reconnect-loop due to disconnect condition..."))))
   (v:debug (name server) "Leaving reconnect loop."))
 
 ;; Adapted from trivial-irc
