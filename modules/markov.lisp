@@ -35,7 +35,8 @@
 
 (define-handler on-message markov (privmsg-event event)
   (when (char= (aref (channel event) 0) #\#)
-    (learn markov (message event))
+    (unless (char= (aref (message event) 0) #\!)
+      (learn markov (message event)))
 
     (when (< (random 100) (probability markov))
       (let ((wordlist (split-sequence:split-sequence #\Space (message event) :remove-empty-subseqs T)))
@@ -58,7 +59,7 @@
      (setf (probability markov) (parse-integer (first args) :junk-allowed T))
      (respond event "Probability set to ~a" (probability markov)))
     ((string-equal action "say")
-     (let ((message (generate-string markov (first args) (second args))))
+     (let ((message (generate-string markov (or (first args) "!NONWORD!") (or (second args) "!NONWORD!"))))
        (if message
            (respond event message)
            (respond event (fstd-message event :markov-nothing)))))
@@ -78,7 +79,7 @@
 
 (defgeneric generate-string (markov &optional word1 word2))
 (defmethod generate-string ((markov markov) &optional (word1 "!NONWORD!") (word2 "!NONWORD!"))
-  (let* ((output (if (eq word1 "!NONWORD!") "" (format NIL "~a ~a" word1 word2))))
+  (let* ((output (if (string= word1 "!NONWORD!") "" (format NIL "~a ~a" word1 word2))))
     (unless (string= word1 "!NONWORD!")
       (let ((wordlist (remove "!NONWORD!" (gethash output (registry markov)) :test #'string=)))
         (when wordlist
