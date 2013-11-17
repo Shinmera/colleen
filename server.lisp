@@ -90,7 +90,7 @@
     (with-accessors ((socket socket)) server
       (when socket
         (v:info (name server) "Disconnecting...")
-        (irc:quit :quit-message (or quit-message "#1=(quit . #1#)")))
+        (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server))
       (setf socket NIL)))
   (remhash (name server) *servers*))
 
