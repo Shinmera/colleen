@@ -12,6 +12,7 @@
 (in-package :org.tymoonnext.colleen.mod.notify)
 
 (defparameter *timestamp-format* '(:long-weekday #\Space (:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2)))
+(defparameter *save-file* (merge-pathnames "notify-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
 (define-module notify ()
   ((%notes :initarg :notes :initform () :accessor notes)))
@@ -35,10 +36,34 @@
   (save notify))
 
 (defmethod save ((notify notify))
-  )
+  (with-open-file (stream *save-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
+    (let ((newlist ()))
+      (dolist (note (notes notify))
+        (let ((table (make-hash-table :test 'equal)))
+          (setf (gethash "message" table) (message note))
+          (setf (gethash "sender" table) (sender note))
+          (setf (gethash "nick" table) (nick note))
+          (setf (gethash "channel" table) (channel note))
+          (setf (gethash "server" table) (server note))
+          (setf (gethash "timestamp" table) (timestamp note))
+          (push table newlist)))
+      (yason:encode (nreverse newlist) stream))))
 
 (defmethod load ((notify notify))
-  )
+  (with-open-file (stream *save-file* :if-does-not-exist NIL)
+    (when stream
+      (let ((notes (yason:parse stream))
+            (newlist ()))
+        (dolist (note notes)
+          (push (make-instance
+                 'note
+                 :message (gethash "message" note)
+                 :sender (gethash "sender" note)
+                 :nick (gethash "nick" note)
+                 :channel (gethash "channel" note)
+                 :server (gethash "server" note)
+                 :timestamp (gethash "timestamp" note)) newlist)
+          (setf (notes notify) (nreverse newlist)))))))
 
 (define-command (make-note notify) notify (recipient &rest message) ()
   (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
