@@ -10,7 +10,7 @@
   (:shadowing-import-from :colleen :restart))
 (in-package :org.tymoonnext.colleen.mod.markov)
 
-(defvar *registry-file* (merge-pathnames "markov-registry.json" (asdf:system-source-directory :colleen)))
+(defvar *registry-file* (merge-pathnames "markov-registry.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
 (define-module markov ()
   ((%probability :initarg :probability :initform 25 :accessor probability)
