@@ -94,22 +94,19 @@
       (setf socket NIL)))
   (remhash (name server) *servers*))
 
-(defun reconnect (server)
-  (v:warn (name server) "Connection lost, attempting reconnect in 5s...")
-  (sleep 5)
-  (connect server :start-thread NIL)
-  (invoke-restart 'continue))
-
 (defun reconnect-loop (&optional (server *current-server*))
   "Handles disconnection conditions and automatically attempts to reconnect."
   (flet ((on-error (err)
            (v:warn (name server) "Error encountered: ~a" err)
-           (reconnect server)))
+           (v:warn (name server) "Connection lost, attempting reconnect in 5s...")
+           (sleep 5)
+           (connect server)))
     (handler-case 
-        (handler-bind
-            ((usocket:ns-try-again-condition #'on-error)
-             (cl:end-of-file #'on-error))
-          (receive-loop server))
+        (receive-loop server)
+      (usocket:ns-try-again-condition (e)
+        (on-error e))
+      (cl:end-of-file (e)
+        (on-error e))
       (disconnect (e)
         (declare (ignore e))
         (v:warn (name server) "Leaving reconnect-loop due to disconnect condition..."))))
