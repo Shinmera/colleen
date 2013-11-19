@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.essentials
-  (:use :cl :colleen :local-time)
+  (:use :cl :colleen :local-time :alexandria)
   (:shadowing-import-from :colleen :restart)
   (:shadow :shutdown))
 (in-package :org.tymoonnext.colleen.mod.essentials)
@@ -43,3 +43,21 @@
            (format-timestring NIL (now) :format 
                               '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space :hour #\: :min #\: :sec #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
 
+(define-group module essentials (:documentation "Manage bot modules."))
+
+(define-command (%start start) essentials (module-name) (:group 'module :authorization T :documentation "Start up a module.")
+  (handler-case
+      (progn (start-module (find-symbol (string-upcase module-name) "KEYWORD"))
+             (respond event "Module started."))
+    (error (err)
+      (respond event "Error: ~a" err))))
+
+(define-command (%stop stop) essentials (module-name) (:group 'module :authorization T :documentation "Stop a module.")
+  (handler-case
+      (progn (stop-module (find-symbol (string-upcase module-name) "KEYWORD"))
+             (respond event "Module stopped."))
+    (error (err)
+      (respond event "Error: ~a" err))))
+
+(define-command (%list list) essentials () (:group 'module :authorization T :documentation "List available modules.")
+  (respond event "Modules: ~{~a~^ ~}" (hash-table-keys *bot-modules*)))
