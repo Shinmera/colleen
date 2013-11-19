@@ -28,7 +28,10 @@
                (:file "colleen")
                (:file "launcher")
                (:module "modules"
-                        :components ((:file "authenticate"))))
+                        :components ((:file "authenticate")
+                                     (:file "essentials")
+                                     (:file "notify")
+                                     (:file "markov"))))
   :depends-on (:bordeaux-threads
                :drakma
                :cl-json :yason
