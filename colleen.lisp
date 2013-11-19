@@ -7,16 +7,16 @@
 (in-package :org.tymoonnext.colleen)
 
 (defun start-module (module-name)
-  (let ((module (gethash module-name *bot-modules*)))
+  (let ((module (get-module module-name)))
     (assert (not (null module)) () "Module ~a not found!" module-name)
-    (v:info (intern (string-upcase (format NIL "MODULE.~a" module-name))) "Starting...")
+    (v:info module-name "Starting...")
     (start module)
     module))
 
 (defun stop-module (module-name)
-  (let ((module (gethash module-name *bot-modules*)))
+  (let ((module (get-module module-name)))
     (assert (not (null module)) () "Module ~a not found!" module-name)
-    (v:info (intern (string-upcase (format NIL "MODULE.~a" module-name))) "Stopping...")
+    (v:info module-name "Stopping...")
     (stop module)
     module))
 
@@ -86,6 +86,7 @@
 (start (get-module :core))
 
 (define-handler welcome core (welcome-event event)
+  (v:info (name (server event)) "Got welcome, joining channels.")
   (let ((nickservpw (server-config (name (server event)) :nickservpw)))
     (when nickservpw
       (v:info (name (server event)) "Sending Nickserv: IDENTIFY ~a" nickservpw)
