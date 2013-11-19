@@ -85,11 +85,15 @@
    :active
    :start
    :stop
-   :get-module
+   :add-group
+   :add-group-command
    :add-command
    :add-handler
    :dispatch
+   :get-module
+   :display-help
    :define-module
+   :define-group
    :define-command
    :define-handler
    ;; SERVER
