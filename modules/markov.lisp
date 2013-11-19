@@ -45,26 +45,31 @@
             (when (and response (not (string= (message event) response)))
               (respond event response))))))))
 
-(define-command markov markov (&optional action &rest args) (:authorization T)
-  (cond
-    ((string-equal action "ignore")
-     (pushnew (first args) (ignored-users markov) :test #'string-equal)
-     (respond event "User ~a has been put on the ignore list." (first args)))
-    ((string-equal action "unignore")
-     (setf (ignored-users markov) (delete (first args) (ignored-users markov) :test #'string-equal))
-     (respond event "User ~a has been removed from the ignore list." (first args)))
-    ((string-equal action "list-ignored")
-     (respond event "Ignored users: ~:[None~;~:*~{~a~^, ~}~]" (ignored-users markov)))
-    ((string-equal action "probability")
-     (setf (probability markov) (parse-integer (first args) :junk-allowed T))
-     (respond event "Probability set to ~a" (probability markov)))
-    ((string-equal action "say")
-     (let ((message (generate-string markov (or (first args) "!NONWORD!") (or (second args) "!NONWORD!"))))
-       (if message
-           (respond event message)
-           (respond event (fstd-message event :markov-nothing)))))
-    (T
-     (respond event "Possible commands: ignore <nick>, unignore <nick>, list-ignored, probability <n>, say [seed1] [seed2]"))))
+(define-group markov markov (:documentation "Interact with the markov chain."))
+
+(define-command (%ignore ignore) markov (&rest nicks) (:authorization T :group 'markov :documentation "Add users to the ignore list.")
+  (dolist (nick nicks)
+    (pushnew nick (ignored-users markov) :test #'string-equal))
+  (respond event "Users have been put on the ignore list.")))
+
+(define-command unignore markov (&rest nicks) (:authorization T :group 'markov :documentation "Remove users from the ignore list.")
+  (setf (ignored-users markov) 
+        (delete-if #'(lambda (nick) (find nick nicks :test #'string-equal)) (ignored-users markov)))
+  (respond event "Users have been removed from the ignore list.")))
+
+(define-command list-ignored markov () (:authorization T :group 'markov :documentation "List all ignored users.")
+  (respond event "Ignored users: ~:[None~;~:*~{~a~^, ~}~]" (ignored-users markov)))
+
+(define-command (%probability probability) markov (&optional new-value) (:authorization T :group 'markov :documentation "Set or view the probability of invoking markov.")
+  (when new-value
+    (setf (probability markov) (parse-integer new-value :junk-allowed T)))
+  (respond event "Probability: ~a" (probability markov)))
+
+(define-command say markov (&optional arg1 arg2) (:group 'markov :documentation "Let the bot say something.")
+  (let ((message (generate-string markov (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))))
+    (if message
+        (respond event message)
+        (respond event (fstd-message event :markov-nothing)))))
 
 (defmethod learn ((markov markov) message)
   (let ((wordlist (split-sequence:split-sequence #\Space message :remove-empty-subseqs T)))
