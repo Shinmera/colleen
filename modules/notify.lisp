@@ -81,7 +81,7 @@
 (define-handler notifier notify (privmsg-event event)
   (let ((newlist ()))
     (dolist (note (notes notify))
-      (if (and (string= (nick event) (nick note))
+      (if (and (string-equal (nick event) (nick note))
                (string= (channel event) (channel note))
                (string= (string-upcase (name (server event))) (server note)))
           (progn (v:debug :notify "Delivering note ~a." note)
