@@ -50,12 +50,12 @@
 (define-command (%ignore ignore) markov (&rest nicks) (:authorization T :group 'markov :documentation "Add users to the ignore list.")
   (dolist (nick nicks)
     (pushnew nick (ignored-users markov) :test #'string-equal))
-  (respond event "Users have been put on the ignore list.")))
+  (respond event "Users have been put on the ignore list."))
 
 (define-command unignore markov (&rest nicks) (:authorization T :group 'markov :documentation "Remove users from the ignore list.")
   (setf (ignored-users markov) 
         (delete-if #'(lambda (nick) (find nick nicks :test #'string-equal)) (ignored-users markov)))
-  (respond event "Users have been removed from the ignore list.")))
+  (respond event "Users have been removed from the ignore list."))
 
 (define-command list-ignored markov () (:authorization T :group 'markov :documentation "List all ignored users.")
   (respond event "Ignored users: ~:[None~;~:*~{~a~^, ~}~]" (ignored-users markov)))
