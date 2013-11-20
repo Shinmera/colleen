@@ -103,9 +103,12 @@
            (connect server)))
     (handler-case 
         (receive-loop server)
-      (usocket:ns-try-again-condition (e)
-        (on-error e))
-      (cl:end-of-file (e)
+      ((or usocket:ns-try-again-condition 
+        usocket:timeout-error 
+        usocket:shutdown-error
+        usocket:connection-reset-error
+        usocket:connection-aborted-error
+        cl:end-of-file) (e)
         (on-error e))
       (disconnect (e)
         (declare (ignore e))
