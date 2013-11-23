@@ -43,7 +43,7 @@
         (when (cdr wordlist)
           (let ((response (generate-string markov (first wordlist) (second wordlist))))
             (when (and response (not (string= (message event) response)))
-              (respond event response))))))))
+              (respond event "~a" response))))))))
 
 (define-group markov markov (:documentation "Interact with the markov chain."))
 
@@ -66,9 +66,10 @@
   (respond event "Probability: ~a" (probability markov)))
 
 (define-command say markov (&optional arg1 arg2) (:group 'markov :documentation "Let the bot say something.")
+  (if (and arg1 (not arg2)) (setf arg2 arg1 arg1 "!NONWORD!"))
   (let ((message (generate-string markov (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))))
-    (if message
-        (respond event message)
+    (if (and message (> (length message) 1))
+        (respond event "~a" message)
         (respond event (fstd-message event :markov-nothing)))))
 
 (defmethod learn ((markov markov) message)
