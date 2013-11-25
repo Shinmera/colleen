@@ -31,7 +31,8 @@
                         :components ((:file "authenticate")
                                      (:file "essentials")
                                      (:file "notify")
-                                     (:file "markov"))))
+                                     (:file "markov")
+                                     (:file "stevenchan"))))
   :depends-on (:bordeaux-threads
                :drakma
                :cl-json :yason
