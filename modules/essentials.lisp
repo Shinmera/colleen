@@ -14,27 +14,35 @@
 (define-module essentials ()
   ())
 
-(define-command reload essentials () (:authorization T)
+(define-command reload essentials () (:authorization T :documentation "Reload the configuration.")
   (when (auth-p (nick event))
     (respond event (fstd-message event :config-reload "Reloading configuration."))
     (load-config)))
 
-(define-command shutdown essentials () (:authorization T)
+(define-command shutdown essentials () (:authorization T :documentation "Disconnect from all servers.")
   (when (auth-p (nick event))
     (irc:broadcast (fstd-message event :shutdown))
     (loop for server being the hash-keys of *servers*
        do (disconnect server))))
 
-(define-command (make-error error) essentials () ()
+(define-command (make-error error) essentials () (:documentation "Simulate a condition.")
   (error "Condition as per error function initiated by ~a in ~a." (nick event) (channel event)))
 
-(define-command echo essentials (&rest args) ()
+(define-command echo essentials (&rest args) (:documentation "Echo back the arguments.")
   (respond event "~{~a ~}" args))
 
-(define-command (send-time time) essentials () ()
+(define-command (send-time time) essentials () (:documentation "Show the current bot-local time.")
   (respond event "~a: It is now ~a" (nick event)
            (format-timestring NIL (now) :format 
                               '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space :hour #\: :min #\: :sec #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
+
+(define-command help essentials (command) (:documentation "Display help on a command.")
+  (loop for module being the hash-values of *bot-modules*
+     do (when (active module)
+          (let ((method (gethash (string-downcase command) (colleen::commands module))))
+            (when method
+              (respond event (documentation method 'FUNCTION))
+              (return NIL))))))
 
 ;; MODULE COMMANDS
 (define-group module essentials (:documentation "Manage bot modules."))
