@@ -74,7 +74,8 @@
             (make-thread #'(lambda ()
                              (v:info (name *current-server*) "Starting read-thread.")
                              (reconnect-loop)) 
-                         :initial-bindings `((*current-server* . ,server)))))
+                         :initial-bindings `((*current-server* . ,server)
+                                             (*servers* . ,*servers*)))))
     server))
 
 (defmethod disconnect ((server symbol) &key (quit-message (config-tree :messages :quit)))
