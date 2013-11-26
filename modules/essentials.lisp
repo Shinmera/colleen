@@ -61,8 +61,14 @@
     (error (err)
       (respond event "Error: ~a" err))))
 
-(define-command (%list list) essentials () (:group 'module :authorization T :documentation "List available modules.")
+(define-command (%list list) essentials () (:group 'module :documentation "List available modules.")
   (respond event "Modules: ~{~a~^ ~}" (hash-table-keys *bot-modules*)))
+
+(define-command (%module-help help) essentials (module) (:group 'module :documentation "Show the docstring for a module.")
+  (let ((instance (get-module (find-symbol (string-upcase module) "KEYWORD"))))
+    (if instance
+        (respond event "~a: ~a" module (or (documentation (class-of instance) T) "No help available."))
+        (respond event "No such module \"~a\"." module))))
 
 ;; IRC COMMANDS
 (define-group irc essentials (:documentation "Manage IRC commands."))
