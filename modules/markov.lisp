@@ -15,7 +15,8 @@
 (define-module markov ()
   ((%probability :initarg :probability :initform 25 :accessor probability)
    (%ignored-users :initarg :ignored-users :initform () :accessor ignored-users)
-   (%registry :initarg :registry :initform (make-hash-table :test 'equal) :accessor registry)))
+   (%registry :initarg :registry :initform (make-hash-table :test 'equal) :accessor registry))
+  (:documentation "Simple markov chain module."))
 
 (defmethod start ((markov markov))
   (if (config-tree :markov :probability)
