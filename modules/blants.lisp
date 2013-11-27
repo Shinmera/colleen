@@ -20,7 +20,7 @@
      until (find (aref string i) '(#\a #\e #\i #\o #\u))
      finally (return (subseq string i))))
 
-(define-handler msghandler blants (privmsg-event event)
+(define-handler blants (privmsg-event event)
   (cl-ppcre:register-groups-bind (name) (*thanks-match* (message event))
     (sleep 2)
     (respond event "...Th~a" (cut-to-first-vocal name)))

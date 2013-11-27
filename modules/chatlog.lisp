@@ -66,22 +66,22 @@
                                       ("type" . ,type)
                                       ("message" . ,message)))))
 
-(define-group chatlog chatlog (:documentation "Change chatlog settings."))
+(define-group chatlog chatlog :documentation "Change chatlog settings.")
 
-(define-command (activate-log acivate) chatlog (&optional channel server) (:authorization T :group 'chatlog :documentation "Activate logging for a channel.")
+(define-command (chatlog acivate) chatlog (&optional channel server) (:authorization T :documentation "Activate logging for a channel.")
   (unless channel (setf channel (channel event)))
   (unless server (setf server (name (server event))))
   (pushnew (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal)
   (respond event "Activated logging for ~a/~a" server channel))
 
-(define-command (deactivate-log deactivate) chatlog (&optional channel server) (:authorization T :group 'chatlog :documentation "Deactivate logging for a channel.")
+(define-command (chatlog deactivate) chatlog (&optional channel server) (:authorization T :documentation "Deactivate logging for a channel.")
   (unless channel (setf channel (channel event)))
   (unless server (setf server (name (server event))))
   (setf (active-in chatlog)
         (delete (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal))
   (respond event "Deactivated logging for ~a/~a" server channel))
 
-(define-command (reconnect-db reconnect) chatlog (&optional db host port user pass) (:authorization T :group 'chatlog :documentation "Restart connection to the database.")
+(define-command (chatlog reconnect) chatlog (&optional db host port user pass) (:authorization T :documentation "Restart connection to the database.")
   (disconnect-db chatlog)
   (connect-db chatlog 
               :db (or db (db chatlog)) 
@@ -90,20 +90,20 @@
               :user (or user (user chatlog)) 
               :pass (or pass (pass chatlog))))
 
-(define-handler privmsg-handler chatlog (privmsg-event event)
+(define-handler chatlog (privmsg-event event)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (message event)))
 
-(define-handler quit-handler chatlog (quit-event event)
+(define-handler chatlog (quit-event event)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "q" (format NIL " ** QUIT ~a" (message event))))
 
-(define-handler part-handler chatlog (part-event event)
+(define-handler chatlog (part-event event)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "p" " ** PART"))
 
-(define-handler join-handler chatlog (join-event event)
+(define-handler chatlog (join-event event)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "j" " ** JOIN"))
 
-(define-handler mode-handler chatlog (mode-event event)
+(define-handler chatlog (mode-event event)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (format NIL " ** MODE ~a" (mode event))))
 
-(define-handler topic-handler chatlog (topic-event event)
+(define-handler chatlog (topic-event event)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "t" (format NIL " ** TOPIC ~a" (topic event))))

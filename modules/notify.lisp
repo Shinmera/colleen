@@ -65,7 +65,7 @@
                  :timestamp (gethash "timestamp" note)) newlist)
           (setf (notes notify) (nreverse newlist)))))))
 
-(define-command (make-note notify) notify (recipient &rest message) ()
+(define-command notify notify (recipient &rest message) ()
   (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
   (appendf (notes notify) 
            (list (make-instance 
@@ -78,7 +78,7 @@
                   :timestamp (format-timestring NIL (now) :format *timestamp-format*))))
   (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))
 
-(define-handler notifier notify (privmsg-event event)
+(define-handler notify (privmsg-event event)
   (let ((newlist ()))
     (dolist (note (notes notify))
       (if (and (string-equal (nick event) (nick note))

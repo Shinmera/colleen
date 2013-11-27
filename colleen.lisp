@@ -87,7 +87,7 @@
 (define-module core () ())
 (start (get-module :core))
 
-(define-handler welcome core (welcome-event event)
+(define-handler core (welcome-event event)
   (v:info (name (server event)) "Got welcome, joining channels.")
   (let ((nickservpw (server-config (name (server event)) :nickservpw)))
     (when nickservpw
@@ -98,5 +98,5 @@
      do (irc:join chan)
        (irc:privmsg chan (standard-message :join))))
 
-(define-handler ping-reply core (ping-event event)
+(define-handler core (ping-event event)
   (irc:pong (server1 event)))

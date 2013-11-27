@@ -85,6 +85,10 @@
    :active
    :start
    :stop
+   :command
+   :docu
+   :cmd-args
+   :cmd-fun
    :add-group
    :add-group-command
    :add-command
