@@ -18,11 +18,11 @@
      (%log-loop :initarg :log-loop :initform NIL :accessor log-loop))
   (:documentation "Module related to Encyclopedia Dramatica activities."))
 
-(define-group ed dramatica :documentation "Interact or change ED settings.")
+(define-group ed :documentation "Interact or change ED settings.")
 
 ;;;;;;;;;;;; RECENT CHANGES
 
-(define-command (ed recent-changes) dramatica (&optional start-or-stop) (:authorization T :documentation "Start or stop the recent-changes polling.")
+(define-command (ed recent-changes) (&optional start-or-stop) (:authorization T :documentation "Start or stop the recent-changes polling.")
   (cond
     ((string-equal start-or-stop "start")
      (if (log-loop dramatica)
@@ -105,6 +105,6 @@
 
 ;;;;;;;;;;;; OTHER COMMANDS
 
-(define-command (ed login) dramatica (username password) (:authorization T :documentation "Log in to the wiki.")
+(define-command (wiki login) (username password) (:authorization T :documentation "Log in to the wiki.")
   )
 

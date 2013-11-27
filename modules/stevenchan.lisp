@@ -38,7 +38,7 @@
          (link (string-trim " " ($ node "link" (text) (node)))))
     (list id author link)))
 
-(define-group stevenchan stevenchan :documentation "Interact with Stevenchan.")
+(define-group stevenchan :documentation "Interact with Stevenchan.")
 
-(define-command (stevenchan latest) stevenchan (&optional board) (:documentation "Get the latest post.")
+(define-command (stevenchan latest) (&optional board) (:documentation "Get the latest post." :modulevar stevenchan)
   (apply #'respond event "#~a by ~a: ~a" (most-recent stevenchan)))

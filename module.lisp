@@ -13,6 +13,9 @@
    (%groups :initform (make-hash-table) :reader groups :allocation :class))
   (:documentation "Base module class."))
 
+(defmethod print-object (module stream)
+  (format stream "<[~a]>" (class-name (class-of module))))
+
 (defclass command ()
   ((%name :initform (error "Name required.") :initarg :name :accessor name)
    (%args :initform () :initarg :arguments :accessor cmd-args)
@@ -34,9 +37,11 @@
   (:documentation "Add a new event handler to the module."))
 (defgeneric dispatch (module event)
   (:documentation "Handle a new event and distribute it to the registered handler functions."))
-(defgeneric get-group (module groupname)
+(defgeneric get-command (module commandname)
+  (:documentation "Get the command instance associated with the command name."))
+(defgeneric get-group (module group-symbol)
   (:documentation "Return the hash-map defining the group."))
-(defgeneric get-group-command (module groupname commandname)
+(defgeneric get-group-command (module group-symbol commandname)
   (:documentation "Return the function symbol to the group-command."))
 
 (defmethod start :after ((module module))
@@ -66,10 +71,17 @@
 (defmethod add-handler ((module module) eventtype method)
   (setf (gethash (string-downcase eventtype) (handlers module)) method))
 
+(defmethod dispatch ((module T) (event event))
+  (loop for module being the hash-values of *bot-modules*
+     if (active module)
+     do (when (dispatch module event)
+          (return-from dispatch))))
+
 (defmethod dispatch ((module module) (event event))
   (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
     (when handler
-      (funcall handler module event))))
+      (funcall handler module event)
+      NIL)))
 
 (defmethod dispatch ((module module) (event command-event))
   (let ((handler (gethash (command event) (commands module))))
@@ -77,16 +89,27 @@
       (funcall (cmd-fun handler) module event)
       T)))
 
-(defmethod get-group ((module module) groupname)
-  (gethash groupname (groups module)))
+(defmethod get-command ((module module) commandname)
+  (gethash (string-downcase commandname) (commands module)))
 
-(defmethod get-group-command ((module module) groupname commandname)
-  (let ((group (get-group module groupname)))
+(defmethod get-group ((module module) group-symbol)
+  (gethash group-symbol (groups module)))
+
+(defmethod get-group-command ((module module) group-symbol commandname)
+  (let ((group (get-group module group-symbol)))
     (when group (gethash commandname group))))
 
 (defun get-module (modulename)
   "Return a module by its keyword name."
   (gethash modulename *bot-modules*))
+
+(defun package-symbol (package)
+  (let ((name (package-name package)))
+    (or (find-symbol name "KEYWORD")
+        (intern name "KEYWORD"))))
+
+(defun get-current-module (&optional (package *package*))
+  (get (package-symbol package) :module))
 
 (defun display-help (module group event)
   "Responds with help about a specific command or the entire group."
@@ -96,30 +119,32 @@
           (respond event "~a" (docu group-command))
           (respond event "USAGE: ~a ~a ~{~a~^ ~}" group (name group-command) (cmd-args group-command))))
       (progn
-        (respond event (docu (gethash group (commands module))))
+        (respond event (docu (get-command module group)))
         (respond event "Commands: ~{~a ~}" (hash-table-keys (get-group module group))))))
 
 (defmacro define-module (name direct-superclasses direct-slots &body options)
   "Define a new module."
-  `(progn 
-     (defclass ,name (module ,@direct-superclasses)
-       ((%active :initform NIL :reader active :allocation :class)
-        (%handlers :initform (make-hash-table :test 'equal) :reader handlers :allocation :class)
-        (%commands :initform (make-hash-table :test 'equal) :reader commands :allocation :class)
-        (%groups :initform (make-hash-table) :reader groups :allocation :class)
-        ,@direct-slots)
-       ,@options)
-     (setf (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*)
-           (make-instance ',name))))
+  (let ((instancesym (gensym "INSTANCE")))
+    `(progn 
+       (defclass ,name (module ,@direct-superclasses)
+         ((%active :initform NIL :reader active :allocation :class)
+          (%handlers :initform (make-hash-table :test 'equal) :reader handlers :allocation :class)
+          (%commands :initform (make-hash-table :test 'equal) :reader commands :allocation :class)
+          (%groups :initform (make-hash-table) :reader groups :allocation :class)
+          ,@direct-slots)
+         ,@options)
+       (let ((,instancesym (make-instance ',name)))
+         (setf (get (package-symbol *package*) :module) ,instancesym
+               (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*) ,instancesym)))))
 
-(defmacro define-group (name module &key documentation)
+(defmacro define-group (name &key (module `(get-current-module)) documentation)
   "Define a new command group for a module."
-  (destructuring-bind (method &optional (command method)) (if (listp name) name (list name))
-    (let ((instance `(get-module ,(find-symbol (string-upcase module) "KEYWORD"))))
+  (let ((documentation (if documentation (format NIL "~a (Group)" documentation) "(Group)")))
+    (destructuring-bind (method &optional (command method)) (if (listp name) name (list name))
       `(progn
-         (add-group ,instance ',command)
+         (add-group ,module ',command)
          (add-command 
-          ,instance ',command '(&rest rest) 
+          ,module ',command '(&rest rest) 
           #'(lambda (module event)
               (let* ((subcmd (or (first (cmd-args event)) "help"))
                      (command (gethash subcmd (gethash ',command (groups module)))))
@@ -129,23 +154,22 @@
                       (setf (cmd-args event) (cdr (cmd-args event)))
                       (funcall (cmd-fun command) module event))
                     (progn
-                      (v:debug ,(find-symbol (string-upcase module) "KEYWORD") "No method found for ~a!" subcmd)
+                      (v:debug :colleen "~a No method found for ~a!" module subcmd)
                       (respond event (fstd-message event :no-command))))))
           ,documentation)
-         (define-command (,command help) ,module (&rest args) (:documentation "Display command information.")
+         (define-command (,command help) (&rest args) (:documentation "Display command information." :module ,module :modulevar module)
            (declare (ignore args))
-           (display-help ,module ',command event))))))
+           (display-help module ',command event))))))
 
-(defmacro define-command (name module (&rest args) (&key (eventvar 'event) authorization documentation) &body body)
+(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) (module `(get-current-module)) (modulevar 'module)) &body body)
   "Define a new command for a module."
   (destructuring-bind (group &optional (name group n-s-p)) (if (listp name) name (list name))
     (unless n-s-p (setf group NIL))
-    (let ((instance `(get-module ,(find-symbol (string-upcase module) "KEYWORD")))
-          (methodgens (gensym "METHOD"))
+    (let ((methodgens (gensym "METHOD"))
           (errgens (gensym "ERROR")))
       `(let ((,methodgens
-              (lambda (,module ,eventvar)
-                (declare (ignorable ,module))
+              (lambda (,modulevar ,eventvar)
+                (declare (ignorable ,modulevar))
                 ,(when authorization
                        `(unless (auth-p (nick ,eventvar))
                           (error 'not-authorized :event ,eventvar)))
@@ -158,15 +182,14 @@
                     (declare (ignore ,errgens))
                    (error 'invalid-arguments :command ',name :argslist ',args))))))
          ,(if group
-              `(add-group-command ,instance ',group ',name ',args ,methodgens ,documentation)
-              `(add-command ,instance ',name ',args ,methodgens ,documentation))))))
+              `(add-group-command ,module ',group ',name ',args ,methodgens ,documentation)
+              `(add-command ,module ',name ',args ,methodgens ,documentation))))))
 
-(defmacro define-handler (module (event-type &optional (eventvar event-type)) &body body)
+(defmacro define-handler (event-type (&key (module `(get-current-module)) (modulevar 'module)) &body body)
   "Define a new event handler for a module."
-  (destructuring-bind (class &optional (varname class) (instance `(get-module ,(find-symbol (string-upcase class) "KEYWORD")))) 
-      (if (listp module) module (list module))
+  (destructuring-bind (event-type &optional (eventvar event-type)) (if (listp event-type) event-type (list event-type))
     `(add-handler 
-      ,instance ',event-type
-      (lambda (,varname ,eventvar)
-        (declare (ignorable ,varname))
+      ,module ',event-type
+      (lambda (,modulevar ,eventvar)
+        (declare (ignorable ,modulevar))
         ,@body))))

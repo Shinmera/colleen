@@ -34,7 +34,7 @@
   (with-open-file (stream *registry-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
     (cl-json:encode-json (registry markov) stream)))
 
-(define-handler markov (privmsg-event event)
+(define-handler (privmsg-event event) (:modulevar markov)
   (when (char= (aref (channel event) 0) #\#)
     (unless (char= (aref (message event) 0) #\!)
       (learn markov (message event)))
@@ -46,29 +46,29 @@
             (when (and response (not (string= (message event) response)))
               (respond event "~a" response))))))))
 
-(define-group markov markov :documentation "Interact with the markov chain.")
+(define-group markov :documentation "Interact with the markov chain.")
 
-(define-command (markov ignore) markov (&rest nicks) (:authorization T :documentation "Add users to the ignore list.")
+(define-command (markov ignore) (&rest nicks) (:authorization T :documentation "Add users to the ignore list." :modulevar markov)
   (dolist (nick nicks)
     (pushnew nick (ignored-users markov) :test #'string-equal))
   (respond event "Users have been put on the ignore list."))
 
-(define-command (markov unignore) markov (&rest nicks) (:authorization T :documentation "Remove users from the ignore list.")
+(define-command (markov unignore) (&rest nicks) (:authorization T :documentation "Remove users from the ignore list." :modulevar markov)
   (setf (ignored-users markov) 
         (delete-if #'(lambda (nick) (find nick nicks :test #'string-equal)) (ignored-users markov)))
   (respond event "Users have been removed from the ignore list."))
 
-(define-command (markov list-ignored) markov () (:authorization T :documentation "List all ignored users.")
+(define-command (markov list-ignored) () (:authorization T :documentation "List all ignored users." :modulevar markov)
   (respond event "Ignored users: ~:[None~;~:*~{~a~^, ~}~]" (ignored-users markov)))
 
-(define-command (markov probability) markov (&optional new-value) (:authorization T :documentation "Set or view the probability of invoking markov.")
+(define-command (markov probability) (&optional new-value) (:authorization T :documentation "Set or view the probability of invoking markov." :modulevar markov)
   (when new-value
     (setf (probability markov) (parse-integer new-value :junk-allowed T)))
   (respond event "Probability: ~a" (probability markov)))
 
-(define-command (markov say) markov (&optional arg1 arg2) (:documentation "Let the bot say something.")
+(define-command (markov say) (&optional arg1 arg2) (:documentation "Let the bot say something." :modulevar markov)
   (if (and arg1 (not arg2)) (setf arg2 arg1 arg1 "!NONWORD!"))
-  (let ((message (generate-string markov (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))))
+  (let ((message (generate-string (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))) markov)
     (if (and message (> (length message) 1))
         (respond event "~a" message)
         (respond event (fstd-message event :markov-nothing)))))

@@ -6,21 +6,23 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defun start-module (module-name)
-  (let ((module (get-module module-name)))
-    (assert (not (null module)) () "Module ~a not found!" module-name)
-    (assert (not (active module)) () "Module ~a already started!" module-name)
-    (v:info module-name "Starting...")
-    (start module)
-    module))
+(defun start-module (&rest module-names)
+  (dolist (module-name module-names)
+    (let ((module (get-module module-name)))
+      (assert (not (null module)) () "Module ~a not found!" module-name)
+      (assert (not (active module)) () "Module ~a already started!" module-name)
+      (v:info module-name "Starting...")
+      (start module)
+      module)))
 
-(defun stop-module (module-name)
-  (let ((module (get-module module-name)))
-    (assert (not (null module)) () "Module ~a not found!" module-name)
-    (assert (not (not (active module))) () "Module ~a already stopped!" module-name)
-    (v:info module-name "Stopping...")
-    (stop module)
-    module))
+(defun stop-module (&rest module-names)
+  (dolist (module-name module-names)
+    (let ((module (get-module module-name)))
+      (assert (not (null module)) () "Module ~a not found!" module-name)
+      (assert (not (not (active module))) () "Module ~a already stopped!" module-name)
+      (v:info module-name "Stopping...")
+      (stop module)
+      module)))
 
 (defun auth-p (nick)
   (find nick (auth-users *current-server*) :test #'equal))
@@ -54,9 +56,7 @@
           (v:warn (name *current-server*) "Unhandled condition: ~a" err))|#))))
 
 (defun process-event (event)
-  (loop for module being the hash-values of *bot-modules*
-     if (active module)
-     do (dispatch module event))
+  (dispatch T event)
 
   (labels ((make-command (message prefix)
              (let ((args (split-sequence #\Space (string-trim '(#\Space) (subseq message (length prefix))))))
@@ -79,15 +79,12 @@
       (let ((event (check-prefix-and-build event)))
         (when event
           (v:debug (name (server event)) "Received command: ~a ~a" (command event) (arguments event))
-          (unless (loop for module being the hash-values of *bot-modules*
-                     for result = (when (active module) (dispatch module event))
-                     if result do (return T))
-            (respond event (fstd-message event :no-command))))))))
+          (dispatch T event))))))
 
 (define-module core () ())
 (start (get-module :core))
 
-(define-handler core (welcome-event event)
+(define-handler (welcome-event event) ()
   (v:info (name (server event)) "Got welcome, joining channels.")
   (let ((nickservpw (server-config (name (server event)) :nickservpw)))
     (when nickservpw
@@ -98,5 +95,5 @@
      do (irc:join chan)
        (irc:privmsg chan (standard-message :join))))
 
-(define-handler core (ping-event event)
+(define-handler (ping-event event) ()
   (irc:pong (server1 event)))

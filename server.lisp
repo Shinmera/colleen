@@ -42,6 +42,7 @@
                                       (real (server-config server :real)))
   (if (null (config-tree :servers server))
       (v:warn server "No configuration found!"))
+  (assert (not (gethash server *servers*)) () "Server already connected!")
   (connect (make-instance 'server :name server 
                           :host host :port port :nick nick 
                           :username user :password pass :realname real)))

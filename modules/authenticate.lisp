@@ -12,26 +12,26 @@
 
 (define-module auth () ())
 
-(define-handler auth (nick-event event)
+(define-handler (nick-event event) ()
   (with-accessors ((prevnick old-nick) (newnick nick)) event
     (when (find prevnick (auth-users (server event)) :test #'string=)
       (v:info (name (server event)) "Changing ~a to ~a in authenticated list due to NICK." prevnick newnick)
       (setf (auth-users (server event))
             (cons newnick (delete prevnick (auth-users (server event)) :test #'string=))))))
 
-(define-handler auth (part-event event)
+(define-handler (part-event event) ()
   (when (auth-p (nick event))
     (remove-from-auth (nick event) "PART")))
 
-(define-handler auth (quit-event event)
+(define-handler (quit-event event) ()
   (when (auth-p (nick event))
     (remove-from-auth (nick event) "QUIT")))
 
-(define-handler auth (kick-event event)
+(define-handler (kick-event event) ()
   (when (auth-p (nick event))
     (remove-from-auth (nick event) "KICK")))
 
-(define-command logout auth () ()
+(define-command logout () ()
   (if (auth-p (nick event))
       (progn
         (remove-from-auth (nick event) "logout command")
@@ -41,7 +41,7 @@
 (defvar *pending-nickserv-auth* ())
 (defvar *nickserv-status-regex* (cl-ppcre:create-scanner "STATUS (.+) ([0-3])"))
 
-(define-command login auth (&rest pw) ()
+(define-command login (&rest pw) ()
   (handler-case 
       (if (auth-p (nick event))
           (respond event (fstd-message event :auth-already))
@@ -65,7 +65,7 @@
       (v:warn :auth "Error during login attempt: ~a" err)
       (respond event (fstd-message event :auth-fail)))))
 
-(define-handler auth (notice-event notice-event)
+(define-handler notice-event ()
   (when (string-equal "NickServ" (nick notice-event))
     (cl-ppcre:register-groups-bind (user level) (*nickserv-status-regex* (message notice-event))
       (let ((event (loop for pending in *pending-nickserv-auth*
