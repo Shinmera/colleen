@@ -29,9 +29,10 @@
                (:file "launcher")
                (:module "modules"
                         :components ((:file "authenticate")
+                                     (:file "blants")
                                      (:file "essentials")
-                                     (:file "notify")
                                      (:file "markov")
+                                     (:file "notify")
                                      (:file "stevenchan"))))
   :depends-on (:bordeaux-threads
                :drakma
