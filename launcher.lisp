@@ -7,42 +7,19 @@
 (in-package :org.tymoonnext.colleen)
 
 (defun startup ()
-  (v:info :colleen.main "Starting up...")
-  (setf *shutting-down* NIL)
-  ;; Configuration
+  (v:info :startup "Loading config...")
   (load-config)
-  ;; Connect
-  (connect)
-  (reconnect-loop))
+  (v:info :startup "Starting modules...")
+  (apply #'start-module (config-tree :startup :modules))
+  (v:info :startup "Connecting to servers...")
+  (mapc #'connect (config-tree :startup :servers))
+  (v:info :startup "Done."))
 
 (defun shutdown ()
-  (v:info :colleen.main "Shutting down...")
-  (setf *shutting-down* T)
-  (disconnect)
-  (setf *shutting-down* NIL)
-  (v:info :colleen.main "Shut down complete."))
-
-(define-condition restart-error () ())
-(define-condition shutdown-error () ())
-
-(defun restart-loop ()
-  (handler-case
-      (handler-bind
-          ((restart-error #'(lambda (c) 
-                          (declare (ignore c))
-                          (shutdown)
-                          (invoke-restart 'restart-bot)))
-           (error #'(lambda (c)
-                      (v:error :colleen.launcher "Caught error on restart-level: ~a" c)
-                      (if *on-error-continue*
-                          (invoke-restart 'continue)
-                          (error c)))))                          
-        (restart-case (startup)
-          (restart-bot () (restart-loop))))
-    (shutdown-error () (shutdown))))
-
-(defun main ()
-  (setf *read-thread* 
-        (bordeaux-threads:make-thread 
-         (lambda ()
-           (restart-loop)))))
+  (v:info :shutdown "Disconnecting servers...")
+  (mapc #'disconnect (alexandria:hash-table-values *servers*))
+  (v:info :shutdown "Stopping modules...")
+  (mapc #'(lambda (module) (ignore-errors (stop-module module))) (alexandria:hash-table-keys *bot-modules*))
+  (v:info :shutdown "Saving config...")
+  (save-config)
+  (v:info :shutdown "Done."))

@@ -34,6 +34,14 @@
 (defgeneric connect (server-or-name &key &allow-other-keys))
 (defgeneric disconnect (server-or-name &key quit-message))
 
+(defmethod connect ((server string) &key (host (server-config server :host))
+                                      (port (server-config server :port))
+                                      (nick (server-config server :nick))
+                                      (user (server-config server :user))
+                                      (pass (server-config server :pass))
+                                      (real (server-config server :real)))
+  (connect (find-symbol (string-upcase server) "KEYWORD") :host host :port port :nick nick :user user :pass pass :real real))
+
 (defmethod connect ((server symbol) &key (host (server-config server :host))
                                       (port (server-config server :port))
                                       (nick (server-config server :nick))

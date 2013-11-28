@@ -8,6 +8,7 @@
 
 (defun start-module (&rest module-names)
   (dolist (module-name module-names)
+    (unless (keywordp module-name) (setf module-name (find-symbol (string-upcase module-name) "KEYWORD")))
     (let ((module (get-module module-name)))
       (assert (not (null module)) () "Module ~a not found!" module-name)
       (assert (not (active module)) () "Module ~a already started!" module-name)
@@ -17,6 +18,7 @@
 
 (defun stop-module (&rest module-names)
   (dolist (module-name module-names)
+    (unless (keywordp module-name) (setf module-name (find-symbol (string-upcase module-name) "KEYWORD")))
     (let ((module (get-module module-name)))
       (assert (not (null module)) () "Module ~a not found!" module-name)
       (assert (not (not (active module))) () "Module ~a already stopped!" module-name)

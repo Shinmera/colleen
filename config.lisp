@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defun load-config (&optional (config-file (merge-pathnames "bot-config.json" (asdf:system-source-directory :colleen))))
+(defun load-config (&optional (config-file *conf-file*))
   "(Re)load the static configuration."
   (when (not config-file)
     (setf config-file (merge-pathnames "bot-config.json" (asdf:system-source-directory :colleen))))
@@ -15,6 +15,15 @@
     (setf *conf* (json:decode-json file))
     (setf *conf-file* config-file)
     (v:info :colleen.main "Loaded config from ~a" config-file)))
+
+(defun save-config (&optional (config-file *conf-file*))
+  "Save the static configuration to file."
+  (when (not config-file)
+    (setf config-file (merge-pathnames "bot-config.json" (asdf:system-source-directory :colleen))))
+  
+  (with-open-file (file config-file :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (json:encode-json *conf* file)
+    (v:info :colleen.main "Saved config to ~a" config-file)))
 
 (defun config (setting &optional new-value (config-file *conf-file*))
   "Get or set configuration values."

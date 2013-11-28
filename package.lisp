@@ -80,6 +80,9 @@
    :motd-event
    :motd-end-event
    :notice-event
+   ;; LAUNCHER
+   :startup
+   :shutdown
    ;; MODULE
    :module
    :active
