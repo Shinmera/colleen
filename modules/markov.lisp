@@ -68,7 +68,7 @@
 
 (define-command (markov say) (&optional arg1 arg2) (:documentation "Let the bot say something." :modulevar markov)
   (if (and arg1 (not arg2)) (setf arg2 arg1 arg1 "!NONWORD!"))
-  (let ((message (generate-string (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))) markov)
+  (let ((message (generate-string markov (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))))
     (if (and message (> (length message) 1))
         (respond event "~a" message)
         (respond event (fstd-message event :markov-nothing)))))
@@ -105,3 +105,4 @@
     (setf output (string-trim '(#\Space #\Tab #\Return #\Linefeed) output))
     (v:trace :markov "Generated string: ~a" output)
     (if (> (length (split-sequence:split-sequence #\Space output)) 0) output)))
+
