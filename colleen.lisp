@@ -58,7 +58,7 @@
           (v:warn (name *current-server*) "Unhandled condition: ~a" err))|#))))
 
 (defun process-event (event)
-  (dispatch T event)
+  (dispatch T event :ignore-errors T)
 
   (labels ((make-command (message prefix)
              (let ((args (split-sequence #\Space (string-trim '(#\Space) (subseq message (length prefix))))))
@@ -81,7 +81,11 @@
       (let ((event (check-prefix-and-build event)))
         (when event
           (v:debug (name (server event)) "Received command: ~a ~a" (command event) (arguments event))
-          (dispatch T event))))))
+          (handler-case
+              (dispatch T event)
+            (error (err)
+              (v:severe (name (server event)) "Uncaught error ~a on event ~a" err event)
+              (respond event "Uncaught error: ~a" err))))))))
 
 (define-module core () ())
 (start (get-module :core))

@@ -122,7 +122,9 @@
         (on-error e))
       (disconnect (e)
         (declare (ignore e))
-        (v:warn (name server) "Leaving reconnect-loop due to disconnect condition..."))))
+        (v:warn (name server) "Leaving reconnect-loop due to disconnect condition..."))
+      (error (e)
+        (v:severe (name server) "Uncaught error in reconnect-loop: ~a" e))))
   (v:debug (name server) "Leaving reconnect loop."))
 
 ;; Adapted from trivial-irc

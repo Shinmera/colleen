@@ -35,7 +35,7 @@
   (:documentation "Add a new command to the module."))
 (defgeneric add-handler (module eventtype method)
   (:documentation "Add a new event handler to the module."))
-(defgeneric dispatch (module event)
+(defgeneric dispatch (module event &key &allow-other-keys)
   (:documentation "Handle a new event and distribute it to the registered handler functions."))
 (defgeneric get-command (module commandname)
   (:documentation "Get the command instance associated with the command name."))
@@ -71,19 +71,21 @@
 (defmethod add-handler ((module module) eventtype method)
   (setf (gethash (string-downcase eventtype) (handlers module)) method))
 
-(defmethod dispatch ((module T) (event event))
+(defmethod dispatch ((module T) (event event) &key ignore-errors)
   (loop for module being the hash-values of *bot-modules*
      if (active module)
-     do (when (dispatch module event)
+     do (when (if ignore-errors 
+                  (ignore-errors (dispatch module event)) 
+                  (dispatch module event))
           (return-from dispatch))))
 
-(defmethod dispatch ((module module) (event event))
+(defmethod dispatch ((module module) (event event) &key)
   (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
     (when handler
       (funcall handler module event)
       NIL)))
 
-(defmethod dispatch ((module module) (event command-event))
+(defmethod dispatch ((module module) (event command-event) &key)
   (let ((handler (gethash (command event) (commands module))))
     (when handler
       (funcall (cmd-fun handler) module event)
