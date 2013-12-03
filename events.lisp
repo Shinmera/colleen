@@ -108,6 +108,10 @@
     (server1 &optional server2)
     (:documentation "Event on a PING request."))
 
+(define-event pong-event :PONG (event) 
+    (server1 &optional server2)
+    (:documentation "Event on a PONG request."))
+
 (define-event nick-event :NICK (user-event)
     (old-nick)
     (:documentation "Event on nick change."))
