@@ -16,7 +16,9 @@
    :*current-server*
    ;; CONDITIONS
    :invalid-arguments
+   :network-error
    :disconnect
+   :ping-timeout
    :connection-failed
    :nickname-in-use
    :not-authorized
@@ -48,6 +50,7 @@
    :respond
    :welcome-event
    :ping-event
+   :pong-event
    :server1
    :server2
    :nick-event
@@ -116,6 +119,7 @@
    :get-server
    :connect
    :disconnect
+   :reconnect
    ;; COLLEEN
    :start-module
    :stop-module

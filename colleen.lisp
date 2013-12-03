@@ -101,5 +101,9 @@
      do (irc:join chan)
        (irc:privmsg chan (standard-message :join))))
 
+(define-handler (pong-event event) ()
+  (setf (last-ping (server event)) (get-universal-time)))
+
 (define-handler (ping-event event) ()
+  (setf (last-ping (server event)) (get-universal-time))
   (irc:pong (server1 event)))

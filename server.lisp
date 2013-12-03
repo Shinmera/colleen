@@ -12,8 +12,11 @@
    (%channels :initform () :accessor channels)
 
    (%read-thread :accessor read-thread)
+   (%ping-thread :accessor ping-thread)
+   (%restart-thread :initform () :accessor restart-thread)
    (%socket :initarg :socket :accessor socket)
    (%stream :initarg :stream :accessor socket-stream)
+   (%last-ping :initform (get-universal-time) :accessor last-ping)
 
    (%nick :initarg :nick :initform (error "Nick required.") :accessor nick)
    (%host :initarg :host :initform (error "Host required.") :accessor host)
@@ -33,6 +36,12 @@
 
 (defgeneric connect (server-or-name &key &allow-other-keys))
 (defgeneric disconnect (server-or-name &key quit-message))
+(defgeneric reconnect (server-or-name &key try-again-indefinitely))
+
+(defun make-server-thread (server slot function)
+  (setf (slot-value server slot) 
+        (make-thread function :initial-bindings `((*current-server* . ,server)
+                                                  (*servers* . ,*servers*)))))
 
 (defmethod connect ((server string) &key (host (server-config server :host))
                                       (port (server-config server :port))
@@ -79,12 +88,8 @@
     ;; Register connection and start read-loop.
     (setf (gethash (name server) *servers*) server)
     (when start-thread
-      (setf (read-thread server)
-            (make-thread #'(lambda ()
-                             (v:info (name *current-server*) "Starting read-thread.")
-                             (reconnect-loop)) 
-                         :initial-bindings `((*current-server* . ,server)
-                                             (*servers* . ,*servers*)))))
+      (make-server-thread server '%read-thread #'read-loop)
+      (make-server-thread server '%ping-thread #'ping-loop))
     server))
 
 (defmethod disconnect ((server symbol) &key (quit-message (config-tree :messages :quit)))
@@ -92,9 +97,12 @@
   (disconnect (gethash server *servers*) :quit-message quit-message))
 
 (defmethod disconnect ((server server) &key (quit-message (config-tree :messages :quit)))
-  (when (thread-alive-p (read-thread server))
-    (v:info (name server) "Interrupting read thread...")
-    (interrupt-thread (read-thread server) #'(lambda () (error 'disconnect))))
+  (flet ((terminate-server-thread (slot)
+           (when (and (slot-value server slot) (thread-alive-p (slot-value server slot)))
+             (v:debug (name server) "Interrupting ~a" slot)
+             (interrupt-thread (slot-value server slot) #'(lambda () (error 'disconnect))))))
+    (terminate-server-thread '%read-thread)
+    (terminate-server-thread '%ping-thread))
 
   (ignore-errors 
     (with-accessors ((socket socket)) server
@@ -104,30 +112,65 @@
       (setf socket NIL)))
   (remhash (name server) *servers*))
 
-(defun reconnect-loop (&optional (server *current-server*))
-  "Handles disconnection conditions and automatically attempts to reconnect."
-  (flet ((on-error (err)
-           (v:warn (name server) "Error encountered: ~a" err)
-           (v:warn (name server) "Connection lost, attempting reconnect in 5s...")
-           (sleep 5)
-           (connect server)))
-    (handler-case 
-        (receive-loop server)
-      ((or usocket:ns-try-again-condition 
-        usocket:timeout-error 
-        usocket:shutdown-error
-        usocket:connection-reset-error
-        usocket:connection-aborted-error
-        cl:end-of-file) (e)
-        (on-error e))
-      (disconnect (e)
-        (declare (ignore e))
-        (v:warn (name server) "Leaving reconnect-loop due to disconnect condition..."))
-      (error (e)
-        (v:severe (name server) "Uncaught error in reconnect-loop: ~a" e))))
-  (v:debug (name server) "Leaving reconnect loop."))
+(defmethod reconnect ((server symbol) &key try-again-indefinitely)
+  (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
+  (reconnect (gethash server *servers*)) :try-again-indefinitely try-again-indefinitely)
 
-;; Adapted from trivial-irc
+(defmethod reconnect ((server server) &key try-again-indefinitely)
+  (v:info (name server) "Reconnecting...")
+  (disconnect server)
+  (loop for result = (ignore-errors (connect server)) 
+     do (if result (return server)
+            (if try-again-indefinitely
+                (progn
+                  (v:warn (name server) "Reconnection failed, trying again in 5s...")
+                  (sleep 5))
+                (error 'connection-failed :server server)))))
+
+(defmacro with-reconnect-handler (servervar &body body)
+  `(handler-case 
+       (progn ,@body)
+     ((or usocket:ns-try-again-condition 
+       usocket:timeout-error 
+       usocket:shutdown-error
+       usocket:connection-reset-error
+       usocket:connection-aborted-error
+       ping-timeout
+       cl:end-of-file) (err)
+       (v:warn (name ,servervar) "Error encountered: ~a" err)
+      (when (not (restart-thread ,servervar))
+        (v:warn (name ,servervar) "Connection lost, attempting reconnect in 5s...")
+        (make-server-thread ,servervar '%restart-thread
+                            (lambda () 
+                               (sleep 5) 
+                               (reconnect ,servervar :try-again-indefinitely)
+                               (setf (restart-thread ,servervar) NIL)))))
+     (disconnect (e)
+       (declare (ignore e))
+       (v:warn (name ,servervar) "Leaving reconnect-handler due to disconnect condition..."))
+     (error (e)
+       (v:severe (name ,servervar) "Uncaught error in reconnect-handler: ~a" e))))
+
+(defvar *irc-message-regex* (cl-ppcre:create-scanner "^(:([^ ]+) +)?([^ ]+)( +(.+))?"))
+(defun read-loop (&optional (server *current-server*))
+  "Continuously receives and handles a message."
+  (with-reconnect-handler server
+    (flet ((prepare-arguments (arguments)
+             (let ((final-arg (search " :" arguments)))
+               (append (split-sequence #\Space arguments :remove-empty-subseqs t :end final-arg)
+                       (when final-arg (list (subseq arguments (+ 2 final-arg))))))))
+      (let ((name (name server)))
+        (with-simple-restart (exit "<~a> Exit the receive loop." name)
+          (loop (with-simple-restart (continue "<~a> Continue reading messages." name)
+                  (v:trace name "Reading message...")
+                  (let ((message (receive-raw-message server)))
+                    (v:trace name "Read message: ~a" message)
+                    (cl-ppcre:register-groups-bind (NIL prefix command arguments NIL) (*irc-message-regex* message)
+                      (setf arguments (prepare-arguments arguments))
+                      (setf command (reply->keyword command))
+                      (handle command prefix arguments))))))
+        (v:debug name "Leaving read loop.")))))
+
 (defun receive-raw-message (&optional (server *current-server*))
   (handler-bind ((sb-int:stream-decoding-error
                   #'(lambda (err)
@@ -141,22 +184,19 @@
            do (write-char char message)
            finally (read-char stream))))))
 
-(defvar *irc-message-regex* (cl-ppcre:create-scanner "^(:([^ ]+) +)?([^ ]+)( +(.+))?"))
-
-(defun receive-loop (&optional (server *current-server*))
-  "Continuously receives and handles a message."
-  (flet ((prepare-arguments (arguments)
-           (let ((final-arg (search " :" arguments)))
-             (append (split-sequence #\Space arguments :remove-empty-subseqs t :end final-arg)
-                     (when final-arg (list (subseq arguments (+ 2 final-arg))))))))
+(defun ping-loop (&optional (server *current-server*))
+  (with-reconnect-handler server
     (let ((name (name server)))
-      (with-simple-restart (exit "<~a> Exit the receive loop." name)
-        (loop (with-simple-restart (continue "<~a> Continue reading messages." name)
-                (v:trace name "Reading message...")
-                (let ((message (receive-raw-message server)))
-                  (v:trace name "Read message: ~a" message)
-                  (cl-ppcre:register-groups-bind (NIL prefix command arguments NIL) (*irc-message-regex* message)
-                    (setf arguments (prepare-arguments arguments))
-                    (setf command (reply->keyword command))
-                    (handle command prefix arguments))))))
-      (v:debug name "Leaving receive loop."))))
+      (with-simple-restart (exit "<~a> Exit the ping loop." name)
+        (loop (with-simple-restart (continue "<~a> Continue pinging." name)
+                (let ((diff (- (get-universal-time) (last-ping server))))
+                  (v:trace name "Last ping T-~a" diff)
+                  (when (and (> diff 58) (< diff 63))
+                    (v:warn name "No ping reply in ~as!" diff))
+                  (when (> diff 120)
+                    (v:warn name "Ping timeout!")
+                    (error 'ping-timeout :server server)))
+                (v:trace name "Sending ping...")
+                (irc:ping (host server))
+                (sleep 5))))
+      (v:debug name "Leaving ping loop."))))
