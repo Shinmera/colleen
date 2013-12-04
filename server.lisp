@@ -120,15 +120,16 @@
   (v:info (name server) "Reconnecting...")
   (disconnect server)
   (loop for result = (ignore-errors (connect server)) 
-     do (if result (return server)
+     do (if result
+            (return-from reconnect server)
             (if try-again-indefinitely
                 (progn
-                  (v:warn (name server) "Reconnection failed, trying again in 5s...")
-                  (sleep 5))
+                  (v:warn (name server) "Reconnection failed, trying again in ~as..." (server-config server :reconnect-cooldown))
+                  (sleep (server-config server :reconnect-cooldown)))
                 (error 'connection-failed :server server)))))
 
 (defmacro with-reconnect-handler (servervar &body body)
-  `(handler-case 
+  `(handler-case
        (progn ,@body)
      ((or usocket:ns-try-again-condition 
        usocket:timeout-error 
@@ -139,12 +140,12 @@
        cl:end-of-file) (err)
        (v:warn (name ,servervar) "Error encountered: ~a" err)
       (when (not (restart-thread ,servervar))
-        (v:warn (name ,servervar) "Connection lost, attempting reconnect in 5s...")
+        (v:warn (name ,servervar) "Connection lost, attempting reconnect in ~as..." (server-config ,servervar :reconnect-cooldown))
         (make-server-thread ,servervar '%restart-thread
-                            (lambda () 
-                               (sleep 5) 
-                               (reconnect ,servervar :try-again-indefinitely)
-                               (setf (restart-thread ,servervar) NIL)))))
+                            #'(lambda () 
+                                (sleep (server-config ,servervar :reconnect-cooldown))
+                                (reconnect ,servervar :try-again-indefinitely T)
+                                (setf (restart-thread ,servervar) NIL)))))
      (disconnect (e)
        (declare (ignore e))
        (v:warn (name ,servervar) "Leaving reconnect-handler due to disconnect condition..."))
@@ -191,12 +192,13 @@
         (loop (with-simple-restart (continue "<~a> Continue pinging." name)
                 (let ((diff (- (get-universal-time) (last-ping server))))
                   (v:trace name "Last ping T-~a" diff)
-                  (when (and (> diff 58) (< diff 63))
+                  (when (and (> diff (- (server-config (name server) :ping-warn) (/ (server-config (name server) :ping-step) 2))) 
+                             (< diff (+ (server-config (name server) :ping-warn) (/ (server-config (name server) :ping-step) 2))))
                     (v:warn name "No ping reply in ~as!" diff))
-                  (when (> diff 120)
+                  (when (> diff (server-config (name server) :ping-timeout))
                     (v:warn name "Ping timeout!")
                     (error 'ping-timeout :server server)))
                 (v:trace name "Sending ping...")
                 (irc:ping (host server))
-                (sleep 5))))
+                (sleep (server-config (name server) :ping-step)))))
       (v:debug name "Leaving ping loop."))))
