@@ -12,8 +12,8 @@
 
 (define-module blants () ())
 
-(defparameter *thanks-match* (cl-ppcre:create-scanner "[Tt]hanks[,]{0,1} ([a-zA-Z]+)"))
-(defparameter *bless-match* (cl-ppcre:create-scanner "[Bb]less you[,]{0,1} ([a-zA-Z]+)"))
+(defparameter *thanks-match* (cl-ppcre:create-scanner "[Tt]hanks[,]? ([a-zA-Z]+)"))
+(defparameter *bless-match* (cl-ppcre:create-scanner "[Bb]less you[,]? ([a-zA-Z]+)"))
 
 (defun cut-to-first-vocal (string)
   (loop for i from 0 below (length string)
@@ -27,3 +27,8 @@
   (cl-ppcre:register-groups-bind (name) (*bless-match* (message event))
     (sleep 2)
     (respond event "...Bl~a" (cut-to-first-vocal name))))
+
+(define-command thanks () (:documentation "Thanks you." :eventvar event)
+  (respond event "Thanks, ~a" (nick event))
+  (sleep 2)
+  (respond event "...Th~a" (cut-to-first-vocal (nick event))))

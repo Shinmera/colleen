@@ -127,8 +127,6 @@
    :remove-from-auth
    :add-to-auth
    :process-event
-   ;; LAUNCHER
-   
    )
   (:shadow restart time trace))
 
