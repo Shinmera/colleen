@@ -88,7 +88,14 @@
 (defmethod dispatch ((module module) (event command-event) &key)
   (let ((handler (gethash (command event) (commands module))))
     (when handler
-      (funcall (cmd-fun handler) module event)
+      (handler-case
+          (funcall (cmd-fun handler) module event)
+        (not-authorized (err)
+          (v:warn (name *current-server*) "User ~a attempted to execute ~a, but is not authorized!" (nick (event err)) (command (event err)))
+          (respond (event err) (fstd-message (event err) :not-authorized)))
+        (invalid-arguments (err)
+          (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
+          (respond event "Invalid arguments. Expected: ~a" (argslist err))))
       T)))
 
 (defmethod get-command ((module module) commandname)

@@ -6,14 +6,16 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(define-condition invalid-arguments (error)
+(define-condition module-error (error) ())
+
+(define-condition invalid-arguments (module-error)
   ((%command :initarg :command :reader command)
    (%argslist :initarg :argslist :reader argslist))
   (:documentation "Condition raised when a command is called with an invalid arguments structure.")
   (:report (lambda (c s)
              (format s "Invalid arguments for command ~a. Expected form: ~a" (command c) (argslist c)))))
 
-(define-condition not-authorized (error)
+(define-condition not-authorized (module-error)
   ((%event :initarg :event :reader event)))
 
 (define-condition network-error (error) 
