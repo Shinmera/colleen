@@ -43,13 +43,15 @@
         (make-thread function :initial-bindings `((*current-server* . ,server)
                                                   (*servers* . ,*servers*)))))
 
-(defmethod connect ((server string) &key (host (server-config server :host))
-                                      (port (server-config server :port))
-                                      (nick (server-config server :nick))
-                                      (user (server-config server :user))
-                                      (pass (server-config server :pass))
-                                      (real (server-config server :real)))
-  (connect (find-symbol (string-upcase server) "KEYWORD") :host host :port port :nick nick :user user :pass pass :real real))
+(defmethod connect ((server string) &key (host NIL host-s-p) (port NIL port-s-p) (nick NIL nick-s-p) (user NIL user-s-p) (pass NIL pass-s-p) (real NIL real-s-p))
+  (setf server (find-symbol (string-upcase server) "KEYWORD"))
+  (unless host-s-p (setf host (server-config server :host)))
+  (unless port-s-p (setf port (server-config server :port)))
+  (unless nick-s-p (setf nick (server-config server :nick)))
+  (unless user-s-p (setf user (server-config server :user)))
+  (unless pass-s-p (setf pass (server-config server :pass)))
+  (unless real-s-p (setf real (server-config server :real)))
+  (connect server :host host :port port :nick nick :user user :pass pass :real real))
 
 (defmethod connect ((server symbol) &key (host (server-config server :host))
                                       (port (server-config server :port))
@@ -91,6 +93,9 @@
       (make-server-thread server '%read-thread #'read-loop)
       (make-server-thread server '%ping-thread #'ping-loop))
     server))
+
+(defmethod disconnect ((server string) &key (quit-message (config-tree :messages :quit)))
+  (disconnect (intern (string-upcase server) "KEYWORD") :quit-message quit-message))
 
 (defmethod disconnect ((server symbol) &key (quit-message (config-tree :messages :quit)))
   (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
