@@ -30,10 +30,14 @@
                (:module "modules"
                         :components ((:file "authenticate")
                                      (:file "blants")
+                                     (:file "chatlog")
+                                     (:file "dramatica")
                                      (:file "essentials")
                                      (:file "markov")
+                                     (:file "medals")
                                      (:file "notify")
-                                     (:file "stevenchan"))))
+                                     (:file "stevenchan")
+                                     (:filw "weather"))))
   :depends-on (:bordeaux-threads
                :drakma
                :cl-json :yason
