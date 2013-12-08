@@ -13,7 +13,7 @@
 
    (%read-thread :accessor read-thread)
    (%ping-thread :accessor ping-thread)
-   (%restart-thread :initform () :accessor restart-thread)
+   (%restart-thread :accessor restart-thread)
    (%socket :initarg :socket :accessor socket)
    (%stream :initarg :stream :accessor socket-stream)
    (%last-ping :initform (get-universal-time) :accessor last-ping)
@@ -91,7 +91,8 @@
     (setf (gethash (name server) *servers*) server)
     (when start-thread
       (make-server-thread server '%read-thread #'read-loop)
-      (make-server-thread server '%ping-thread #'ping-loop))
+      (make-server-thread server '%ping-thread #'ping-loop)
+      (setf (restart-thread server) NIL))
     server))
 
 (defmethod disconnect ((server string) &key (quit-message (config-tree :messages :quit)))
@@ -109,12 +110,13 @@
     (terminate-server-thread '%read-thread)
     (terminate-server-thread '%ping-thread))
 
-  (ignore-errors 
-    (with-accessors ((socket socket)) server
-      (when socket
-        (v:info (name server) "Disconnecting...")
-        (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server))
-      (setf socket NIL)))
+  (when (socket server)
+    (v:info (name server) "Disconnecting...")
+    (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server)
+    (finish-output (socket-stream server))
+    (close (socket-stream server))
+    (usocket:socket-close (socket server)))
+  (setf (socket server) NIL)
   (remhash (name server) *servers*))
 
 (defmethod reconnect ((server symbol) &key try-again-indefinitely)
@@ -124,14 +126,16 @@
 (defmethod reconnect ((server server) &key try-again-indefinitely)
   (v:info (name server) "Reconnecting...")
   (disconnect server)
-  (loop for result = (ignore-errors (connect server)) 
-     do (if result
-            (return-from reconnect server)
-            (if try-again-indefinitely
-                (progn
-                  (v:warn (name server) "Reconnection failed, trying again in ~as..." (server-config server :reconnect-cooldown))
-                  (sleep (server-config server :reconnect-cooldown)))
-                (error 'connection-failed :server server)))))
+  (handler-bind ((connection-failed
+                  #'(lambda (err)
+                      (if try-again-indefinitely
+                          (progn
+                            (v:warn (name server) "Reconnection failed, trying again in ~as..." (server-config server :reconnect-cooldown))
+                            (invoke-restart 'reconnect))
+                          (error err)))))
+    (loop do (sleep (server-config server :reconnect-cooldown))
+       until (with-simple-restart (reconnect "Retry connecting.") 
+               (connect server)))))
 
 (defmacro with-reconnect-handler (servervar &body body)
   `(handler-case
@@ -149,8 +153,7 @@
         (make-server-thread ,servervar '%restart-thread
                             #'(lambda () 
                                 (sleep (server-config ,servervar :reconnect-cooldown))
-                                (reconnect ,servervar :try-again-indefinitely T)
-                                (setf (restart-thread ,servervar) NIL)))))
+                                (reconnect ,servervar :try-again-indefinitely T)))))
      (disconnect (e)
        (declare (ignore e))
        (v:warn (name ,servervar) "Leaving reconnect-handler due to disconnect condition..."))
@@ -191,6 +194,7 @@
            finally (read-char stream))))))
 
 (defun ping-loop (&optional (server *current-server*))
+  (setf (last-ping server) (get-universal-time))
   (with-reconnect-handler server
     (let ((name (name server)))
       (with-simple-restart (exit "<~a> Exit the ping loop." name)
