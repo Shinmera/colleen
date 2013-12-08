@@ -44,13 +44,17 @@
 (defgeneric get-group-command (module group-symbol commandname)
   (:documentation "Return the function symbol to the group-command."))
 
-(defmethod start :after ((module module))
-  (setf (active module) T))
+(defmethod start :around ((module module))
+  (call-next-method)
+  (setf (active module) T)
+  module)
 
 (defmethod start ((module module)))
 
-(defmethod stop :before ((module module))
-  (setf (active module) NIL))
+(defmethod stop :around ((module module))
+  (setf (active module) NIL)
+  (call-next-method)
+  module)
 
 (defmethod stop ((module module)))
 
