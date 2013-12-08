@@ -157,7 +157,8 @@
   "Send a PRIVMSG."
   (when message
     (v:debug (name server) "Sending privmsg to ~a: ~a" target message)
-    (raw server "PRIVMSG ~a :~a" target message)))
+    (dolist (message (split-sequence:split-sequence #\Newline message))
+      (raw server "PRIVMSG ~a :~a" target message))))
 
 (defun notice (target message &key (server *current-server*))
   "Send a NOTICE."
