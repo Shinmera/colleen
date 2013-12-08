@@ -22,17 +22,17 @@
 (defmethod stop ((medals medals))
   (%save medals))
 
-(defmethod %load ((medals medals))
+(defmethod %load ((module medals))
   (with-open-file (stream *save-file* :if-does-not-exist NIL)
     (when stream
       (let ((medals (yason:parse stream)))
         (loop for k being the hash-keys of medals
            for v being the hash-values of medals
-           do (setf (gethash k (medals medals)) v))))))
+           do (setf (gethash k (medals module)) v))))))
 
-(defmethod %save ((medals medals))
+(defmethod %save ((module medals))
   (with-open-file (stream *save-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
-    (yason:encode (medals medals) stream)))
+    (yason:encode (medals module) stream)))
 
 (defun %award (module event user medal)
   (setf medal (format NIL "~{~a~^ ~}" medal))
@@ -47,11 +47,18 @@
 (define-command (medals load) () (:authorization T :documentation "Perform a load from disk.")
   (%load module))
 
-(define-command (medals show) (user) (:documentation "List the medals a user has.")
+(define-command (medals show) (&optional user) (:documentation "List the medals a user has.")
+  (unless user (setf user (nick event)))
   (respond event "~a has the following medals: ~{~a~^, ~}" user (gethash (string-downcase user) (medals module))))
 
 (define-command (medals award) (user &rest medal) (:authorization T :documentation "Award a medal to a user.")
   (%award module event user medal))
+
+(define-command (medals revoke) (user &rest medal) (:authorization T :documentation "Revoke a medal from a user.")
+  (setf medal (format NIL "~{~a~^ ~}" medal)
+        user (string-downcase user))
+  (setf (gethash user (medals module)) (delete medal (gethash user (medals module)) :test #'string-equal))
+  (respond event "The ~a medal has been revoked from ~a" medal user))
 
 (define-command award (user &rest medal) (:authorization T :documentation "Award a medal to a user.")
   (%award module event user medal))
