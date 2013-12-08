@@ -7,6 +7,7 @@
 (in-package :org.tymoonnext.colleen)
 
 (defun make-event (event-name server prefix arguments)
+  "Makes an event instance from the given parameters."
   (let ((class (gethash event-name *event-map*)))
     (if class
         (make-instance class :server server :prefix prefix :arguments arguments)
@@ -19,6 +20,9 @@
   (:documentation "Base event class."))
 
 (defmacro arguments-bind ((&rest vars) expression &body body)
+  "Destructuring-bind extension to make event parsing easier.
+Any list ends with a &REST if not provided.
+Alternatively to &REST you can bass a &STRING symbol that will parse the REST to one single string."
   (let ((ignores) (stringvar))
     ;; Change BODY to REST and remember var name.
     (let ((stringpos (position '&string vars)))
@@ -42,6 +46,12 @@
        ,@body)))
 
 (defmacro define-event (name event-or-code (&rest superclasses) &optional structure class-options)
+  "Define a new event class for a given IRC event code.
+NAME is the class-name to use for the event, preferably suffixed by -event.
+EVENT-OR-CODE is the event symbol as in REPLY-CODES or the IRC event name or number.
+SUPERCLASSES is a list of superclasses, defaulting to (EVENT)
+STRUCTURE is a lambda-list of the arguments that are to be parsed for this event. See ARGUMENTS-BIND.
+CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOCUMENTATION and so on."
   (let ((eventvar (gensym "EVENT"))
         (restvar (gensym "REST"))
         (varlist (remove-if-not #'(lambda (var) (and var (not (find var '(&rest &string &optional))))) structure)))

@@ -117,11 +117,13 @@
   (gethash modulename *bot-modules*))
 
 (defun package-symbol (package)
+  "Returns the symbol of a package."
   (let ((name (package-name package)))
     (or (find-symbol name "KEYWORD")
         (intern name "KEYWORD"))))
 
 (defun get-current-module (&optional (package *package*))
+  "Returns the module of the current package context."
   (get (package-symbol package) :module))
 
 (defun display-help (module group event)
@@ -136,7 +138,7 @@
         (respond event "Commands: ~{~a ~}" (hash-table-keys (get-group module group))))))
 
 (defmacro define-module (name direct-superclasses direct-slots &body options)
-  "Define a new module."
+  "Define a new module class. See DEFCLASS."
   (let ((instancesym (gensym "INSTANCE")))
     `(progn 
        (defclass ,name (module ,@direct-superclasses)
@@ -151,7 +153,10 @@
                (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*) ,instancesym)))))
 
 (defmacro define-group (name &key (module `(get-current-module)) documentation)
-  "Define a new command group for a module."
+  "Define a new command group for a module.
+NAME designates the command name as a symbol.
+MODULE binds the group to this module, defaults to the current package-context module.
+DOCUMENTATION is an optional string giving some information about the command group."
   (let ((documentation (if documentation (format NIL "~a (Group)" documentation) "(Group)")))
     (destructuring-bind (method &optional (command method)) (if (listp name) name (list name))
       `(progn
@@ -175,7 +180,14 @@
            (display-help module ',command event))))))
 
 (defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) (module `(get-current-module)) (modulevar 'module)) &body body)
-  "Define a new command for a module."
+  "Define a new command for a module.
+NAME is either the direct command name or a list of form (GROUP NAME).
+ARGS is a lambda-list org arguments expected for the command. Note that &key will not work.
+AUTHORIZATION, when not-NIL states that this command can only be used by users on the authenticated list. See AUTH-P.
+DOCUMENTATION is an optional string giving some information about the command.
+EVENTVAR is the symbol that the event variable is bound to in the body. Defaults to EVENT.
+MODULE binds the command to this module, defaulting to the current package-context module.
+MODULEVAR is the symbol that the module variable is bound to in the body. Defaults to MODULE."
   (destructuring-bind (group &optional (name group n-s-p)) (if (listp name) name (list name))
     (unless n-s-p (setf group NIL))
     (let ((methodgens (gensym "METHOD"))
@@ -199,7 +211,10 @@
               `(add-command ,module ',name ',args ,methodgens ,documentation))))))
 
 (defmacro define-handler (event-type (&key (module `(get-current-module)) (modulevar 'module)) &body body)
-  "Define a new event handler for a module."
+  "Define a new event handler for a module.
+EVENT-TYPE designates the event-class that should be handled or a list of the form (EVENT-TYPE EVENTVAR).
+MODULE binds the handler to this module, defaulting to the current package-context module.
+MODULEVAR is the symbol that the module variable is bound to in the body. Defaults to MODULE."
   (destructuring-bind (event-type &optional (eventvar event-type)) (if (listp event-type) event-type (list event-type))
     `(add-handler 
       ,module ',event-type

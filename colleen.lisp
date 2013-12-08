@@ -7,6 +7,7 @@
 (in-package :org.tymoonnext.colleen)
 
 (defun start-module (&rest module-names)
+  "Start up one or more modules. Each module name should be a symbol or string."
   (dolist (module-name module-names)
     (unless (keywordp module-name) (setf module-name (find-symbol (string-upcase module-name) "KEYWORD")))
     (with-simple-restart (skip "Skip starting the module.")
@@ -20,6 +21,7 @@
         module))))
 
 (defun stop-module (&rest module-names)
+  "Stop one or more modules. Each module name should be a symbol or string."
   (dolist (module-name module-names)
     (unless (keywordp module-name) (setf module-name (find-symbol (string-upcase module-name) "KEYWORD")))
     (with-simple-restart (skip "Skip stopping the module.")
@@ -33,20 +35,24 @@
         module))))
 
 (defun auth-p (nick)
+  "Return T if the requested nick is on the server's authenticated users list."
   (find nick (auth-users *current-server*) :test #'equal))
 
 (defun remove-from-auth (nick &optional reason)
+  "Remove the user from the authenticated list. The optional reason string is only for logging."
   (v:info (name *current-server*) "Removing ~a from authenticated list (~a)." nick reason)
   (setf (auth-users *current-server*)
         (delete nick (auth-users *current-server*) :test #'equal))
   nick)
 
 (defun add-to-auth (nick &optional reason)
+  "Add the user to the authenticated list. The optional reason string is only for logging."
   (v:info (name *current-server*) "Adding ~a to authenticated list (~a)." nick reason)
   (pushnew nick (auth-users *current-server*) :test #'equal)
   NIL)
 
 (defun handle (command prefix arguments)
+  "Handle a raw IRC command line."
   (let ((event (make-event command *current-server* prefix arguments)))
     (when event
       (v:debug (name *current-server*) "HANDLE EVENT: ~a" event)
@@ -58,6 +64,7 @@
           (v:warn (name *current-server*) "Unhandled condition: ~a" err))))))
 
 (defun process-event (event)
+  "Process and event and dispatch it to the modules."
   (dispatch T event :ignore-errors T)
 
   (labels ((make-command (message prefix)
@@ -87,7 +94,7 @@
               (v:severe (name (server event)) "Uncaught error ~a on event ~a" err event)
               (respond event "Uncaught error: ~a" err))))))))
 
-(define-module core () ())
+(define-module core () () (:documentation "Colleen core module, handling a few standard events."))
 (start (get-module :core))
 
 (define-handler (welcome-event event) ()

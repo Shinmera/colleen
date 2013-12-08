@@ -34,11 +34,15 @@
   "Retrieve a server by its keyword name, if it is connected."
   (gethash keyword *servers*))
 
-(defgeneric connect (server-or-name &key &allow-other-keys))
-(defgeneric disconnect (server-or-name &key quit-message))
-(defgeneric reconnect (server-or-name &key try-again-indefinitely))
+(defgeneric connect (server-or-name &key &allow-other-keys)
+  (:documentation "Connect to a server instance."))
+(defgeneric disconnect (server-or-name &key quit-message)
+  (:documentation "Disconnect a server instance and terminate their read-threads."))
+(defgeneric reconnect (server-or-name &key try-again-indefinitely)
+  (:documentation "Attempt to reconnect a server instance."))
 
 (defun make-server-thread (server slot function)
+  "Convenience function to create and set new server threads with correct initial-bindings."
   (setf (slot-value server slot) 
         (make-thread function :initial-bindings `((*current-server* . ,server)
                                                   (*servers* . ,*servers*)))))
@@ -138,6 +142,7 @@
                (connect server)))))
 
 (defmacro with-reconnect-handler (servervar &body body)
+  "Handles all possible connection errors and initiates a reconnect on failure."
   `(handler-case
        (progn ,@body)
      ((or usocket:ns-try-again-condition 
@@ -181,6 +186,7 @@
         (v:debug name "Leaving read loop.")))))
 
 (defun receive-raw-message (&optional (server *current-server*))
+  "Reads a raw message from the stream."
   (handler-bind ((sb-int:stream-decoding-error
                   #'(lambda (err)
                       (v:warn (name server) "Stream decoding error: ~a" err)
@@ -194,6 +200,7 @@
            finally (read-char stream))))))
 
 (defun ping-loop (&optional (server *current-server*))
+  "Continuously send out and check pings to handle a ping-timeout."
   (setf (last-ping server) (get-universal-time))
   (with-reconnect-handler server
     (let ((name (name server)))

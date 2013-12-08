@@ -7,6 +7,7 @@
 (in-package :org.tymoonnext.colleen)
 
 (defun startup ()
+  "Start up the bot: Load config, start modules, connect to servers."
   (v:info :startup "Loading config...")
   (load-config)
   (v:info :startup "Starting modules...")
@@ -16,6 +17,7 @@
   (v:info :startup "Done."))
 
 (defun shutdown ()
+  "Shut down the bot: Disconnect servers, stop modules, save config."
   (v:info :shutdown "Disconnecting servers...")
   (mapc #'disconnect (alexandria:hash-table-values *servers*))
   (v:info :shutdown "Stopping modules...")

@@ -9,10 +9,9 @@
 (defvar *servers* (make-hash-table :synchronized T) "Table containing the IRC server instances.")
 (defvar *bot-modules* (make-hash-table :synchronized T) "Global module table consisting of name->instance pairs.")
 (defvar *event-map* (make-hash-table :synchronized T :test 'equal) "Global event map for event codes to event classes.")
-(defvar *conf-file* NIL)
-(defvar *conf* NIL)
-(defvar *shutting-down* NIL)
+(defvar *conf-file* NIL "Pathname pointing to the config file being used.")
+(defvar *conf* NIL "ALIST structure of the global configuration.")
 
-(defvar *current-server*)
+(defvar *current-server* "Special variable containing the server in the current thread context.")
 
 (defvar *user-regex* (cl-ppcre:create-scanner "(.+)!(.+)@(.+)"))

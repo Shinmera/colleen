@@ -6,7 +6,8 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(define-condition module-error (error) ())
+(define-condition module-error (error) ()
+  (:documentation "Condition superclass for module related errors."))
 
 (define-condition invalid-arguments (module-error)
   ((%command :initarg :command :reader command)
@@ -16,17 +17,19 @@
              (format s "Invalid arguments for command ~a. Expected form: ~a" (command c) (argslist c)))))
 
 (define-condition not-authorized (module-error)
-  ((%event :initarg :event :reader event)))
+  ((%event :initarg :event :reader event))
+  (:documentation "Condition raised when a user tried to execute a command he isn't authorized for."))
 
 (define-condition network-error (error) 
-  ((%server :initarg :server :reader failed-server)))
+  ((%server :initarg :server :reader failed-server))
+  (:documentation "Condition superclass for network releated errors."))
 
-(define-condition disconnect (network-error) ())
+(define-condition disconnect (network-error) ()
+  (:documentation "Condition to disconnect and leave the handler loops."))
 
 (define-condition connection-failed (network-error)
-  ((%error :initarg :error :reader initial-error)))
+  ((%error :initarg :error :reader initial-error))
+  (:documentation "Condition when the connection attempt failed for some reason. The original error is included."))
 
-(define-condition nickname-in-use (network-error)
-  ((%nick :initarg :nick :reader nick)))
-
-(define-condition ping-timeout (network-error) ())
+(define-condition ping-timeout (network-error) ()
+  (:documentation "Condition signalled when a ping-timeout is noticed."))

@@ -10,7 +10,7 @@
 
 (defsystem colleen
   :name "Colleen IRC Bot"
-  :version "0.0.1"
+  :version "0.9.3"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"

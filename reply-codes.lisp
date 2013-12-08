@@ -524,4 +524,5 @@
               (982 :ERR_NOLANGUAGE ) ; KineIRCd 
               (983 :ERR_TEXTTOOSHORT) ; KineIRCd 
               (999 :ERR_NUMERIC_ERR) ; Bahamut
-              )))))
+              ))))
+  "Map containing all known IRC codes, mapping them to specific keywords.")
