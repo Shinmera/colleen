@@ -37,7 +37,7 @@
                                      (:file "medals")
                                      (:file "notify")
                                      (:file "stevenchan")
-                                     (:filw "weather"))))
+                                     (:file "weather"))))
   :depends-on (:bordeaux-threads
                :drakma
                :cl-json :yason
