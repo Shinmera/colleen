@@ -9,6 +9,9 @@
   (:use :cl :colleen)
   (:shadowing-import-from :colleen :restart))
 (in-package :org.tymoonnext.colleen.mod.chatlog)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (ql:quickload :clsql)
+  (ql:quickload :clsql-mysql))
 
 (define-module chatlog ()
   ((%active-in :initarg :active-in :initform () :accessor active-in)

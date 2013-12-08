@@ -9,9 +9,9 @@
   (:use :cl :colleen)
   (:shadowing-import-from :colleen :restart))
 (in-package :org.tymoonnext.colleen.mod.dramatica)
-
-(ql:quickload :cl-wiki)
-(ql:quickload :xencl)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (ql:quickload :cl-wiki)
+  (ql:quickload :xencl))
 
 (define-module dramatica ()
     ((%log-running :initarg :log-running :initform NIL :accessor log-running)
