@@ -107,3 +107,6 @@
 (define-handler (ping-event event) ()
   (setf (last-ping (server event)) (get-universal-time))
   (irc:pong (server1 event)))
+
+(define-handler (nick-in-use-event event) ()
+  (irc:nick (format NIL "~a_" (server-config (name (server event)) :nick))))
