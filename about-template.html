@@ -1,0 +1,119 @@
+<!--
+  This file is a part of Colleen
+  (c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
+  Author: Nicolas Hafner <shinmera@tymoon.eu>
+  !-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Colleen - About</title>
+    <style type="text/css">
+      code{font-family: Consolas, Inconsolata, monospace;}
+      h3{display: inline-block;margin:0;padding:0;}
+      .docs{list-style: none;}
+      .docs li{margin-bottom: 20px;}
+      .docs pre{margin: 0 0 0 10px; white-space: pre-wrap;}
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="http://shinmera.tymoon.eu/public/colleen-logo.png" alt="Piping"/>
+      <h1>v0.9.3</h1>
+    </header>
+    <div id="content">
+      <article>
+        <header><h2>What is Colleen?</h2></header>
+        <p>Colleen is yet another IRC chat bot framework. Its main features are multiple server connections, extensive event system, multi-module system and a simple command construct.</p>
+      </article>
+      <article>
+        <header><h2>How To</h2></header>
+        <p>
+          As a bot user you will most likely want to configure the bot-config.json file to your liking. To start the bot you will then have to load Colleen through ASDF or quicklisp:
+        </p>
+        <code>(ql:quickload :colleen)</code>
+        <p>
+          Next you can launch the bot with the startup command.
+        </p>
+        <code>(startup)</code>
+        <p>
+          That is all it takes for the bot to launch all requested modules and connect to the designated servers. For bot interaction, see the individual modules. You can start and stop modules with <code>START-MODULE</code> and <code>STOP-MODULE</code> respectively. (Dis)connecting a server works through the <code>CONNECT</code> and <code>DISCONNECT</code> commands. These take either a string, symbol or server instance. Colleen will automatically handle reconnection upon unforseen connection loss or ping-timeout.
+        </p>
+        <p>
+          To shut the bot back down again:
+        </p>
+        <code>(shutdown)</code>
+        <p>
+          Colleen uses the <a href="http://shinmera.tymoon.eu/public/verbose-about.html">VERBOSE</a> logging system. See its documentation for usage.
+        </p>
+      </article>
+      <article>
+        <header><h2>Extending Colleen</h2></header>
+        <p>
+          Colleen extensions are written in the form of modules. Every module should have its own package, to avoid symbol collisions and to allow the module system to take some redundancy off your hands. As such, most simple modules begin like this:
+        </p>
+        <pre><code>(in-package :colleen)
+(defpackage :org.tymoonnext.colleen.mod.my-module
+  (:use :cl :colleen))
+(in-package :org.tymoonnext.colleen.mod.my-module)
+
+(define-module my-module () ())</code></pre>
+        <p>
+          <code>DEFINE-MODULE</code> behaves just like <code>DEFCLASS</code>, but declares some necessary class fields for the system to operate properly. Next you can define event handlers, commands and command groups for your module:
+        </p>
+        <pre><code>(define-handler (privmsg-event event) ()
+  (v:info :my-module "Got a privmsg-event: ~a" event))
+
+(define-command greet (name &amp;optional greeting) (:documentation "Greets you.")
+  (respond event "Hello ~a! ~:[How are you?~;~:*~a~]" name greeting))
+
+(define-group my-group :documentation "A command group")
+
+(define-command (my-group noop) () (:documentation "Does absolutely nothing.")
+  NIL)</code></pre>
+        <p>
+          See the individual functions for more information on their arguments. If there are special events that are not yet in the colleen event system or that you would like to handle specifically, you can use <code>DEFINE-EVENT</code>:
+        </p>
+        <pre><code>(define-event my-event :RPL_LUSEROP (event)
+  (int &amp;string info)
+  (:documentation "Reply to LUSERS command - Number of IRC Operators online."))</code></pre>
+        <p>
+          The event definition will automatically set up event parsing for you and set the according fields (INT and INFO in this case) on the event instance upon creation. Each defined parser field gets an automatic accessor of the same name and a slot name preceded with a %.
+        </p>
+      </article>
+      <article>
+        <header><h2>Other Guff</h2></header>
+        <p>
+          Colleen is licensed under the <a href="http://opensource.org/licenses/Artistic-2.0">Artistic License 2.0</a> and &#169;2013 TymoonNET/NexT, <a href="http://shinmera.com">Nicolas Hafner</a>.<br />
+          This library can be obtained via git on <a href="git://git.tymoon.eu/colleen.git">git://git.tymoon.eu/colleen.git</a>. For questions, patches or suggestions, please contact me via <a href="mailto:shinmera@tymoon.eu">email</a>.
+        </p>
+      </article>
+      <article>
+        <header><h2>Colleen Package Function Index</h2></header>
+        <ul id="docs" class="docs">
+          <li id="template">
+            <a name="" class="anchor"></a>
+            <article>
+              <header>
+                <span class="functype">test</span>
+                <code>
+                  <h3 class="funcname">Foo</h3>
+                  <span class="funcargs">()</span>
+                </code>
+              </header>
+              <pre class="funcdesc">
+                Foobar
+              </pre>
+            </article>
+          </li>
+        </ul>
+      </article>
+      <article>
+        <header><h2>IRC Commands Package Function Index</h2></header>
+        <ul id="cmd-docs" class="docs">
+          
+        </ul>
+      </article>
+    </div>
+  </body>
+</html>
