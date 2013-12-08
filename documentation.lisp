@@ -15,7 +15,10 @@
   ($ template ".anchor" (attr :name (symbol-name (nth 0 object)))))
 
 (defun build-documentation ()
-  (write-documentation :colleen
-                       (merge-pathnames "about-template.html" (asdf:system-source-directory :colleen))
-                       :output-file (merge-pathnames "about.html" (asdf:system-source-directory :colleen))
-                       :exclude '(:internal)))
+  ($ (initialize (merge-pathnames "about-template.html" (asdf:system-source-directory :colleen))))
+  (let ((template ($ "#template")))
+    (let ((nodes (lquery-doc::documentate template :colleen :exclude '(:internal :method))))
+      ($ "#docs" (empty) (append nodes)))
+    (let ((nodes (lquery-doc::documentate template :irc :exclude '(:internal :method))))
+      ($ "#cmd-docs" (empty) (append nodes))))
+  ($ (write-to-file (merge-pathnames "about.html" (asdf:system-source-directory :colleen)))))
