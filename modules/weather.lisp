@@ -17,7 +17,7 @@
 (defvar *weather-api* "https://api.forecast.io/forecast/~a/~a,~a,~a?units=si&exclude=hourly,daily,flags")
 
 (defun get-coordinates (location)
-  (let* ((stream (drakma:http-request (format NIL *location-api* location) :want-stream T))
+  (let* ((stream (drakma:http-request (format NIL *location-api* location) :want-stream T :external-format-in :utf-8 :external-format-out :utf-8))
          (result (json:decode-json stream))
          (data (cdr (assoc :location 
                (cdr (assoc :geometry 
@@ -31,7 +31,7 @@
   (- (get-universal-time) *unix-epoch-difference*))
 
 (defun get-weather (latitude longitude &optional (timestamp (get-unix-time)) (apikey (config-tree :weather :apikey)))
-  (let* ((stream (drakma:http-request (format NIL *weather-api* apikey latitude longitude timestamp) :want-stream T))
+  (let* ((stream (drakma:http-request (format NIL *weather-api* apikey latitude longitude timestamp) :want-stream T  :external-format-in :utf-8))
          (data (json:decode-json stream)))
     (close stream)
     (cdr (assoc :currently data))))
