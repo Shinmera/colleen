@@ -25,8 +25,10 @@
     (loop for server being the hash-keys of *servers*
        do (disconnect server))))
 
-(define-command error () (:documentation "Simulate a condition.")
-  (error "Condition as per error function initiated by ~a in ~a." (nick event) (channel event)))
+(define-command error (&optional type) (:documentation "Simulate a condition.")
+  (if type
+      (error (find-symbol (string-upcase type)))
+      (error "Condition as per error function initiated by ~a in ~a." (nick event) (channel event))))
 
 (define-command echo (&rest args) (:documentation "Echo back the arguments.")
   (respond event "~{~a ~}" args))
