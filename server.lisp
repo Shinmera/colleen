@@ -36,7 +36,7 @@
 
 (defgeneric connect (server-or-name &key &allow-other-keys)
   (:documentation "Connect to a server instance."))
-(defgeneric disconnect (server-or-name &key quit-message)
+(defgeneric disconnect (server-or-name &key quit-message kill-reconnect)
   (:documentation "Disconnect a server instance and terminate their read-threads."))
 (defgeneric reconnect (server-or-name &key try-again-indefinitely)
   (:documentation "Attempt to reconnect a server instance."))
@@ -106,11 +106,13 @@
   (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
   (disconnect (gethash server *servers*) :quit-message quit-message))
 
-(defmethod disconnect ((server server) &key (quit-message (config-tree :messages :quit)))
+(defmethod disconnect ((server server) &key (quit-message (config-tree :messages :quit)) (kill-reconnect T))
   (flet ((terminate-server-thread (slot)
            (when (and (slot-value server slot) (thread-alive-p (slot-value server slot)))
              (v:debug (name server) "Interrupting ~a" slot)
              (interrupt-thread (slot-value server slot) #'(lambda () (error 'disconnect))))))
+    (when kill-reconnect
+      (terminate-server-thread '%restart-thread))
     (terminate-server-thread '%read-thread)
     (terminate-server-thread '%ping-thread))
 
@@ -129,7 +131,7 @@
 
 (defmethod reconnect ((server server) &key try-again-indefinitely)
   (v:info (name server) "Reconnecting...")
-  (disconnect server)
+  (disconnect server :kill-reconnect NIL)
   (handler-bind ((connection-failed
                   #'(lambda (err)
                       (if try-again-indefinitely
