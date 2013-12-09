@@ -10,7 +10,8 @@
   ((%active :initform NIL :accessor active :allocation :class)
    (%handlers :initform (make-hash-table :test 'equal) :reader handlers :allocation :class)
    (%commands :initform (make-hash-table :test 'equal) :reader commands :allocation :class)
-   (%groups :initform (make-hash-table) :reader groups :allocation :class))
+   (%groups :initform (make-hash-table) :reader groups :allocation :class)
+   (%threads :initform (make-hash-table) :accessor threads))
   (:documentation "Base module class."))
 
 (defmethod print-object (module stream)
@@ -75,6 +76,16 @@
 (defmethod add-handler ((module module) eventtype method)
   (setf (gethash (string-downcase eventtype) (handlers module)) method))
 
+(defmacro with-module-thread (module &body thread-body)
+  (let ((uidgens (gensym "UUID")))
+    `(let ((,uidgens (uuid:make-v4-uuid)))
+       (setf (gethash ,uidgens (threads ,module))
+             (make-thread #'(lambda ()
+                              ,@thread-body
+                              (remhash ,uidgens (threads ,module)))
+                          :initial-bindings `((*current-server* . ,*current-server*)
+                                              (*servers* . ,*servers*)))))))
+
 (defmethod dispatch ((module T) (event event) &key ignore-errors)
   (loop for module being the hash-values of *bot-modules*
      if (active module)
@@ -86,20 +97,22 @@
 (defmethod dispatch ((module module) (event event) &key)
   (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
     (when handler
-      (funcall handler module event)
+      (with-module-thread module 
+        (funcall handler module event))
       NIL)))
 
 (defmethod dispatch ((module module) (event command-event) &key)
   (let ((handler (gethash (command event) (commands module))))
     (when handler
-      (handler-case
-          (funcall (cmd-fun handler) module event)
-        (not-authorized (err)
-          (v:warn (name *current-server*) "User ~a attempted to execute ~a, but is not authorized!" (nick (event err)) (command (event err)))
-          (respond (event err) (fstd-message (event err) :not-authorized)))
-        (invalid-arguments (err)
-          (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
-          (respond event "Invalid arguments. Expected: ~a" (argslist err))))
+      (with-module-thread module
+        (handler-case
+            (funcall (cmd-fun handler) module event)
+          (not-authorized (err)
+            (v:warn (name *current-server*) "User ~a attempted to execute ~a, but is not authorized!" (nick (event err)) (command (event err)))
+            (respond (event err) (fstd-message (event err) :not-authorized)))
+          (invalid-arguments (err)
+            (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
+            (respond event "Invalid arguments. Expected: ~a" (argslist err)))))
       T)))
 
 (defmethod get-command ((module module) commandname)
