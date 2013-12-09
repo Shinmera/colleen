@@ -128,7 +128,7 @@
    :add-to-auth
    :process-event
    )
-  (:shadow restart time trace))
+  (:shadow time trace))
 
 (defpackage org.tymoonnext.colleen.commands
   (:use :cl)
