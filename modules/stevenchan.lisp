@@ -22,13 +22,20 @@
 (defmethod stop ((stevenchan stevenchan)))
 
 (defun check-loop (module)
-  (loop while (active module)
-     do (destructuring-bind (id author link) (most-recent module)
-          (when (> id (last-id module))
-            (v:info :Stevenchan "New post: ~a by ~a: ~a" id author link)
-            (setf (last-id module) id)
-            (irc:privmsg "#Stevenchan" (format NIL "New post: ~a by ~a: ~a" id author link) :server (get-server :tynet))))
-       (sleep 10)))
+  (v:trace :stevenchan "Entering check-loop!")
+  (loop
+     do (v:debug :stevenchan "Checking for new posts...") 
+       (handler-case 
+            (destructuring-bind (id author link) (most-recent module)
+              (when (> id (last-id module))
+                (v:info :Stevenchan "New post: ~a by ~a: ~a" id author link)
+                (setf (last-id module) id)
+                (irc:privmsg "#Stevenchan" (format NIL "New post: ~a by ~a: ~a" id author link) :server (get-server :tynet))))
+          (error (err)
+            (v:warn :Stevenchan "Error in check-loop: ~a" err)))
+       (sleep 10)
+     while (active module))
+  (v:trace :stevenchan "Leaving check-loop!"))
 
 (defgeneric most-recent (stevenchan &optional rss-url))
 (defmethod most-recent ((stevenchan stevenchan) &optional (rss-url (rss-url stevenchan)))
@@ -42,3 +49,9 @@
 
 (define-command (stevenchan latest) (&optional board) (:documentation "Get the latest post." :modulevar stevenchan)
   (apply #'respond event "#~a by ~a: ~a" (most-recent stevenchan)))
+
+(define-command (stevenchan movie) (&optional user) (:documentation "Get information about the movie night.")
+  (unless user (setf user (nick event)))
+  ($ (initialize (drakma:http-request "http://movies.tymoon.eu" :external-format-in :utf-8) :type :HTML))
+  (respond event "~a: Next movie is ~a. Movie nights always on Saturdays, 22:00 CE(S)T. http://justin.tv/stc_mv (pw: faggotry)"
+           user ($ "#content .box .largeCenter" (text) (node))))
