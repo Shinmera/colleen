@@ -36,7 +36,7 @@
 
 (defgeneric connect (server-or-name &key &allow-other-keys)
   (:documentation "Connect to a server instance."))
-(defgeneric disconnect (server-or-name &key quit-message kill-reconnect)
+(defgeneric disconnect (server-or-name &key quit-message &allow-other-keys)
   (:documentation "Disconnect a server instance and terminate their read-threads."))
 (defgeneric reconnect (server-or-name &key try-again-indefinitely)
   (:documentation "Attempt to reconnect a server instance."))
