@@ -153,12 +153,13 @@
   (raw server "INFO~@[ ~a~]" remote-server))
 
 ;; SENDING MESSAGES
-(defun privmsg (target message &key (server *current-server*))
+(defun privmsg (target message &key (server *current-server*) (line-limit 5))
   "Send a PRIVMSG."
   (when message
     (v:debug (name server) "Sending privmsg to ~a: ~a" target message)
-    (dolist (message (split-sequence:split-sequence #\Newline message))
-      (raw server "PRIVMSG ~a :~a" target message))))
+    (loop for message in (split-sequence:split-sequence #\Newline message)
+       for i from 0 below line-limit
+       do (raw server "PRIVMSG ~a :~a" target message))))
 
 (defun notice (target message &key (server *current-server*))
   "Send a NOTICE."
