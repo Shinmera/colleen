@@ -36,6 +36,7 @@
                                      (:file "markov")
                                      (:file "medals")
                                      (:file "notify")
+                                     (:file "search")
                                      (:file "stevenchan")
                                      (:file "weather"))))
   :depends-on (:bordeaux-threads
@@ -46,7 +47,8 @@
                :local-time
                :lquery
                :alexandria
-               :usocket))
+               :usocket
+               :uuid))
 
 (defsystem colleen-doc
   :name "Colleen Doc"
