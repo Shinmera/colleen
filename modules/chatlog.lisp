@@ -47,13 +47,13 @@
   (setf (user chatlog) user)
   (setf (pass chatlog) pass)
   (clsql:connect (list host db user pass port) :database-type :mysql)
-  (unless (clsql:table-exists-p "chatlog")
-    (clsql:create-table "chatlog" '(("server" (string 36) :not-null)
-                                    ("channel" (string 36) :not-null)
-                                    ("user" (string 36) :not-null)
-                                    ("time" integer :not-null)
-                                    ("type" (string 1) :not-null)
-                                    ("message" text)))))
+  (unless (clsql:table-exists-p 'chatlog)
+    (clsql:create-table 'chatlog '((server (string 36) :not-null)
+                                     (channel (string 36) :not-null)
+                                     (user (string 36) :not-null)
+                                     (time integer :not-null)
+                                     (type (string 1) :not-null)
+                                     (message text)))))
 
 (defmethod disconnect-db ((chatlog chatlog))
   (clsql:disconnect))
@@ -61,30 +61,26 @@
 (defconstant +UNIX-EPOCH-DIFFERENCE+ (encode-universal-time 0 0 0 1 1 1970 0))
 (defmethod insert-record ((chatlog chatlog) server channel user type message)
   (when (find (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal)
-    (clsql:insert-records :into "chatlog"
-                          :av-pairs `(("server" . ,(format NIL "~a" server))
-                                      ("channel" . ,channel)
-                                      ("user" . ,user)
-                                      ("time" . ,(- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+))
-                                      ("type" . ,type)
-                                      ("message" . ,message)))))
+    (clsql:insert-records :into 'chatlog
+                          :attributes '(server channel user time type message)
+                          :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message))))
 
 (define-group chatlog :documentation "Change chatlog settings.")
 
-(define-command (chatlog acivate) (&optional channel server) (:authorization T :documentation "Activate logging for a channel.")
+(define-command (chatlog acivate) (&optional channel server) (:authorization T :documentation "Activate logging for a channel." :modulevar chatlog)
   (unless channel (setf channel (channel event)))
   (unless server (setf server (name (server event))))
   (pushnew (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal)
   (respond event "Activated logging for ~a/~a" server channel))
 
-(define-command (chatlog deactivate) (&optional channel server) (:authorization T :documentation "Deactivate logging for a channel.")
+(define-command (chatlog deactivate) (&optional channel server) (:authorization T :documentation "Deactivate logging for a channel." :modulevar chatlog)
   (unless channel (setf channel (channel event)))
   (unless server (setf server (name (server event))))
   (setf (active-in chatlog)
         (delete (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal))
   (respond event "Deactivated logging for ~a/~a" server channel))
 
-(define-command (chatlog reconnect) (&optional db host port user pass) (:authorization T :documentation "Restart connection to the database.")
+(define-command (chatlog reconnect) (&optional db host port user pass) (:authorization T :documentation "Restart connection to the database." :modulevar chatlog)
   (disconnect-db chatlog)
   (connect-db chatlog 
               :db (or db (db chatlog)) 
@@ -93,20 +89,26 @@
               :user (or user (user chatlog)) 
               :pass (or pass (pass chatlog))))
 
-(define-handler (privmsg-event event) ()
+(define-handler (privmsg-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (message event)))
 
-(define-handler (quit-event event) ()
+(define-handler (nick-event event) (:modulevar chatlog)
+  (insert-record chatlog (name (server event)) (channel event) (old-nick event) "n" (format NIL " ** NICK ~a" (nick event))))
+
+(define-handler (quit-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "q" (format NIL " ** QUIT ~a" (message event))))
 
-(define-handler (part-event event) ()
+(define-handler (part-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "p" " ** PART"))
 
-(define-handler (join-event event) ()
+(define-handler (join-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "j" " ** JOIN"))
 
-(define-handler (mode-event event) ()
-  (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (format NIL " ** MODE ~a" (mode event))))
+(define-handler (kick-event event) (:modulevar chatlog)
+  (insert-record chatlog (name (server event)) (channel event) (nick event) "k" (format NIL " ** KICK ~a (~a)" (target event) (reason event))))
 
-(define-handler (topic-event event) ()
+(define-handler (mode-event event) (:modulevar chatlog)
+  (insert-record chatlog (name (server event)) (target event) (nick event) "o" (format NIL " ** MODE ~a" (mode event))))
+
+(define-handler (topic-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "t" (format NIL " ** TOPIC ~a" (topic event))))
