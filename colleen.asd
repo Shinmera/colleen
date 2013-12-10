@@ -36,6 +36,7 @@
                                      (:file "markov")
                                      (:file "medals")
                                      (:file "notify")
+                                     (:file "rss")
                                      (:file "search")
                                      (:file "silly")
                                      (:file "stevenchan")
