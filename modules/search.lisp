@@ -19,12 +19,8 @@
   (respond event (shorten-url (format NIL "http://lmgtfy.com/?q=~{~a~^ ~}" query))))
 
 (define-command (search google) (&rest query) (:documentation "Query google and return the first search result link.")
-  (let ((lquery:*lquery-master-document*))
-    ($ (initialize (drakma:http-request (format NIL "http://www.google.com/search?q=~{~a~^+~}" query)) :type :HTML))
-    (let ((node ($ "#res #search li .s" (eq 0))))
-      (respond event "http://~a ~a" 
-               ($ node ".kv cite" (text) (node))
-               (cl-ppcre:regex-replace-all "\\n" ($ node ".st" (text) (node)) "")))))
+  (multiple-value-bind (url description) (google-term (format NIL "~{~a~^ ~}" query))
+    (respond event "~a : ~a" url description)))
 
 (define-command (search wikipedia) (&rest query) (:documentation "Search wikipedia and return the first paragraph of a matching page.")
   (mediawiki-search-wrap event query "http://en.wikipedia.org/wiki/" "http://en.wikipedia.org/w/api.php" 0))
@@ -45,13 +41,23 @@
   )
 
 (define-command (search clhs) (&rest query) (:documentation "Search the Common Lisp Hyperspec and return the short explanation.")
-  )
+  (let ((lquery:*lquery-master-document*)
+        (url (google-term (format NIL "clhs+Body+~{~a~^+~}" query))))
+    ($ (initialize (drakma:http-request url) :type :HTML))
+    (respond event "~a ~a" ($ "body>a" (eq 0) (text) (node)) url)))
 
 (define-command (search shorten) (&rest address) (:documentation "Create a shortened URL through bit.ly .")
   (let ((short (shorten-url (format NIL "~{~a~^ ~}" address))))
     (if short
         (respond event short)
         (respond event "Url-shortening failed!"))))
+
+(defun google-term (term)
+  (let ((lquery:*lquery-master-document*))
+    ($ (initialize (drakma:http-request "http://www.google.com/search" :external-format-in :utf-8 :external-format-out :utf-8 :parameters `(("q" . ,term))) :type :HTML))
+    (let ((node ($ "#res #search li" (eq 0))))
+      (values (cl-ppcre:register-groups-bind (url) ("\\?q=(.*?)&" ($ node "h3 a" (attr :href) (node))) url)
+              (cl-ppcre:regex-replace-all "\\n" ($ node ".s .st" (text) (node)) "")))))
 
 (defun mediawiki-search-wrap (event query base api &optional (section 0))
   (let ((result (mediawiki-search query base api section)))
