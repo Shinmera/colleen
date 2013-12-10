@@ -37,6 +37,7 @@
                                      (:file "medals")
                                      (:file "notify")
                                      (:file "search")
+                                     (:file "silly")
                                      (:file "stevenchan")
                                      (:file "weather"))))
   :depends-on (:bordeaux-threads
