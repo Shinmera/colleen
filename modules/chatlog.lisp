@@ -90,7 +90,9 @@
               :pass (or pass (pass chatlog))))
 
 (define-handler (privmsg-event event) (:modulevar chatlog)
-  (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (message event)))
+  (if (and (> (length (message event)) (length " ACTION ")) (string= (message event) "ACTION" :start1 1 :end1 7))
+      (insert-record chatlog (name (server event)) (channel event) (nick event) "a" (format NIL " * ~a" (subseq (message event) 7)))
+      (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (message event))))
 
 (define-handler (nick-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (old-nick event) "n" (format NIL " ** NICK ~a" (nick event))))
