@@ -51,7 +51,8 @@
 (defun quit (&key quit-message (server *current-server*))
   "Quit a server."
   (v:debug (name server) "Sending QUIT: ~a" quit-message)
-  (raw server "QUIT~@[ :~a~]" quit-message))
+  (raw server "QUIT~@[ :~a~]" quit-message)
+  (setf (channels server) NIL))
 
 (defun squit (remote-server quit-message &key (server *current-server*))
   "Disconnect a remote server from the network."
