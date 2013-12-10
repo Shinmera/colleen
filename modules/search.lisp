@@ -10,6 +10,9 @@
   (:shadow :search))
 (in-package :org.tymoonnext.colleen.mod.search)
 
+(defun drakma-utf8 (url &rest params)
+  (apply #'drakma:http-request url :external-format-in :utf-8 :external-format-out :utf-8 :user-agent :chrome :preserve-uri T params))
+
 (define-module search () ()
   (:documentation "Perform searches on various sites."))
 
@@ -22,23 +25,60 @@
   (multiple-value-bind (url description) (google-term (format NIL "~{~a~^ ~}" query))
     (respond event "~a : ~a" url description)))
 
-(define-command (search wikipedia) (&rest query) (:documentation "Search wikipedia and return the first paragraph of a matching page.")
+(define-command (search wikipedia) (&rest query) (:documentation "Search wikipedia.")
   (mediawiki-search-wrap event query "http://en.wikipedia.org/wiki/" "http://en.wikipedia.org/w/api.php" 0))
 
-(define-command (search wiktionary) (&rest query) (:documentation "Search wiktionary and return the first paragraph of a matching page.")
+(define-command (search wiktionary) (&rest query) (:documentation "Search wiktionary.")
   (mediawiki-search-wrap event query "http://en.wiktionary.org/wiki/" "http://en.wiktionary.org/w/api.php" 1))
 
-(define-command (search ed) (&rest query) (:documentation "Search encyclopediadramatica and return the first paragraph of a matching page.")
+(define-command (search ed) (&rest query) (:documentation "Search encyclopediadramatica, the number one wiki for internet drama.")
   (mediawiki-search-wrap event query "http://encyclopediadramatica.es/" "http://encyclopediadramatica.es/api.php" 0))
 
-(define-command (search cliki) (&rest query) (:documentation "Search CLiki.net and return the first paragraph of a matching page.")
-  )
+(define-command (search kanjidamage) (&rest query) (:documentation "Return information about a kanji symbol crawled from Kanjidamage.com")
+  (setf query (format NIL "~{~a~^ ~}" query))
+  (let ((lquery:*lquery-master-document*))
+    (multiple-value-bind (html status headers uri) (drakma:http-request "http://kanjidamage.com/kanji/search" 
+                                                                        :parameters `(("q" . ,query) ("utf8" . "✓")) 
+                                                                        :external-format-in :utf-8 :external-format-out :utf-8)
+      (declare (ignore status headers))
+      ($ (initialize html :type :HTML))
+      (respond event "~a : ~a ~a - ~a" 
+               uri
+               ($ "h1 .kanji_character" (text) (node))
+               ($ "h1 .translation" (text) (node))
+               (cl-ppcre:regex-replace-all "\\s\\s" ($ ".span12 .definition p" (text) (node)) " ")))))
 
-(define-command (search kanjidamage) (symbol) (:documentation "Return information about a kanji symbol crawled from Kanjidamage.com")
-  )
+(define-command (search jigen) (symbol &optional n) (:documentation "Search Jigen.net, a kanji character database.")
+  (let ((lquery:*lquery-master-document*))
+    ($ (initialize (drakma-utf8 (format NIL "http://jigen.net/data/~a?type2=1&rs=-1" (drakma:url-encode symbol :utf-8))) :type :HTML))
+    (let ((results ($ "#main .ka_list li")))
+      (if (and (cdr results) (not n))
+          (respond event "Mathing pages (please specify nubmer): ~{~a~^, ~}" ($ results "a" (text)))
+          (let ((page ($ results (eq (or n 0)) "a" (attr :href) (node))))
+            ($ (initialize (drakma-utf8 page) :type :HTML))
+            ($ "sup" (remove))
+            (let* ((dds ($ "#kjid dl dd"))
+                   (add (- (length dds) 7)))
+              (respond event "~a : Readings: ~{~a~^, ~}; Composition: ~{~a~}; Pronunciation: ~{~a~^, ~}; Display: ~a; Variants: ~{~a~^, ~}" 
+                       page
+                       ($ dds (eq (+ add 0)) "li" (text))
+                       ($ dds (eq (+ add 2)) (text))
+                       ($ dds (eq (+ add 3)) "li" (text))
+                       ($ dds (eq (+ add 4)) (text) (node))
+                       ($ dds (eq (+ add 5)) "li" (text)))))))))
 
-(define-command (search jigen) (symbol) (:documentation "Search Jigen.net and return information about a symbol.")
-  )
+(define-command (search cliki) (&rest query) (:documentation "Search CLiki.net, a wiki dedicated to open source lisp projects and such..")
+  (setf query (format NIL "~{~a~^+~}" query))
+  (let ((lquery:*lquery-master-document*))
+    ($ (initialize (drakma:http-request "http://www.cliki.net/site/search" :parameters `(("query" . ,query)) :external-format-in :utf-8) :type :HTML))
+    (let ((results ($ "#content-area li")))
+      (if results
+          (let ((page (format NIL "http://www.cliki.net~a" ($ results (eq 0) "a" (attr :href) (node)))))
+            ($ (initialize (drakma-utf8 page) :type :HTML))
+            (cl-ppcre:register-groups-bind (html NIL) ("<div id=\"article\">(.*?)<" ($ "#article" (serialize) (node)))
+              ($ (initialize (format NIL "<html><head></head><body>~a</body></html>" html) :type :HTML))
+              (respond event "~a : ~a" page ($ "body" (text) (node)))))
+          (respond event "Nothing found for ~a." query)))))
 
 (define-command (search clhs) (&rest query) (:documentation "Search the Common Lisp Hyperspec and return the short explanation.")
   (let ((lquery:*lquery-master-document*)
@@ -54,7 +94,10 @@
 
 (defun google-term (term)
   (let ((lquery:*lquery-master-document*))
-    ($ (initialize (drakma:http-request "http://www.google.com/search" :external-format-in :utf-8 :external-format-out :utf-8 :parameters `(("q" . ,term))) :type :HTML))
+    ($ (initialize (drakma:http-request "http://www.google.com/search" 
+                                        :parameters `(("q" . ,term))
+                                        :external-format-out :utf-8
+                                        :external-format-in :utf-8) :type :HTML))
     (let ((node ($ "#res #search li" (eq 0))))
       (values (cl-ppcre:register-groups-bind (url) ("\\?q=(.*?)&" ($ node "h3 a" (attr :href) (node))) url)
               (cl-ppcre:regex-replace-all "\\n" ($ node ".s .st" (text) (node)) "")))))
@@ -84,12 +127,13 @@
                  data)))
     (let ((data (json:decode-json-from-string
                  (flexi-streams:octets-to-string
-                  (drakma:http-request 
+                  (drakma:http-request
                    "http://api.bitly.com/v3/shorten"
                    :parameters `(("login" . "o_2vsdcdup6q")
                                  ("apiKey" . "R_37fc5c0f8bc59052587bee13c2257c4f")
                                  ("longUrl" . ,url))
-                   :external-format-out :utf-8 :external-format-in :utf-8 :user-agent :chrome) 
+                   :external-format-out :utf-8
+                   :external-format-in :utf-8) 
                   :external-format :utf-8))))
       (values (g data :url :data)
               (g data :hash :data)
