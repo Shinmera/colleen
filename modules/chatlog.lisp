@@ -96,7 +96,8 @@
   (insert-record chatlog (name (server event)) (channel event) (old-nick event) "n" (format NIL " ** NICK ~a" (nick event))))
 
 (define-handler (quit-event event) (:modulevar chatlog)
-  (insert-record chatlog (name (server event)) (channel event) (nick event) "q" (format NIL " ** QUIT ~a" (message event))))
+  (dolist (channel (channels (server event)))
+    (insert-record chatlog (name (server event)) channel (nick event) "q" (format NIL " ** QUIT ~a" (message event)))))
 
 (define-handler (part-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "p" " ** PART"))
