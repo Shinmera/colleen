@@ -114,7 +114,7 @@
             (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
             (respond event "Invalid arguments. Expected: ~a" (argslist err)))
           (error (err)
-            (v:warn (find-symbol (class-name (class-of module)) :KEYWORD) "Unhandled condition: ~a" err)
+            (v:warn (find-symbol (string-upcase (class-name (class-of module))) :KEYWORD) "Unhandled condition: ~a" err)
             (respond event "Unhandled condition: ~a" err))))
       T)))
 
