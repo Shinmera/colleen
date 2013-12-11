@@ -47,6 +47,8 @@
   (setf (user chatlog) user)
   (setf (pass chatlog) pass)
   (clsql:connect (list host db user pass port) :database-type :mysql)
+  (clsql:execute-command "SET NAMES utf8")
+  (clsql:execute-command "SET CHARACTER SET utf8")
   (unless (clsql:table-exists-p 'chatlog)
     (clsql:create-table 'chatlog '((server (string 36) :not-null)
                                      (channel (string 36) :not-null)
@@ -125,7 +127,7 @@
   (insert-record chatlog (name (server event)) (channel event) (nick event) "k" (format NIL " ** KICK ~a (~a)" (target event) (reason event))))
 
 (define-handler (mode-event event) (:modulevar chatlog)
-  (insert-record chatlog (name (server event)) (target event) (nick event) "o" (format NIL " ** MODE ~a" (mode event))))
+  (insert-record chatlog (name (server event)) (target event) (nick event) "o" (format NIL " ** MODE ~a ~a" (mode event) (parameter event))))
 
 (define-handler (topic-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "t" (format NIL " ** TOPIC ~a" (topic event))))
