@@ -41,6 +41,8 @@
 
 (defmethod start ((rss rss))
   (load-feeds rss)
+  (dolist (feed (feeds rss))
+    (update feed))
   (setf (thread rss) (bordeaux-threads:make-thread 
                       #'(lambda () (check-loop rss))
                       :initial-bindings `((*servers* . ,*servers*)))))
@@ -73,16 +75,19 @@
 (defmethod check-loop ((rss rss))
   (v:debug :rss "Starting check-loop.")
   (loop while (active rss)
-     do (loop for feed being the hash-values of (feeds rss)
-           do (let ((update (update feed)))
-                (when update
-                  (v:info :rss "~a New item: ~a" feed update)
-                  (dolist (channel (report-to feed))
-                    (irc:privmsg (cdr channel) 
-                                 (format NIL "[RSS UPDATE] ~a: ~a ~a" 
-                                         (name feed) (title update) (link update)) 
-                                 :server (get-server (car channel)))))))
-       (sleep (* 60 5)))
+     do (sleep (* 60 5)) 
+       (loop for feed being the hash-values of (feeds rss)
+          do (handler-case 
+                 (let ((update (update feed)))
+                   (when update
+                     (v:info :rss "~a New item: ~a" feed update)
+                     (dolist (channel (report-to feed))
+                       (irc:privmsg (cdr channel) 
+                                    (format NIL "[RSS UPDATE] ~a: ~a ~a" 
+                                            (name feed) (title update) (link update)) 
+                                    :server (get-server (car channel))))))
+               (error (err)
+                 (v:warn :rss "Error in check-loop: ~a" err)))))
   (v:debug :rss "Leaving check-loop."))
 
 (defmethod update ((feed feed))
