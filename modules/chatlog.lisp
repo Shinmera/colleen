@@ -72,7 +72,8 @@
            (with-simple-restart (try-again "Retry inserting the record.")
              (clsql:insert-records :into 'chatlog
                                    :attributes '(server channel user time type message)
-                                   :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message)))))))
+                                   :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message))
+             T)))))
 
 (define-group chatlog :documentation "Change chatlog settings.")
 
@@ -102,6 +103,9 @@
   (if (and (> (length (message event)) (length " ACTION ")) (string= (message event) "ACTION" :start1 1 :end1 7))
       (insert-record chatlog (name (server event)) (channel event) (nick event) "a" (format NIL " * ~a" (subseq (message event) 7)))
       (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (message event))))
+
+(define-handler (send-event event) (:modulevar chatlog)
+  (insert-record chatlog (name (server event)) (channel event) (nick event) "m" (message event)))
 
 (define-handler (nick-event event) (:modulevar chatlog)
   (dolist (channel (channels (server event)))
