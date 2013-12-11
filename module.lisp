@@ -97,7 +97,7 @@
 (defmethod dispatch ((module module) (event event) &key)
   (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
     (when handler
-      (with-module-thread module 
+      (with-module-thread module
         (funcall handler module event))
       NIL)))
 
@@ -112,7 +112,10 @@
             (respond (event err) (fstd-message (event err) :not-authorized)))
           (invalid-arguments (err)
             (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
-            (respond event "Invalid arguments. Expected: ~a" (argslist err)))))
+            (respond event "Invalid arguments. Expected: ~a" (argslist err)))
+          (error (err)
+            (v:warn (find-symbol (class-name (class-of module)) :KEYWORD) "Unhandled condition: ~a" err)
+            (respond event "Unhandled condition: ~a" err))))
       T)))
 
 (defmethod get-command ((module module) commandname)
