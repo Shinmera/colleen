@@ -6,34 +6,6 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defun start-module (&rest module-names)
-  "Start up one or more modules. Each module name should be a symbol or string."
-  (dolist (module-name module-names)
-    (unless (keywordp module-name) (setf module-name (find-symbol (string-upcase module-name) "KEYWORD")))
-    (with-simple-restart (skip "Skip starting the module.")
-      (let ((module (get-module module-name)))
-        (assert (not (null module)) () "Module ~a not found!" module-name)
-        (with-simple-restart (force "Force starting the module.")
-          (assert (not (active module)) () "Module ~a already started!" module-name))
-        (v:info module-name "Starting...")
-        (loop until (with-simple-restart (retry "Retry starting the module.")
-                      (start module)))
-        module))))
-
-(defun stop-module (&rest module-names)
-  "Stop one or more modules. Each module name should be a symbol or string."
-  (dolist (module-name module-names)
-    (unless (keywordp module-name) (setf module-name (find-symbol (string-upcase module-name) "KEYWORD")))
-    (with-simple-restart (skip "Skip stopping the module.")
-      (let ((module (get-module module-name)))
-        (assert (not (null module)) () "Module ~a not found!" module-name)
-        (with-simple-restart (force "Force stopping the module.")
-          (assert (not (not (active module))) () "Module ~a already stopped!" module-name))
-        (v:info module-name "Stopping...")
-        (loop until (with-simple-restart (retry "Retry stopping the module.")
-                      (stop module)))
-        module))))
-
 (defun auth-p (nick)
   "Return T if the requested nick is on the server's authenticated users list."
   (find nick (auth-users *current-server*) :test #'equal))
@@ -93,27 +65,3 @@
             (error (err)
               (v:severe (name (server event)) "Uncaught error ~a on event ~a" err event)
               (respond event "Uncaught error: ~a" err))))))))
-
-(define-module core () () (:documentation "Colleen core module, handling a few standard events."))
-(start (get-module :core))
-
-(define-handler (welcome-event event) ()
-  (v:info (name (server event)) "Got welcome, joining channels.")
-  (let ((nickservpw (server-config (name (server event)) :nickservpw)))
-    (when nickservpw
-      (v:info (name (server event)) "Sending Nickserv: IDENTIFY ~a" nickservpw)
-      (irc:privmsg "NickServ" (format NIL "IDENTIFY ~a" nickservpw))))
-  
-  (loop for chan in (server-config (name *current-server*) :channels)
-     do (irc:join chan)
-       (irc:privmsg chan (standard-message :join))))
-
-(define-handler (pong-event event) ()
-  (setf (last-ping (server event)) (get-universal-time)))
-
-(define-handler (ping-event event) ()
-  (setf (last-ping (server event)) (get-universal-time))
-  (irc:pong (server1 event)))
-
-(define-handler (nick-in-use-event event) ()
-  (irc:nick (format NIL "~a_" (server-config (name (server event)) :nick))))
