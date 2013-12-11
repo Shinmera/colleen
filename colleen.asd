@@ -31,6 +31,7 @@
                         :components ((:file "authenticate")
                                      (:file "blants")
                                      (:file "chatlog")
+                                     (:file "core")
                                      (:file "dramatica")
                                      (:file "essentials")
                                      (:file "markov")
