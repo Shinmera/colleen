@@ -47,7 +47,8 @@
           (setf (gethash "server" table) (server note))
           (setf (gethash "timestamp" table) (timestamp note))
           (push table newlist)))
-      (yason:encode (nreverse newlist) stream))))
+      (yason:encode (nreverse newlist) stream)
+      (v:info :notify "Saved ~d notes." (length newlist)))))
 
 (defmethod load ((notify notify))
   (with-open-file (stream *save-file* :if-does-not-exist NIL)
@@ -62,8 +63,10 @@
                  :nick (gethash "nick" note)
                  :channel (gethash "channel" note)
                  :server (gethash "server" note)
-                 :timestamp (gethash "timestamp" note)) newlist)
-          (setf (notes notify) (nreverse newlist)))))))
+                 :timestamp (gethash "timestamp" note))
+                newlist))
+        (setf (notes notify) (nreverse newlist))
+        (v:info :notify "Loaded ~d notes." (length newlist))))))
 
 (define-command notify (recipient &rest message) (:modulevar notify)
   (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
