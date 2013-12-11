@@ -144,6 +144,9 @@
       (respond event "~a: ~a" name (url (gethash name (feeds module))))
       (respond event "No feed called \"~a\" could be found!" name)))
 
+(define-command (rss list) () (:documentation "List the currently available feeds.")
+  (respond event "Known feeds: ~{~a~^, ~}" (alexandria:hash-table-keys (feeds module))))
+
 (define-command (rss watch) (name) (:authorization T :documentation "Start watching a feed on this channel.")
   (pushnew (cons (name (server event)) (channel event)) (report-to module))
   (respond event "Now watching ~a on this channel." name))
