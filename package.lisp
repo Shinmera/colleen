@@ -46,6 +46,7 @@
    :channel
    :command-event
    :command
+   :send-event
    :cmd-args
    :respond
    :welcome-event

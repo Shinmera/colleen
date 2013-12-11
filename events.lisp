@@ -139,9 +139,15 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
       (setf channel (nick event)))))
 
 (defclass command-event (privmsg-event)
-    ((%command :initarg :command :accessor command)
-     (%cmd-args :initarg :cmd-args :accessor cmd-args))
-    (:documentation "Event for commands."))
+  ((%command :initarg :command :accessor command)
+   (%cmd-args :initarg :cmd-args :accessor cmd-args))
+  (:documentation "Event for commands."))
+
+(defclass send-event (event) 
+  ((%nick :initarg :nick :accessor nick)
+   (%channel :initarg :channel :accessor channel)
+   (%message :initarg :message :accessor message))
+  (:documentation "Event for when the bot sends a message."))
 
 (define-event join-event :JOIN (channel-event) ()
     (:documentation "User join event."))
