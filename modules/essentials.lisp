@@ -12,7 +12,8 @@
 (in-package :org.tymoonnext.colleen.mod.essentials)
 
 (define-module essentials ()
-  ())
+  ((%last-seen :initform (make-hash-table :test 'equalp) :accessor last-seen))
+  (:documentation "A few essential bot and irc commands."))
 
 (define-command reload () (:authorization T :documentation "Reload the configuration.")
   (when (auth-p (nick event))
@@ -121,3 +122,20 @@
       (irc:channel-mode target mode :server serv)
       (irc:user-mode target mode :server serv)))
 
+;; LAST SEEN
+(define-handler (join-event event) ()
+  (setf (gethash (nick event) (last-seen module)) (get-universal-time)))
+
+(define-handler (privmsg-event event) ()
+  (setf (gethash (nick event) (last-seen module)) (get-universal-time)))
+
+(defun format-time-since (secs)
+  (multiple-value-bind (s m h dd yy) (decode-universal-time secs)
+    (declare (ignore s))
+    (setf yy (- yy 1) dd (- dd 1) m (- m 1) h (- h 1))
+    (format NIL "~D years, ~D days, ~D hours, ~D minutes" yy dd h m)))
+
+(define-command last-seen (nick) (:documentation "Tell how long it has been since the bot last saw the requested nick.")
+  (if (gethash nick (last-seen module))
+      (respond event "I have last seen ~a ~a ago." nick (format-time-since (- (get-universal-time) (gethash nick (last-seen module)))))
+      (respond event "I don't know anyone called ~a." nick)))
