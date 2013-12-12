@@ -25,6 +25,22 @@
   (multiple-value-bind (url description) (google-term (format NIL "~{~a~^ ~}" query))
     (respond event "~a : ~a" url description)))
 
+(define-command (search image) (&rest query) (:documentation "Query google images and return the link to the first image in the results.")
+  (setf query (format NIL "~{~a~^ ~}" query))
+  (let* ((stream
+          (drakma:http-request "https://ajax.googleapis.com/ajax/services/search/images" :want-stream T
+                               :parameters `(("q" . ,query) ("v" . "1.0"))
+                               :external-format-out :utf-8
+                               :external-format-in :utf-8))
+         (data (json:decode-json stream))
+         (results (cdr (assoc :results (cdr (assoc :response-data data))))))
+    (close stream)
+    (if results
+        (respond event "~a : ~a" 
+                 (cdr (assoc :url (first results)))
+                 (cdr (assoc :title-no-formatting (first results))))
+        (respond event "No results found for ~a." query))))
+
 (define-command (search wikipedia) (&rest query) (:documentation "Search wikipedia.")
   (mediawiki-search-wrap event query "http://en.wikipedia.org/wiki/" "http://en.wikipedia.org/w/api.php" 0))
 
