@@ -78,29 +78,37 @@
         (setf (feeds rss) feeds)
         (v:info :rss "~a feeds loaded." (hash-table-count feeds))))))
 
+(define-condition recheck (error) ())
 (defmethod check-loop ((rss rss))
   (v:debug :rss "Starting check-loop.")
   (loop while (active rss)
-     do (sleep (* 60 5))
-       (v:info :rss "Checking all...")
-       (loop for feed being the hash-values of (feeds rss)
-          do (handler-case 
-                 (let ((update (update feed)))
-                   (when update
-                     (v:info :rss "~a New item: ~a" feed update)
-                     (dolist (channel (report-to feed))
-                       (irc:privmsg (cdr channel) 
-                                    (format NIL "[RSS UPDATE] ~a: ~a ~a" 
-                                            (name feed) (title update) (link update)) 
-                                    :server (get-server (car channel))))))
-               (error (err)
-                 (v:warn :rss "Error in check-loop: ~a" err)))))
+     do (handler-case
+            (progn
+              (sleep (* 60 5))
+              (v:info :rss "[Check-Loop] Checking all...")
+              (loop for feed being the hash-values of (feeds rss)
+                 do (handler-case 
+                        (let ((update (update feed)))
+                          (when update
+                            (v:info :rss "~a New item: ~a" feed update)
+                            (dolist (channel (report-to feed))
+                              (irc:privmsg (cdr channel) 
+                                           (format NIL "[RSS UPDATE] ~a: ~a ~a" 
+                                                   (name feed) (title update) (link update)) 
+                                           :server (get-server (car channel))))))
+                      (error (err)
+                        (v:warn :rss "Error in check-loop: ~a" err)))))
+          (recheck (err) 
+            (declare (ignore err))
+            (v:debug :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately."))))
   (v:debug :rss "Leaving check-loop."))
 
 (defmethod update ((feed feed))
   (v:debug :rss "~a updating." feed)
   (let ((newest (first (get-items feed :limit 1))))
-    (unless (and (last-item feed) (string-equal (guid (last-item feed)) (guid newest)))
+    (unless (and (last-item feed) 
+                 (string-equal (guid (last-item feed)) (guid newest))
+                 (string-equal (link (last-item feed)) (link newest)))
       (setf (last-item feed) newest)
       newest)))
 
@@ -169,3 +177,9 @@
       (let ((item (first (get-items (gethash name (feeds module)) :limit 1))))
         (respond event "~a: ~a ~a~@[ ~a~]" (nick event) (title item) (link item) (publish-date item)))
       (respond event "No feed called \"~a\" could be found!" name)))
+
+(define-command (rss recheck) () (:authorization T :documentation "Forces a recheck of all feeds immediately.")
+  (bordeaux-threads:interrupt-thread 
+   (thread module)
+   #'(lambda () (error 'recheck)))
+  (respond event "Forcing recheck..."))
