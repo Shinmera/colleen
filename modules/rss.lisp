@@ -148,15 +148,24 @@
   (respond event "Known feeds: ~{~a~^, ~}" (alexandria:hash-table-keys (feeds module))))
 
 (define-command (rss watch) (name) (:authorization T :documentation "Start watching a feed on this channel.")
-  (pushnew (cons (name (server event)) (channel event)) (report-to module))
-  (respond event "Now watching ~a on this channel." name))
+  (if (gethash name (feeds module))
+      (progn
+        (pushnew (cons (name (server event)) (channel event)) (report-to (gethash name (feeds module))))
+        (respond event "Now watching ~a on this channel." name))
+      (respond event "No feed called \"~a\" could be found!" name)))
 
 (define-command (rss unwatch) (name) (:authorization T :documentation "Stop watching a feed on this channel.")
-  (setf (report-to module) (delete-if #'(lambda (el) (and (eql (name (server event)) (car el))
-                                                          (string-equal (channel event) (cdr el))))
-                                      (report-to module)))
-  (respond event "No longer watching ~a on this channel." name))
+  (if (gethash name (feeds module))
+      (progn
+        (setf (report-to (gethash name (feeds module))) 
+              (delete-if #'(lambda (el) (and (eql (name (server event)) (car el))
+                                             (string-equal (channel event) (cdr el))))
+                                            (report-to module)))
+        (respond event "No longer watching ~a on this channel." name))
+      (respond event "No feed called \"~a\" could be found!" name)))
 
 (define-command (rss latest) (name) (:documentation "Get the latest feed item.")
-  (let ((item (first (get-items (gethash name (feeds module)) :limit 1))))
-    (respond event "~a: ~a ~a~@[ ~a~]" (nick event) (title item) (link item) (publish-date item))))
+  (if (gethash name (feeds module))
+      (let ((item (first (get-items (gethash name (feeds module)) :limit 1))))
+        (respond event "~a: ~a ~a~@[ ~a~]" (nick event) (title item) (link item) (publish-date item)))
+      (respond event "No feed called \"~a\" could be found!" name)))
