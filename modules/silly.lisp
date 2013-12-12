@@ -27,3 +27,19 @@
 (define-command sammich () (:documentation "You are stupid.")
   (sleep 2)
   (respond event ".. what?"))
+
+(define-command roll (&optional (size 6) (times 1)) (:documentation "Roll a random number.")
+  (if (or (string-equal size "infinity") (string-equal times "infinity"))
+      (respond event "~ad~a: infinity" times size)
+      (progn
+        (when (stringp size) (setf size (parse-integer size :junk-allowed T)))
+        (when (stringp times) (setf times (parse-integer times :junk-allowed T)))
+        (respond event "~dd~d: ~d" times size (loop for i from 0 below times summing (1+ (random size)))))))
+
+(define-command |8| (&rest |8|) (:documentation "\"Eight.\"")
+  (declare (ignore |8|))
+  (respond event "8."))
+
+(define-command fortune (&rest what) (:documentation "Get the fortune about something.")
+  (unless what (setf what (list (nick event))))
+  (respond event "Fortune for ~{~a~^ ~}: Faggotry." what))
