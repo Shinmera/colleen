@@ -20,5 +20,7 @@
     (let ((nodes (lquery-doc::documentate template :colleen :exclude '(:internal :method))))
       ($ "#docs" (empty) (append nodes)))
     (let ((nodes (lquery-doc::documentate template :irc :exclude '(:internal :method))))
-      ($ "#cmd-docs" (empty) (append nodes))))
+      ($ "#cmd-docs" (empty) (append nodes)))
+    (let ((nodes (lquery-doc::documentate template :events :exclude '(:internal :method))))
+      ($ "#evt-docs" (empty) (append nodes))))
   ($ (write-to-file (merge-pathnames "about.html" (asdf:system-source-directory :colleen)))))

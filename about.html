@@ -17,7 +17,7 @@
   <body>
     <header>
       <img src="http://shinmera.tymoon.eu/public/colleen-logo.png" alt="Piping"/>
-      <h1>v0.9.3</h1>
+      <h1>v0.9.6</h1>
     </header>
     <div id="content">
       <article>
@@ -52,7 +52,7 @@
         </p>
         <pre><code>(in-package :colleen)
 (defpackage :org.tymoonnext.colleen.mod.my-module
-  (:use :cl :colleen))
+  (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.my-module)
 
 (define-module my-module () ())</code></pre>
@@ -87,7 +87,7 @@
         </p>
       </article>
       <article>
-        <header><h2>Colleen Package Function Index</h2></header>
+        <header><h2>Colleen Package Index</h2></header>
         <ul id="docs" class="docs"><li id="template">
             <a class="anchor" name="*BOT-MODULES*"/>
             <article>
@@ -497,18 +497,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Define a new module class. See DEFCLASS.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="DESCRIPTION"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">DESCRIPTION</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="DISCONNECT"/>
             <article>
               <header>
@@ -527,7 +515,8 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">DISCONNECT</h3>
-                  <span class="funcargs">(SERVER-OR-NAME &amp;KEY QUIT-MESSAGE (QUIT-MESSAGE (CONFIG-TREE :MESSAGES :QUIT)))</span>
+                  <span class="funcargs">(SERVER-OR-NAME &amp;KEY QUIT-MESSAGE (QUIT-MESSAGE (CONFIG-TREE :MESSAGES :QUIT))
+ (KILL-RECONNECT T) &amp;ALLOW-OTHER-KEYS)</span>
                 </code>
               </header>
               <pre class="funcdesc">Disconnect a server instance and terminate their read-threads.</pre>
@@ -665,30 +654,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="HOSTNAME"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">HOSTNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="IDLE-TIME"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">IDLE-TIME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="INVALID-ARGUMENTS"/>
             <article>
               <header>
@@ -699,30 +664,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 </code>
               </header>
               <pre class="funcdesc">Condition raised when a command is called with an invalid arguments structure.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="JOIN-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">JOIN-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">User join event.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="KICK-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">KICK-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">User kick event.</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="LOAD-CONFIG"/>
@@ -749,30 +690,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="MODE"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">MODE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="MODE-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">MODE-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Mode change event.</pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="MODULE"/>
             <article>
               <header>
@@ -783,30 +700,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 </code>
               </header>
               <pre class="funcdesc">Base module class.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="MOTD-END-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">MOTD-END-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on a ENDOFMOTD line.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="MOTD-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">MOTD-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on a MOTD line.</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="NAME"/>
@@ -851,31 +744,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NICK</h3>
-                  <span class="funcargs">(CONDITION)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="NICK-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">NICK-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on nick change.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="NICKNAME-IN-USE"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">NICKNAME-IN-USE</h3>
-                  <span class="funcargs"></span>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -893,54 +762,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Condition raised when a user tried to execute a command he isn't authorized for.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="NOTICE-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">NOTICE-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Notice message.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="OLD-NICK"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">OLD-NICK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="PARAMETER"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">PARAMETER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="PART-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">PART-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">User part event.</pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="PASSWORD"/>
             <article>
               <header>
@@ -953,18 +774,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="PING-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">PING-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on a PING request.</pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="PING-TIMEOUT"/>
             <article>
               <header>
@@ -975,18 +784,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 </code>
               </header>
               <pre class="funcdesc">Condition signalled when a ping-timeout is noticed.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="PONG-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">PONG-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on a PONG request.</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="PORT"/>
@@ -1013,18 +810,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="PRIVMSG-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">PRIVMSG-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Privmsg event.</pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="PROCESS-EVENT"/>
             <article>
               <header>
@@ -1037,36 +822,12 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Process and event and dispatch it to the modules.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="QUIT-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">QUIT-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">User quit event.</pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="REALNAME"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">REALNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="REASON"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">REASON</h3>
                   <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
@@ -1121,6 +882,18 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Respond to an event origin with the given message.</pre>
             </article>
           </li><li id="template">
+            <a class="anchor" name="SEND-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SEND-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event for when the bot sends a message.</pre>
+            </article>
+          </li><li id="template">
             <a class="anchor" name="SERVER"/>
             <article>
               <header>
@@ -1157,30 +930,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Shorthand accessor for server configuration values, defaulting to the DEFAULT server if not available.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="SERVER1"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">SERVER1</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="SERVER2"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">SERVER2</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="SHUTDOWN"/>
             <article>
               <header>
@@ -1191,18 +940,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 </code>
               </header>
               <pre class="funcdesc">Shut down the bot: Disconnect servers, stop modules, save config.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="SIGNON-TIME"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">SIGNON-TIME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="STANDARD-MESSAGE"/>
@@ -1277,42 +1014,6 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Stop one or more modules. Each module name should be a symbol or string.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="TARGET"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">TARGET</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="TOPIC"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL GENERIC</span>
-                <code>
-                  <h3 class="funcname">TOPIC</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
-                </code>
-              </header>
-              <pre class="funcdesc"></pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="TOPIC-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">TOPIC-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Topic set event.</pre>
-            </article>
-          </li><li id="template">
             <a class="anchor" name="USER-EVENT"/>
             <article>
               <header>
@@ -1336,82 +1037,10 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               </header>
               <pre class="funcdesc"></pre>
             </article>
-          </li><li id="template">
-            <a class="anchor" name="WELCOME-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">WELCOME-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on successful logon.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="WHOIS-CHANNELS-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">WHOIS-CHANNELS-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on WHOISCHANNELS response.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="WHOIS-END-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">WHOIS-END-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on ENDOFWHOIS response.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="WHOIS-IDLE-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">WHOIS-IDLE-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on WHOISIDLE response.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="WHOIS-SERVER-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">WHOIS-SERVER-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on WHOISSERVER response.</pre>
-            </article>
-          </li><li id="template">
-            <a class="anchor" name="WHOIS-USER-EVENT"/>
-            <article>
-              <header>
-                <span class="functype">EXTERNAL CLASS</span>
-                <code>
-                  <h3 class="funcname">WHOIS-USER-EVENT</h3>
-                  <span class="funcargs"></span>
-                </code>
-              </header>
-              <pre class="funcdesc">Event on WHOISUSER response.</pre>
-            </article>
           </li></ul>
       </article>
       <article>
-        <header><h2>IRC Commands Package Function Index</h2></header>
+        <header><h2>IRC Commands Package Index</h2></header>
         <ul id="cmd-docs" class="docs"><li id="template">
             <a class="anchor" name="ADMIN"/>
             <article>
@@ -1683,7 +1312,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL FUNCTION</span>
                 <code>
                   <h3 class="funcname">PRIVMSG</h3>
-                  <span class="funcargs">(TARGET MESSAGE &amp;KEY (SERVER *CURRENT-SERVER*))</span>
+                  <span class="funcargs">(TARGET MESSAGE &amp;KEY (SERVER *CURRENT-SERVER*) (LINE-LIMIT 5))</span>
                 </code>
               </header>
               <pre class="funcdesc">Send a PRIVMSG.</pre>
@@ -1927,6 +1556,370 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 </code>
               </header>
               <pre class="funcdesc">Request the NICK history of a user.</pre>
+            </article>
+          </li></ul>
+      </article>
+      <article>
+        <header><h2>IRC Events Package Index</h2></header>
+        <ul id="evt-docs" class="docs"><li id="template">
+            <a class="anchor" name="DESCRIPTION"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">DESCRIPTION</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="IDLE-TIME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">IDLE-TIME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="JOIN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">JOIN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">User join event.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="KICK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">KICK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">User kick event.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MODE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Mode change event.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MOTD-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MOTD-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on a ENDOFMOTD line.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MOTD-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MOTD-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on a MOTD line.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NICK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NICK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on nick change.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOTICE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOTICE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Notice message.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="OLD-NICK"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">OLD-NICK</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PARAMETER"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">PARAMETER</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PART-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">PART-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">User part event.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PING-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">PING-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on a PING request.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PONG-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">PONG-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on a PONG request.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PRIVMSG-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">PRIVMSG-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Privmsg event.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="QUIT-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">QUIT-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">User quit event.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="REASON"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">REASON</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER1"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVER1</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER2"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVER2</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SIGNON-TIME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SIGNON-TIME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TARGET"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TARGET</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOPIC"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TOPIC</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOPIC-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TOPIC-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Topic set event.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WELCOME-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WELCOME-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on successful logon.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-CHANNELS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-CHANNELS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on WHOISCHANNELS response.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on ENDOFWHOIS response.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-IDLE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-IDLE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on WHOISIDLE response.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-SERVER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-SERVER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on WHOISSERVER response.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-USER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-USER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Event on WHOISUSER response.</pre>
             </article>
           </li></ul>
       </article>
