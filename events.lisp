@@ -5,7 +5,9 @@
 |#
 
 (in-package :org.tymoonnext.colleen.events)
-;;; NON REPLY
+
+;;;;;;;;;;;;;;;; COMMANDS ;;;;;;;;;;;;;;;;
+
 (define-event ping-event :PING (event) 
     (server1 &optional server2)
     (:documentation "Event on a PING request."))
@@ -44,7 +46,7 @@
     (target mode &optional parameter)
     (:documentation "Mode change event."))
 
-(define-event topic-event :TOPIC (channel-event)
+(define-event topic-set-event :TOPIC (channel-event)
     (channel topic)
     (:documentation "Topic set event."))
 
@@ -56,7 +58,7 @@
     (NIL message)
     (:documentation "Notice message."))
 
-;;;;;;;;;;;;;;;; REPLIES ;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;; REPLIES ;;;;;;;;;;;;;;;;
 
 (defun print-generated-event-definition (name origin format comment)
   (setf name (string-trim '(#\Newline #\Linefeed #\Space) name))
@@ -111,11 +113,11 @@
     (:documentation "See RFC"))
 
 (define-event trace-connecting-event :RPL_TRACECONNECTING (event)
-    (NIL group server)
+    (NIL group server-name)
     (:documentation "See RFC"))
 
 (define-event trace-handshake-event :RPL_TRACEHANDSHAKE (event)
-    (NIL group server)
+    (NIL group server-name)
     (:documentation "See RFC"))
 
 (define-event trace-unknown-event :RPL_TRACEUNKNOWN (event)
@@ -131,7 +133,7 @@
     (:documentation "See RFC"))
 
 (define-event trace-server-event :RPL_TRACESERVER (event)
-    (serv group ints intc server hostname &optional vprotocol-version)
+    (serv group ints intc server-name hostname &optional vprotocol-version)
     (:documentation "See RFC"))
 
 (define-event trace-service-event :RPL_TRACESERVICE (event)
@@ -183,7 +185,7 @@
     (:documentation "Information about a user's own modes. Some daemons have extended the mode command and certain modes take parameters (like channel modes)."))
 
 (define-event servlist-event :RPL_SERVLIST (event)
-    (name server mask server-type hopcount message)
+    (name server-name mask server-type hopcount message)
     (:documentation "A service entry in the service list"))
 
 (define-event servlist-end-event :RPL_SERVLISTEND (event)
@@ -191,7 +193,7 @@
     (:documentation "Termination of an RPL_SERVLIST list"))
 
 (define-event statsl-line-event :RPL_STATSLLINE (event)
-    (NIL hostmask NIL servername maxdepth)
+    (NIL hostmask NIL server-name maxdepth)
     (:documentation "Reply to STATS (See RFC)"))
 
 (define-event stats-uptime-event :RPL_STATSUPTIME (event)
@@ -199,11 +201,11 @@
     (:documentation "Reply to STATS (See RFC)"))
 
 (define-event stats-oline-event :RPL_STATSOLINE (event)
-    (NIL hostmask NIL nick [info])
+    (NIL hostmask NIL nick &optional info)
     (:documentation "Reply to STATS (See RFC); The info field is an extension found in some IRC daemons, which returns info such as an e-mail address or the name/job of an operator"))
 
 (define-event stats-hline-event :RPL_STATSHLINE (event)
-    (NIL hostmask NIL servername)
+    (NIL hostmask NIL server-name)
     (:documentation "Reply to STATS (See RFC)"))
 
 (define-event luser-client-event :RPL_LUSERCLIENT (event)
@@ -227,7 +229,7 @@
     (:documentation "Reply to LUSERS command - Information about local connections; Text may vary."))
 
 (define-event admin-me-event :RPL_ADMINME (event)
-    (server message)
+    (server-name message)
     (:documentation "Start of an RPL_ADMIN* reply. In practise, the server parameter is often never given, and instead the info field contains the text 'Administrative info about <server>'. Newer daemons seem to follow the RFC and output the server's hostname in the 'server' parameter, but also output the server name in the text as per traditional daemons."))
 
 (define-event admin-loc1-event :RPL_ADMINLOC1 (event)
@@ -279,7 +281,7 @@
     (:documentation "Reply to WHOIS - Information about the user"))
 
 (define-event whois-server-event :RPL_WHOISSERVER (event)
-    (nick server server-info)
+    (nick server-name server-info)
     (:documentation "Reply to WHOIS - What server they're on"))
 
 (define-event whois-operator-event :RPL_WHOISOPERATOR (event)
@@ -367,11 +369,11 @@
     (:documentation "Termination of an RPL_EXCEPTLIST list. Also known as RPL_ENDOFEXLIST (Unreal, Ultimate)"))
 
 (define-event version-event :RPL_VERSION (event)
-    (version server comments)
+    (version server-name comments)
     (:documentation "Reply by the server showing its version details, however this format is not often adhered to"))
 
 (define-event who-reply-event :RPL_WHOREPLY (event)
-    (channel user host server nick &rest params)
+    (channel user host server-name nick &rest params)
     (:documentation "Reply to vanilla WHO (See RFC). This format can be very different if the 'WHOX' version of the command is used (see ircu)."))
 
 (define-event namreply-event :RPL_NAMREPLY (event)
@@ -379,7 +381,7 @@
     (:documentation "Reply to NAMES (See RFC)"))
 
 (define-event links-event :RPL_LINKS (event)
-    (mask server hopcount server-info)
+    (mask server-name hopcount server-info)
     (:documentation "Reply to the LINKS command"))
 
 (define-event links-end-event :RPL_ENDOFLINKS (event)
@@ -439,7 +441,7 @@
     (:documentation "Sent upon successful registration of a service"))
 
 (define-event time-event :RPL_TIME (event)
-    (server time-string &rest params)
+    (server-name time-string &rest params)
     (:documentation "Response to the TIME command. The string format may vary greatly. Also see #679 ."))
 
 (define-event users-start-event :RPL_USERSSTART (event)
@@ -467,7 +469,7 @@
     (:documentation "Used to indicate the nickname parameter supplied to a command is currently unused"))
 
 (define-event nosuch-server-event :ERR_NOSUCHSERVER (event)
-    (server reason)
+    (server-name reason)
     (:documentation "Used to indicate the server name given currently doesn't exist"))
 
 (define-event nosuch-channel-event :ERR_NOSUCHCHANNEL (event)
@@ -531,7 +533,7 @@
     (:documentation "Sent when there is no MOTD to send the client"))
 
 (define-event no-admininfo-event :ERR_NOADMININFO (event)
-    (server reason)
+    (server-name reason)
     (:documentation "Returned by a server in response to an ADMIN request when no information is available. RFC1459 mentions this in the list of numerics. While it's not listed as a valid reply in section 4.3.7 ('Admin command'), it's confirmed to exist in the real world."))
 
 (define-event file-error-event :ERR_FILEERROR (event)
@@ -711,7 +713,7 @@
     (:documentation "Used to notify the client upon JOIN that they are joining a different channel than expected because the IRC Daemon has been set up to map the channel they attempted to join to the channel they eventually will join."))
 
 (define-event servmode-event :RPL_SERVMODEIS (event)
-    (server modes &rest parameters)
+    (server-name modes &rest parameters)
     (:documentation "Reply to MODE <servername>. KineIRCd supports server modes to simplify configuration of servers; Similar to RPL_CHANNELMODEIS"))
 
 (define-event other-umode-event :RPL_OTHERUMODEIS (event)
