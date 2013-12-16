@@ -48,6 +48,7 @@
    :command
    :cmd-args
    :send-event
+   :message
    :respond
    ;; LAUNCHER
    :startup
@@ -147,8 +148,7 @@
   (:shadow :time :trace :restart :list :error))
 
 (defpackage org.tymoonnext.colleen.events
-  (:use :cl)
-  (:import-from :colleen :event :define-event :user-event :channel-event)
+  (:use :cl :colleen)
   (:nicknames :events)
   (:export
    :welcome-event
@@ -159,7 +159,6 @@
    :nick-event
    :old-nick
    :privmsg-event
-   :message
    :join-event
    :part-event
    :quit-event
@@ -173,11 +172,8 @@
    :kick-event
    :reason
    :whois-user-event
-   :realname
    :whois-channels-event
-   :channels
    :whois-server-event
-   :hostname
    :description
    :whois-idle-event
    :idle-time
