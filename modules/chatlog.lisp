@@ -30,10 +30,10 @@
               :host (config-tree :chatlog :host)
               :port (config-tree :chatlog :port)
               :user (config-tree :chatlog :user)
-              :pass (config-tree :chatlog :pass)))
+              :pass (config-tree :chatlog :pass))
+  (disconnect-db chatlog))
 
 (defmethod stop ((chatlog chatlog))
-  (disconnect-db chatlog)
   (setf (config-tree :chatlog :db) (db chatlog))
   (setf (config-tree :chatlog :host) (host chatlog))
   (setf (config-tree :chatlog :port) (port chatlog))
