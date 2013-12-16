@@ -251,7 +251,7 @@
                            (string= (message event) prefix :end1 (length prefix)))
                       (return (make-command (message event) prefix))))))
 
-    (when (eql (class-name (class-of event)) 'privmsg-event)
+    (when (eql (class-name (class-of event)) 'events::privmsg-event)
       (let ((event (check-prefix-and-build event)))
         (when event
           (v:debug (name (server event)) "Received command: ~a ~a" (command event) (arguments event))
