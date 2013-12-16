@@ -135,4 +135,7 @@
   (insert-record chatlog (name (server event)) (target event) (nick event) "o" (format NIL " ** MODE ~a ~a" (mode event) (parameter event))))
 
 (define-handler (topic-event event) (:modulevar chatlog)
+  (insert-record chatlog (name (server event)) (channel event) (channel event) "t" (format NIL " ** TOPIC ~a" (topic event))))
+
+(define-handler (topic-set-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "t" (format NIL " ** TOPIC ~a" (topic event))))
