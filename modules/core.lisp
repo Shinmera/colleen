@@ -32,5 +32,5 @@
     (v:debug (name (server event)) "Changing nick of server to ~a due to NICK event." (nick event))
     (setf (nick server event) (nick event))))
 
-(define-handler (events::nick-in-use-event event) ()
+(define-handler (events::nickname-in-use-event event) ()
   (irc:nick (format NIL "~a_" (server-config (name (server event)) :nick))))
