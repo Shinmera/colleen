@@ -46,44 +46,9 @@
    :channel
    :command-event
    :command
-   :send-event
    :cmd-args
+   :send-event
    :respond
-   :welcome-event
-   :ping-event
-   :pong-event
-   :server1
-   :server2
-   :nick-event
-   :old-nick
-   :privmsg-event
-   :message
-   :join-event
-   :part-event
-   :quit-event
-   :reason
-   :mode-event
-   :target
-   :mode
-   :parameter
-   :topic-event
-   :topic
-   :kick-event
-   :reason
-   :whois-user-event
-   :realname
-   :whois-channels-event
-   :channels
-   :whois-server-event
-   :hostname
-   :description
-   :whois-idle-event
-   :idle-time
-   :signon-time
-   :whois-end-event
-   :motd-event
-   :motd-end-event
-   :notice-event
    ;; LAUNCHER
    :startup
    :shutdown
@@ -180,3 +145,44 @@
    :userhost
    :ison)
   (:shadow :time :trace :restart :list :error))
+
+(defpackage org.tymoonnext.colleen.events
+  (:use :cl)
+  (:import-from :colleen :event :define-event :user-event :channel-event)
+  (:nicknames :events)
+  (:export
+   :welcome-event
+   :ping-event
+   :pong-event
+   :server1
+   :server2
+   :nick-event
+   :old-nick
+   :privmsg-event
+   :message
+   :join-event
+   :part-event
+   :quit-event
+   :reason
+   :mode-event
+   :target
+   :mode
+   :parameter
+   :topic-event
+   :topic
+   :kick-event
+   :reason
+   :whois-user-event
+   :realname
+   :whois-channels-event
+   :channels
+   :whois-server-event
+   :hostname
+   :description
+   :whois-idle-event
+   :idle-time
+   :signon-time
+   :whois-end-event
+   :motd-event
+   :motd-end-event
+   :notice-event))

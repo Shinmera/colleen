@@ -21,11 +21,11 @@
                (:file "conditions")
                (:file "reply-codes")
                (:file "config")
-               (:file "events")
+               (:file "event")
                (:file "module")
                (:file "server")
                (:file "commands")
-               (:file "colleen")
+               (:file "events")
                (:file "launcher")
                (:module "modules"
                         :components ((:file "authenticate")
