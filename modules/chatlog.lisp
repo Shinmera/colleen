@@ -19,7 +19,8 @@
    (%host :initarg :host :accessor host)
    (%port :initarg :port :accessor port)
    (%user :initarg :user :accessor user)
-   (%pass :initarg :pass :accessor pass))
+   (%pass :initarg :pass :accessor pass)
+   (%lock :initform (bordeaux-threads:make-lock "DATABASE") :accessor lock))
   (:documentation "Logs messages in channels to a database."))
 
 (defmethod start ((chatlog chatlog))
@@ -63,19 +64,22 @@
 (defconstant +UNIX-EPOCH-DIFFERENCE+ (encode-universal-time 0 0 0 1 1 1970 0))
 (defmethod insert-record ((chatlog chatlog) server channel user type message)
   (when (find (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal)
-    (handler-bind ((clsql-sys:sql-database-error
-                     #'(lambda (err)
-                         (v:severe :chatlog "SQL ERROR: ~a" err)
-                         (v:info :chatlog "Reconnecting and trying again.")
-                         (disconnect-db chatlog)
-                         (connect-db chatlog)
-                         (invoke-restart 'try-again))))
-      (loop until
-           (with-simple-restart (try-again "Retry inserting the record.")
-             (clsql:insert-records :into 'chatlog
-                                   :attributes '(server channel user time type message)
-                                   :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message))
-             T)))))
+    (bordeaux-threads:with-lock-held ((lock chatlog))
+      (connect-db chatlog)
+      (handler-bind ((clsql-sys:sql-database-error
+                      #'(lambda (err)
+                          (v:severe :chatlog "SQL ERROR: ~a" err)
+                          (v:info :chatlog "Reconnecting and trying again.")
+                          (disconnect-db chatlog)
+                          (connect-db chatlog)
+                          (invoke-restart 'try-again))))
+        (loop until
+             (with-simple-restart (try-again "Retry inserting the record.")
+               (clsql:insert-records :into 'chatlog
+                                     :attributes '(server channel user time type message)
+                                     :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message))
+               T)))
+      (disconnect-db chatlog))))
 
 (define-group chatlog :documentation "Change chatlog settings.")
 
@@ -99,7 +103,8 @@
               :host (or host (host chatlog)) 
               :port (or port (port chatlog)) 
               :user (or user (user chatlog)) 
-              :pass (or pass (pass chatlog))))
+              :pass (or pass (pass chatlog)))
+  (disconnect-db chatlog))
 
 (define-handler (privmsg-event event) (:modulevar chatlog)
   (if (and (> (length (message event)) (length " ACTION ")) (string= (message event) "ACTION" :start1 1 :end1 7))
