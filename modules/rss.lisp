@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.rss
-  (:use :cl :colleen :lquery))
+  (:use :cl :colleen :events :lquery))
 (in-package :org.tymoonnext.colleen.mod.rss)
 
 (defparameter *save-file* (merge-pathnames "rss-feed-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
@@ -41,8 +41,6 @@
 
 (defmethod start ((rss rss))
   (load-feeds rss)
-  (loop for feed being the hash-values of (feeds rss)
-     do (update feed))
   (setf (thread rss) (bordeaux-threads:make-thread 
                       #'(lambda () (check-loop rss))
                       :initial-bindings `((*servers* . ,*servers*)))))
@@ -81,7 +79,8 @@
 (define-condition recheck (error) ())
 (defmethod check-loop ((rss rss))
   (v:debug :rss "Starting check-loop.")
-  (loop while (active rss)
+  (loop with startup = T
+     while (active rss)
      do (handler-case
             (progn
               (sleep (* 60 5))
@@ -89,7 +88,7 @@
               (loop for feed being the hash-values of (feeds rss)
                  do (handler-case 
                         (let ((update (update feed)))
-                          (when update
+                          (when (and update (not startup))
                             (v:info :rss "~a New item: ~a" feed update)
                             (dolist (channel (report-to feed))
                               (irc:privmsg (cdr channel) 
@@ -100,7 +99,8 @@
                         (v:warn :rss "Error in check-loop: ~a" err)))))
           (recheck (err) 
             (declare (ignore err))
-            (v:debug :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately."))))
+            (v:debug :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately.")))
+       (setf startup NIL))
   (v:debug :rss "Leaving check-loop."))
 
 (defmethod update ((feed feed))

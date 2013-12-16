@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.silly
-  (:use :cl :colleen))
+  (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.silly)
 
 (define-module silly () ()

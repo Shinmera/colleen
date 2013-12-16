@@ -6,8 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.notify
-  (:use :cl :colleen :alexandria :local-time)
-  (:shadowing-import-from :colleen :restart)
+  (:use :cl :colleen :events :alexandria :local-time)
   (:shadow :load))
 (in-package :org.tymoonnext.colleen.mod.notify)
 

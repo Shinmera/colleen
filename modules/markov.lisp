@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.markov
-  (:use :cl :colleen :alexandria)
+  (:use :cl :colleen :events :alexandria)
   (:shadowing-import-from :colleen :restart))
 (in-package :org.tymoonnext.colleen.mod.markov)
 

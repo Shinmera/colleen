@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.stevenchan
-  (:use :cl :colleen :alexandria :lquery)
+  (:use :cl :colleen :events :alexandria :lquery)
   (:shadowing-import-from :colleen :restart))
 (in-package :org.tymoonnext.colleen.mod.stevenchan)
 

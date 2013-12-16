@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.search
-  (:use :cl :colleen :lquery)
+  (:use :cl :colleen :events :lquery)
   (:shadow :search))
 (in-package :org.tymoonnext.colleen.mod.search)
 

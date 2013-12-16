@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.dramatica
-  (:use :cl :colleen)
+  (:use :cl :colleen :events)
   (:shadowing-import-from :colleen :restart))
 (in-package :org.tymoonnext.colleen.mod.dramatica)
 (eval-when (:compile-toplevel :load-toplevel :execute)

@@ -9,7 +9,7 @@
 (define-module core () () (:documentation "Colleen core module, handling a few standard events."))
 (start (get-module :core))
 
-(define-handler (welcome-event event) ()
+(define-handler (events::welcome-event event) ()
   (v:info (name (server event)) "Got welcome, joining channels.")
   (let ((nickservpw (server-config (name (server event)) :nickservpw)))
     (when nickservpw
@@ -20,17 +20,17 @@
      do (irc:join chan)
        (irc:privmsg chan (standard-message :join))))
 
-(define-handler (pong-event event) ()
+(define-handler (events::pong-event event) ()
   (setf (last-ping (server event)) (get-universal-time)))
 
-(define-handler (ping-event event) ()
+(define-handler (events::ping-event event) ()
   (setf (last-ping (server event)) (get-universal-time))
-  (irc:pong (server1 event)))
+  (irc:pong (events::server1 event)))
 
-(define-handler (nick-event event) ()
-  (when (string-equal (old-nick event) (nick (server event)))
+(define-handler (events::nick-event event) ()
+  (when (string-equal (events::old-nick event) (nick (server event)))
     (v:debug (name (server event)) "Changing nick of server to ~a due to NICK event." (nick event))
     (setf (nick server event) (nick event))))
 
-(define-handler (nick-in-use-event event) ()
+(define-handler (events::nick-in-use-event event) ()
   (irc:nick (format NIL "~a_" (server-config (name (server event)) :nick))))

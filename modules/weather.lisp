@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.weather
-  (:use :cl :colleen)
+  (:use :cl :colleen :events)
   (:shadowing-import-from :colleen :restart))
 (in-package :org.tymoonnext.colleen.mod.weather)
 
