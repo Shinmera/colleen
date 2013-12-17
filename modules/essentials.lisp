@@ -26,6 +26,11 @@
     (loop for server being the hash-keys of *servers*
        do (disconnect server))))
 
+(define-command quickload (&optional (system "colleen")) (:authorization T :documentation "Perform a ql:quickload.")
+  (setf system (find-symbol (string-upcase system) :KEYWORD))
+  (ql:quickload system)
+  (respond event "System loaded."))
+
 (define-command error (&optional type) (:documentation "Simulate a condition.")
   (if type
       (error (find-symbol (string-upcase type)))
@@ -37,7 +42,7 @@
 (define-command time () (:documentation "Show the current bot-local time.")
   (respond event "~a: It is now ~a" (nick event)
            (format-timestring NIL (now) :format 
-                              '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space :hour #\: :min #\: :sec #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
+                              '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space (:hour 2) #\: (:min 2) #\: (:sec 2) #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
 
 (define-command help (command) (:documentation "Display help on a command.")
   (loop for module being the hash-values of *bot-modules*
