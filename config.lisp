@@ -50,14 +50,17 @@
   (or (config-tree :servers server var)
       (config-tree :servers :default var)))
 
-(defun format-message (event message)
+(defun format-message (event message &rest other-replaces)
   "Format the given message, replacing $NICK$, $CHANNEL$ and $MYSELF$ with the according values."
-  (flet ((rep (search replace message)
-           (cl-ppcre:regex-replace-all search message replace)))
-    (rep "\\$NICK\\$" (nick event)
-         (rep "\\$CHANNEL\\$" (channel event)
-              (rep "\\$MYSELF\\$" (server-config (name (server event)) :nick)
-                   message)))))
+  (let ((replaces (append other-replaces
+                          (list (cons "\\$NICK\\$" (nick event))
+                                (cons "\\$CHANNEL\\$" (channel event))
+                                (cons "\\$MYSELF\\$" (nick (server event)))))))
+    (flet ((rep (search replace message)
+             (cl-ppcre:regex-replace-all search message replace)))
+      (loop for replace in replaces
+         do (setf message (rep (car replace) (cdr replace) message))
+         finally (return message)))))
 
 (defun standard-message (msgsymbol &rest otherwise-format)
   "Returns the default message designated by the symbol or if provided the otherwise-formatted string."
