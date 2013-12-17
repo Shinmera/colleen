@@ -104,6 +104,14 @@
     (message)
     (:documentation "Sent by the server to a user to suggest an alternative server, sometimes used when the connection is refused because the server is already full. Also known as RPL_SLINE (AustHex), and RPL_REDIR Also see #010 ."))
 
+(define-event isupport-event :RPL_ISUPPORT (event)
+    (&rest params)
+    (:documentation "Also known as RPL_PROTOCTL (Bahamut, Unreal, Ultimate)"))
+
+(define-event your-id-event :RPL_YOURID (event)
+    (&rest params)
+    (:documentation ""))
+
 (define-event save-nick-event :RPL_SAVENICK (event)
     (message)
     (:documentation "Sent to the client when their nickname was forced to change due to a collision"))
@@ -256,6 +264,14 @@
     (command message)
     (:documentation "When a server drops a command without processing it, it MUST use this reply. Also known as RPL_LOAD_THROTTLED and RPL_LOAD2HI, I'm presuming they do the same thing."))
 
+(define-event local-users-event :RPL_LOCALUSERS (event)
+    (&rest params)
+    (:documentation "Also known as RPL_CURRENT_LOCAL"))
+
+(define-event global-users-event :RPL_GLOBALUSERRS (event)
+    (&rest params)
+    (:documentation "Also known as RPL_CURRENT_GLOBAL"))
+
 (define-event away-event :RPL_AWAY (event)
     (nick message)
     (:documentation "Used in reply to a command directed at a user who is marked as away"))
@@ -339,6 +355,10 @@
 (define-event topic-event :RPL_TOPIC (event)
     (channel topic)
     (:documentation "Response to TOPIC with the set topic"))
+
+(define-event topic-who-time-event :RPL_TOPICWHOTIME (event)
+    (&rest params)
+    (:documentation ""))
 
 (define-event inviting-event :RPL_INVITING (event)
     (nick channel)
@@ -459,6 +479,10 @@
 (define-event nousers-event :RPL_NOUSERS (event)
     (message)
     (:documentation "Reply to USERS when nobody is logged in"))
+
+(define-event host-hidden-event :RPL_HOSTHIDDEN (event)
+    (&rest params)
+    (:documentation "Reply to a user when user mode +x (host masking) was set successfully"))
 
 (define-event unknow-nerror-event :ERR_UNKNOWNERROR (event)
     (command &string message)
