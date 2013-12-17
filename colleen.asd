@@ -38,6 +38,7 @@
                                      (:file "medals")
                                      (:file "notify")
                                      (:file "rss")
+                                     (:file "rules")
                                      (:file "search")
                                      (:file "silly")
                                      (:file "stevenchan")
