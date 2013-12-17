@@ -98,6 +98,13 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
     (channel)
     (:documentation "Events for channel commands."))
 
+(defmethod initialize-instance :after ((event channel-event) &rest rest)
+  (declare (ignore rest))
+  (with-slots ((channel %channel)) event
+    (setf channel (first (arguments event)))
+    (unless (char= (aref channel 0) #\#)
+      (setf channel (nick event)))))
+
 (defgeneric respond (event message &rest format-args)
   (:documentation "Respond to an event origin with the given message."))
 
