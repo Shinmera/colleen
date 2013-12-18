@@ -152,11 +152,17 @@
   (:nicknames :events)
   (:export
    ;; Event classes
+   :ping-event
    :pong-event
    :nick-event
    :privmsg-event
    :join-event
    :part-event
+   :quit-event
+   :mode-event
+   :topic-set-event
+   :kick-event
+   :notice-event
    :welcome-event
    :your-host-event
    :created-event
