@@ -32,10 +32,12 @@
     (unless (char= (aref channel 0) #\#)
       (setf channel (nick event)))))
 
-(define-event join-event :JOIN (channel-event) ()
+(define-event join-event :JOIN (channel-event)
+    ()
     (:documentation "User join event."))
 
-(define-event part-event :PART (channel-event) ()
+(define-event part-event :PART (channel-event)
+    ()
     (:documentation "User part event."))
 
 (define-event quit-event :QUIT (user-event)
@@ -209,7 +211,7 @@
     (:documentation "Reply to STATS (See RFC)"))
 
 (define-event stats-oline-event :RPL_STATSOLINE (event)
-    (NIL hostmask NIL nick &optional info)
+    (NIL hostmask NIL nick &optional message)
     (:documentation "Reply to STATS (See RFC); The info field is an extension found in some IRC daemons, which returns info such as an e-mail address or the name/job of an operator"))
 
 (define-event stats-hline-event :RPL_STATSHLINE (event)
@@ -268,7 +270,7 @@
     (&rest params)
     (:documentation "Also known as RPL_CURRENT_LOCAL"))
 
-(define-event global-users-event :RPL_GLOBALUSERRS (event)
+(define-event global-users-event :RPL_GLOBALUSERS (event)
     (&rest params)
     (:documentation "Also known as RPL_CURRENT_GLOBAL"))
 
@@ -749,7 +751,7 @@
     (:documentation "Generic response for new lists to save numerics."))
 
 (define-event whowas-details-event :RPL_WHOWASDETAILS (event)
-    (nick who-type information)
+    (nick who-type message)
     (:documentation "Returned by WHOWAS to return extended information (if available). The type field is a number indication what kind of information."))
 
 (define-event whois-secure-event :RPL_WHOISSECURE (event)
