@@ -54,6 +54,8 @@
 
 (defmethod stop :around ((module module))
   (setf (active module) NIL)
+  (loop for thread being the hash-values of (threads module)
+     do (when (thread-alive-p thread) (destroy-thread thread)))
   (call-next-method)
   module)
 
