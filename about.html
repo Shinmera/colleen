@@ -588,7 +588,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL FUNCTION</span>
                 <code>
                   <h3 class="funcname">FORMAT-MESSAGE</h3>
-                  <span class="funcargs">(EVENT MESSAGE)</span>
+                  <span class="funcargs">(EVENT MESSAGE &amp;REST OTHER-REPLACES)</span>
                 </code>
               </header>
               <pre class="funcdesc">Format the given message, replacing $NICK$, $CHANNEL$ and $MYSELF$ with the according values.</pre>
@@ -1562,28 +1562,1036 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
       <article>
         <header><h2>IRC Events Package Index</h2></header>
         <ul id="evt-docs" class="docs"><li id="template">
-            <a class="anchor" name="DESCRIPTION"/>
+            <a class="anchor" name="ACTIVE-TYPE"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
-                  <h3 class="funcname">DESCRIPTION</h3>
+                  <h3 class="funcname">ACTIVE-TYPE</h3>
                   <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="IDLE-TIME"/>
+            <a class="anchor" name="ADDRESS"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
-                  <h3 class="funcname">IDLE-TIME</h3>
+                  <h3 class="funcname">ADDRESS</h3>
                   <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ADMIN-EMAIL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ADMIN-EMAIL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to ADMIN command (E-mail address of administrator)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ADMIN-LOC1-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ADMIN-LOC1-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to ADMIN command (Location, first line)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ADMIN-LOC2-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ADMIN-LOC2-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to ADMIN command (Location, second line)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ADMIN-LOCATION"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">ADMIN-LOCATION</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ADMIN-ME-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ADMIN-ME-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Start of an RPL_ADMIN* reply. In practise, the server parameter is often never given, and instead the info field contains the text 'Administrative info about &lt;server&gt;'. Newer daemons seem to follow the RFC and output the server's hostname in the 'server' parameter, but also output the server name in the text as per traditional daemons.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ALREADY-REGISTERED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ALREADY-REGISTERED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the server to any link which attempts to register again</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="AUTHNAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">AUTHNAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="AWAY-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">AWAY-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used in reply to a command directed at a user who is marked as away</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BACKSTREAM-SENDQ"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">BACKSTREAM-SENDQ</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BAD-CHANNEL-KEY-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BAD-CHANNEL-KEY-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when attempting to join a key-locked channel either without a key or with the wrong key</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BAD-CHANNEL-MASK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BAD-CHANNEL-MASK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">The given channel mask was invalid</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BAD-CHAR-ENCODING-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BAD-CHAR-ENCODING-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by any command which may have had the given data modified because one or more glyphs were incorrectly encoded in the current charset (given). Such a use would be where an invalid UTF-8 sequence was given which may be considered insecure, or defines a character which is invalid within that context. For safety reasons, the invalid character is not returned to the client.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BAD-MASK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BAD-MASK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used when a message is being sent to a mask with an invalid syntax</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BANID"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">BANID</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BANLIST-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BANLIST-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_BANLIST list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BANLIST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BANLIST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">A ban-list item (See RFC); &lt;time left&gt; and &lt;reason&gt; are additions used by KineIRCd</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BANLIST-FULL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BANLIST-FULL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when a channel access list (i.e. ban list etc) is full and cannot be added to</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BANNED-FROM-CHAN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BANNED-FROM-CHAN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when attempting to join a channel a user is banned from</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BOUNCE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">BOUNCE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent by the server to a user to suggest an alternative server, sometimes used when the connection is refused because the server is already full. Also known as RPL_SLINE (AustHex), and RPL_REDIR Also see #010 .</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="BYTE-COUNT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">BYTE-COUNT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CANNOT-CHANGE-CHANMODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CANNOT-CHANGE-CHANMODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to MODE when a user cannot change a channel mode</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CANNOT-CHANGE-SERVERMODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CANNOT-CHANGE-SERVERMODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to MODE when a user cannot change a server mode</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CANNOT-CHANGE-UMODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CANNOT-CHANGE-UMODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to MODE when a user cannot change a user mode</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CANNOT-SEND-TO-CHAN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CANNOT-SEND-TO-CHAN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent to a user who does not have the rights to send a message to a channel</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CANNOT-SEND-TO-NICK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CANNOT-SEND-TO-NICK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned from NOTICE, PRIVMSG or other commands to notify the user that they cannot send a message to a particular client. Similar to ERR_CANNOTSENDTOCHAN. KineIRCd uses this in conjunction with user-mode +R to allow users to block people who are not identified to services (spam avoidance)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CANNOT-SET-MODES-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CANNOT-SET-MODES-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returns a full list of modes that cannot be set when a client issues a MODE command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CANT-KILL-SERVER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CANT-KILL-SERVER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by KILL to anyone who tries to kill a server</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHAN-CHAR"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CHAN-CHAR</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHAN-MODES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CHAN-MODES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHAN-OPEN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CHAN-OPEN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Message returned from KNOCK when the channel can be freely joined by the user</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHAN-PRIVS-NEEDED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CHAN-PRIVS-NEEDED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by any command requiring special channel privileges (eg. channel operator) to indicate the operation was unsuccessful</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHANNEL-FULL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CHANNEL-FULL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when attempting to join a channel which is set +l and is already full</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHANNEL-MODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CHANNEL-MODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHANNEL-MODES-WITH-PARAMS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CHANNEL-MODES-WITH-PARAMS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHANREDIR-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CHANREDIR-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used to notify the client upon JOIN that they are joining a different channel than expected because the IRC Daemon has been set up to map the channel they attempted to join to the channel they eventually will join.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CHARSET"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CHARSET</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CLASS-COUNT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CLASS-COUNT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CLIENT-NAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CLIENT-NAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CMD-COUNT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CMD-COUNT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CODE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CODE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CODES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CODES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="COMMENTS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">COMMENTS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CONFIG-FILE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CONFIG-FILE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CONNECT-FREQ"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CONNECT-FREQ</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CONNECTION-ADDRESS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">CONNECTION-ADDRESS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="CREATED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">CREATED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Part of the post-registration greeting. Text varies widely</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="DEBUG-LEVEL"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">DEBUG-LEVEL</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="DESTINATION"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">DESTINATION</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="DISABLED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">DISABLED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="EMAIL-ADDRESS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">EMAIL-ADDRESS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ERRONEUSNICKNAME-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ERRONEUSNICKNAME-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned after receiving a NICK message which contains a nickname which is considered invalid, such as it's reserved ('anonymous') or contains characters considered invalid for nicknames. This numeric is misspelt, but remains with this name for historical reasons :)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ETRACE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ETRACE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Output from 'extended' trace</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ETRACE-FULL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ETRACE-FULL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Output from 'extended' trace</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="EXCEPTIONMASK"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">EXCEPTIONMASK</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="EXCEPTLIST-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">EXCEPTLIST-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_EXCEPTLIST list. Also known as RPL_ENDOFEXLIST (Unreal, Ultimate)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="EXCEPTLIST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">EXCEPTLIST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">An exception mask for the exception mask list. Also known as RPL_EXLIST (Unreal, Ultimate)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="FILE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">FILE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="FILE-ERROR-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">FILE-ERROR-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Generic error message used to report a failed file operation during the processing of a command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="FLAGS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">FLAGS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="GENERIC-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">GENERIC-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Generic response for new lists to save numerics.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="GLOBAL-USERS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">GLOBAL-USERS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Also known as RPL_CURRENT_GLOBAL</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="GROUP"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">GROUP</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HELP-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">HELP-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">End of HELP command output</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HELP-START-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">HELP-START-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Start of HELP command output</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HELP-TXT-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">HELP-TXT-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Output from HELP command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HOP"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">HOP</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HOPCOUNT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">HOPCOUNT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HOPS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">HOPS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HOST-HIDDEN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">HOST-HIDDEN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to a user when user mode +x (host masking) was set successfully</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HOST2"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">HOST2</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="HOSTNAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">HOSTNAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INFO-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">INFO-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_INFO list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INFO-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">INFO-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to INFO</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">INT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INTC"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">INTC</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INTS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">INTS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INVITED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">INVITED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent to users on a channel when an INVITE command has been issued</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INVITELIST-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">INVITELIST-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_INVITELIST list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INVITELIST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">INVITELIST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">An invite mask for the invite mask list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INVITEMASK"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">INVITEMASK</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INVITEONLY-CHAN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">INVITEONLY-CHAN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when attempting to join a channel which is invite only without an invitation</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="INVITING-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">INVITING-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the server to indicate that the attempted INVITE message was successful and is being passed onto the end client. Note that RFC1459 documents the parameters in the reverse order. The format given here is the format used on production servers, and should be considered the standard reply above that given by RFC1459.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ISON-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ISON-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to the ISON command (see RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="ISUPPORT-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">ISUPPORT-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Also known as RPL_PROTOCTL (Bahamut, Unreal, Ultimate)</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="JOIN-EVENT"/>
@@ -1598,16 +2606,364 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">User join event.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="KICK-EVENT"/>
+            <a class="anchor" name="KEY-SET-EVENT"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL CLASS</span>
                 <code>
-                  <h3 class="funcname">KICK-EVENT</h3>
+                  <h3 class="funcname">KEY-SET-EVENT</h3>
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">User kick event.</pre>
+              <pre class="funcdesc">Returned when the channel key for a channel has already been set</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="KNOCK-DISABLED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">KNOCK-DISABLED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned from KNOCK when the command has been disabled</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="KNOCK-DLVR-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">KNOCK-DLVR-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Message returned from using KNOCK command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="KNOCK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">KNOCK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Message delivered using KNOCK command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="KNOCK-ON-CHAN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">KNOCK-ON-CHAN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Message returned from KNOCK when the user has used KNOCK on a channel they have already joined</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LANGUAGE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">LANGUAGE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LANGUAGE-CODE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">LANGUAGE-CODE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LANGUAGE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LANGUAGE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">A language reply to LANGUAGE when requesting a list of known languages</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LINK"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">LINK</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LINK-UPTIME-IN-SECONDS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">LINK-UPTIME-IN-SECONDS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LINKNAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">LINKNAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LINKS-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LINKS-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_LINKS list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LINKS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LINKS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to the LINKS command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LIST-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LIST-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Channel list - End of list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LIST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LIST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Channel list - A channel</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LIST-START-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LIST-START-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Channel list - Header</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LOCAL-USERS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LOCAL-USERS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Also known as RPL_CURRENT_LOCAL</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LOGFILE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">LOGFILE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LUSER-CHANNELS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LUSER-CHANNELS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to LUSERS command - Number of channels formed</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LUSER-CLIENT-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LUSER-CLIENT-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to LUSERS command, other versions exist (eg. RFC2812); Text may vary.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LUSER-ME-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LUSER-ME-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to LUSERS command - Information about local connections; Text may vary.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LUSER-OP-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LUSER-OP-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to LUSERS command - Number of IRC operators online</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LUSER-STAFF-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LUSER-STAFF-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to LUSERS command - Number of network staff (or 'helpers') online (differs from Local/Global operators). Similar format to RPL_LUSEROP</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="LUSER-UNKNOWN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">LUSER-UNKNOWN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to LUSERS command - Number of unknown/unregistered connections</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MAINTAINER"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MAINTAINER</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MASK"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MASK</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MAX-HOPS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MAX-HOPS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MAX-LANGS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MAX-LANGS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MAX-SENDQ"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MAX-SENDQ</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MAXDEPTH"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MAXDEPTH</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="MODE"/>
@@ -1622,16 +2978,100 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="MODE-EVENT"/>
+            <a class="anchor" name="MODE-CHANGE-WARN-EVENT"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL CLASS</span>
                 <code>
-                  <h3 class="funcname">MODE-EVENT</h3>
+                  <h3 class="funcname">MODE-CHANGE-WARN-EVENT</h3>
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Mode change event.</pre>
+              <pre class="funcdesc">Plain text warning to the user about turning on or off a user mode. If no '+' or '-' prefix is used for the mode char, '+' is presumed.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODE-CHAR"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MODE-CHAR</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODE-PARAMS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MODE-PARAMS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODE-UNKNOWN-FLAG-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MODE-UNKNOWN-FLAG-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the server to indicate that a MODE message was sent with a nickname parameter and that the mode flag sent was not recognised</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODECHAR"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MODECHAR</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">MODES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODLIST-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MODLIST-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Terminates MODLIST output</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODLIST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MODLIST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Output from the MODLIST command</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="MOTD-END-EVENT"/>
@@ -1643,7 +3083,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on a ENDOFMOTD line.</pre>
+              <pre class="funcdesc">Termination of an RPL_MOTD list</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="MOTD-EVENT"/>
@@ -1655,7 +3095,151 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on a MOTD line.</pre>
+              <pre class="funcdesc">Reply to MOTD</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MOTD-START-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MOTD-START-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Start of an RPL_MOTD list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MYINFO-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MYINFO-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Same as RFC2812 however with additional fields to avoid additional 005 burden.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NAME-TYPE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">NAME-TYPE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NAMES-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NAMES-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_NAMREPLY list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NAMREPLY-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NAMREPLY-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to NAMES (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NANOSECONDS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">NANOSECONDS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NEED-MORE-PARAMS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NEED-MORE-PARAMS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the server by any command which requires more parameters than the number of parameters given</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NETWORKS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NETWORKS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">A reply to the NETWORKS command when requesting a list of known networks (within the IIRC domain).</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NEW-CHAN"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">NEW-CHAN</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NEWTYPE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">NEWTYPE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NEXT-SERVER"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">NEXT-SERVER</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NICK-COLLISION-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NICK-COLLISION-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by a server to a client when it detects a nickname collision</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="NICK-EVENT"/>
@@ -1670,16 +3254,352 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Event on nick change.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="NOTICE-EVENT"/>
+            <a class="anchor" name="NICKINFO"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">NICKINFO</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NICKNAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">NICKNAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NICKNAME-IN-USE-EVENT"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL CLASS</span>
                 <code>
-                  <h3 class="funcname">NOTICE-EVENT</h3>
+                  <h3 class="funcname">NICKNAME-IN-USE-EVENT</h3>
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Notice message.</pre>
+              <pre class="funcdesc">Returned by the NICK command when the given nickname is already in use</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-ADMININFO-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-ADMININFO-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by a server in response to an ADMIN request when no information is available. RFC1459 mentions this in the list of numerics. While it's not listed as a valid reply in section 4.3.7 ('Admin command'), it's confirmed to exist in the real world.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-CHANNEL-MODES-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-CHANNEL-MODES-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when attempting to set a mode on a channel which does not support channel modes, or channel mode changes. Also known as ERR_MODELESS</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-LANGUAGE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-LANGUAGE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the LANGUAGE command to tell the client it has specified an unknown language code.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-LOGIN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-LOGIN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the SUMMON command if a given user was not logged in and could not be summoned</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-MOTD-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-MOTD-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent when there is no MOTD to send the client</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-NICKNAME-GIVEN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-NICKNAME-GIVEN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when a nickname parameter expected for a command isn't found</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-OPERHOST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-OPERHOST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by OPER to a client who cannot become an IRC operator because the server has been configured to disallow the client's host</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-ORIGIN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-ORIGIN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">PING or PONG message missing the originator parameter which is required since these commands must work without valid prefixes</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-PERM-FOR-HOST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-PERM-FOR-HOST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned to a client which attempts to register with a server which has been configured to refuse connections from the client's host</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-PRIVILEGES-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-PRIVILEGES-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by any command requiring special privileges (eg. IRC operator) to indicate the operation was unsuccessful</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-PRIVS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-PRIVS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned from an oper command when the IRC operator does not have the relevant operator privileges.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-RECIPIENT-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-RECIPIENT-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when no recipient is given with a command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-SUCH-SERVICE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-SUCH-SERVICE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned to a client which is attempting to send an SQUERY (or other message) to a service which does not exist</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-TESTLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-TESTLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply from oper command reporting no I/K lines match the given user@host</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-TEXT-TO-SEND-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-TEXT-TO-SEND-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when NOTICE/PRIVMSG is used with no message given</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-TOP-LEVEL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-TOP-LEVEL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used when a message is being sent to a mask without being limited to a top-level domain (i.e. * instead of *.au)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NO-TOPIC-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NO-TOPIC-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Response to TOPIC when no topic is set</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOSUCH-CHANNEL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOSUCH-CHANNEL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used to indicate the given channel name is invalid, or does not exist</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOSUCH-NICK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOSUCH-NICK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used to indicate the nickname parameter supplied to a command is currently unused</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOSUCH-SERVER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOSUCH-SERVER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used to indicate the server name given currently doesn't exist</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOT-IMPLEMENTED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOT-IMPLEMENTED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when a requested feature is not implemented (and cannot be completed)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOT-ON-CHANNEL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOT-ON-CHANNEL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the server whenever a client tries to perform a channel effecting command for which the client is not a member</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOT-REGISTERED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOT-REGISTERED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the server to indicate that the client must be registered before the server will allow it to be parsed in detail</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOUSERS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOUSERS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to USERS when nobody is logged in</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="NOW-AWAY-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">NOW-AWAY-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply from AWAY when marked away</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="OLD-CHAN"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">OLD-CHAN</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="OLD-NICK"/>
@@ -1694,12 +3614,96 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
+            <a class="anchor" name="OMOTD-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">OMOTD-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">IRC operator MOTD footer</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="OMOTD-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">OMOTD-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">IRC Operator MOTD text (repeated, usually)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="OMOTD-START-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">OMOTD-START-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">IRC Operator MOTD header, sent upon OPER command</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="OPER"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">OPER</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="OTHER-UMODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">OTHER-UMODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to MODE &lt;nickname&gt; to return the user-modes of another user to help troubleshoot connections, etc. Similar to RPL_UMODEIS, however including the target</pre>
+            </article>
+          </li><li id="template">
             <a class="anchor" name="PARAMETER"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PARAMETER</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PARAMETERS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">PARAMETERS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PARAMS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">PARAMS</h3>
                   <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
@@ -1718,16 +3722,40 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">User part event.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="PING-EVENT"/>
+            <a class="anchor" name="PASSWORD-MISMATCH-EVENT"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL CLASS</span>
                 <code>
-                  <h3 class="funcname">PING-EVENT</h3>
+                  <h3 class="funcname">PASSWORD-MISMATCH-EVENT</h3>
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on a PING request.</pre>
+              <pre class="funcdesc">Returned by the PASS command to indicate the given password was required and was either not given or was incorrect</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PFX-UNROUTABLE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">PFX-UNROUTABLE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Proposed.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="PING-FREQ"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">PING-FREQ</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="PONG-EVENT"/>
@@ -1742,6 +3770,18 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Event on a PONG request.</pre>
             </article>
           </li><li id="template">
+            <a class="anchor" name="PRIVILEGES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">PRIVILEGES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
             <a class="anchor" name="PRIVMSG-EVENT"/>
             <article>
               <header>
@@ -1754,16 +3794,40 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Privmsg event.</pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="QUIT-EVENT"/>
+            <a class="anchor" name="QUERY"/>
             <article>
               <header>
-                <span class="functype">EXTERNAL CLASS</span>
+                <span class="functype">EXTERNAL GENERIC</span>
                 <code>
-                  <h3 class="funcname">QUIT-EVENT</h3>
-                  <span class="funcargs"></span>
+                  <h3 class="funcname">QUERY</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
-              <pre class="funcdesc">User quit event.</pre>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="RCVD-BYTES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">RCVD-BYTES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="REAL-NAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">REAL-NAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="REASON"/>
@@ -1772,6 +3836,234 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">REASON</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="RECVD-MSGS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">RECVD-MSGS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="REHASHING-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">REHASHING-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Successful reply from REHASH</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="REMOTE-COUNT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">REMOTE-COUNT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="REMOTE-PFX-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">REMOTE-PFX-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Proposed.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="RESOURCE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">RESOURCE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="RESTRICTED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">RESTRICTED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent by the server to a user upon connection to indicate the restricted nature of the connection (i.e. usermode +r)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="REVISION"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">REVISION</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SAVE-NICK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SAVE-NICK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent to the client when their nickname was forced to change due to a collision</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SECONDS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SECONDS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SENDQ"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SENDQ</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SENT-BYTES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SENT-BYTES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SENT-MSGS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SENT-MSGS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERV"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERV</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER-INFO"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVER-INFO</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER-MODE-LOCK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SERVER-MODE-LOCK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by MODE to inform the client the server has been set mode +L by an administrator to stop server modes being changed</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER-MODES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVER-MODES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER-MODES-WITH-PARAMS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVER-MODES-WITH-PARAMS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER-NAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVER-NAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVER-TYPE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVER-TYPE</h3>
                   <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
@@ -1802,16 +4094,268 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
-            <a class="anchor" name="SIGNON-TIME"/>
+            <a class="anchor" name="SERVICE"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
-                  <h3 class="funcname">SIGNON-TIME</h3>
+                  <h3 class="funcname">SERVICE</h3>
                   <span class="funcargs">(SB-PCL::OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVICE-NAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVICE-NAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVICE-TYPE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">SERVICE-TYPE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVLIST-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SERVLIST-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_SERVLIST list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVLIST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SERVLIST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">A service entry in the service list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SERVMODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SERVMODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to MODE &lt;servername&gt;. KineIRCd supports server modes to simplify configuration of servers; Similar to RPL_CHANNELMODEIS</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SPAM-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SPAM-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used during the connection (after MOTD) to announce the network policy on spam and privacy. Supposedly now obsoleted in favour of using NOTICE.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STAFF-ONLINE-COUNT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">STAFF-ONLINE-COUNT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-CLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-CLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-COMMANDS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-COMMANDS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">End of RPL_STATS* list.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-HLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-HLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-ILINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-ILINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-KLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-KLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-LINKINFO-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-LINKINFO-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-NLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-NLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC), Also known as RPL_STATSOLDNLINE (ircu, Unreal)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-OLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-OLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC); The info field is an extension found in some IRC daemons, which returns info such as an e-mail address or the name/job of an operator</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-UPTIME-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-UPTIME-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATS-YLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATS-YLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="STATSL-LINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">STATSL-LINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to STATS (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SUMMON-DISABLED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SUMMON-DISABLED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by SUMMON when it has been disabled or not implemented</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="SUMMONING-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">SUMMONING-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by a server answering a SUMMON message to indicate that it is summoning that user</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="TARGET"/>
@@ -1824,6 +4368,234 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 </code>
               </header>
               <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TARGET-ADDRESS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TARGET-ADDRESS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TARGET-FQDN"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TARGET-FQDN</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TARGET-NOTIFY-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TARGET-NOTIFY-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent following a PRIVMSG/NOTICE to indicate the target has been notified of an attempt to talk to them while they are set +g</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TARGET-UMODEG-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TARGET-UMODEG-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent to indicate the given target is set +g (server-side ignore)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TESTLINE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TESTLINE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply from an oper command reporting relevant I/K lines that will match a given user@host</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TESTMARK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TESTMARK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply from an oper command reporting how many users match a given user@host mask</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TEXT-TOO-SHORT-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TEXT-TOO-SHORT-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by any command requiring text (such as a message or a reason), which was not long enough to be considered valid. This was created initially to combat '/wallops foo' abuse, but is also used by DIE and RESTART commands to attempt to encourage meaningful reasons.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="THROUGH-NAME"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">THROUGH-NAME</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TIME-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TIME-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Response to the TIME command. The string format may vary greatly. Also see #679 .</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TIME-LEFT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TIME-LEFT</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TIME-ON-SERVER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TIME-ON-SERVER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Optionally sent upon connection, and/or sent as a reply to the TIME command. This returns the time on the server in a uniform manner. The seconds (and optionally nanoseconds) is the time since the UNIX Epoch, and is used since many existing timestamps in the IRC-2 protocol are done this way (i.e. ban lists). The timezone is hours and minutes each of Greenwich ('[+/-]HHMM'). Since all timestamps sent from the server are in a similar format, this numeric is designed to give clients the ability to provide accurate timestamps to their users.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TIME-OPEN"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TIME-OPEN</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TIME-STRING"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TIME-STRING</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TIMEZONE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">TIMEZONE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOO-MANY-CHANNELS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TOO-MANY-CHANNELS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent to a user when they have joined the maximum number of allowed channels and they tried to join another channel</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOO-MANY-KNOCK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TOO-MANY-KNOCK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Message returned when too many KNOCKs for a channel have been sent by a user</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOO-MANY-LANGUAGES-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TOO-MANY-LANGUAGES-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the LANGUAGE command to tell the client they cannot set as many languages as they have requested. To assist the client, the maximum languages which can be set at one time is given, and the language settings are not changed.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOO-MANY-MATCHES-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TOO-MANY-MATCHES-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when too many matches have been found for a command and the output has been truncated. An example would be the WHO command, where by the mask '*' would match everyone on the network! Ouch!</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOO-MANY-TARGETS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TOO-MANY-TARGETS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">The given target(s) for a command are ambiguous in that they relate to too many targets</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="TOPIC"/>
@@ -1847,7 +4619,583 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Topic set event.</pre>
+              <pre class="funcdesc">Response to TOPIC with the set topic</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TOPIC-WHO-TIME-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TOPIC-WHO-TIME-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-CLASS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-CLASS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-CONNECTING-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-CONNECTING-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used to terminate a list of RPL_TRACE* replies</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-HANDSHAKE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-HANDSHAKE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-LINK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-LINK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-LOG-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-LOG-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-NEWTYPE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-NEWTYPE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-OPERATOR-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-OPERATOR-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-SERVER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-SERVER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-SERVICE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-SERVICE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-UNKNOWN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-UNKNOWN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACE-USER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACE-USER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">See RFC</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACEROUTE-HOP-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACEROUTE-HOP-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned from the TRACEROUTE IRC-Op command when tracerouting a host</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRACEROUTE-START-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRACEROUTE-START-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Start of an RPL_TRACEROUTE_HOP list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="TRY-AGAIN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">TRY-AGAIN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">When a server drops a command without processing it, it MUST use this reply. Also known as RPL_LOAD_THROTTLED and RPL_LOAD2HI, I'm presuming they do the same thing.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UMODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UMODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Information about a user's own modes. Some daemons have extended the mode command and certain modes take parameters (like channel modes).</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UMODEG-MSG-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UMODEG-MSG-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent to a user who is +g to inform them that someone has attempted to talk to them (via PRIVMSG/NOTICE), and that they will need to be accepted (via the ACCEPT command) before being able to talk to them</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UN-AWAY-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UN-AWAY-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply from AWAY when no longer marked as away</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNAVAIL-RESOURCE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNAVAIL-RESOURCE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Return when the target is unable to be reached temporarily, eg. a delay mechanism in play, or a service being offline</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNIQOP-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNIQOP-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNIQUE-PRIVS-NEEDED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNIQUE-PRIVS-NEEDED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Any mode requiring 'channel creator' privileges returns this error if the client is attempting to use it while not a channel creator on the given channel</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNKNOW-NERROR-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNKNOW-NERROR-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent when an error occured executing a command, but it is not specifically known why the command could not be executed.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNKNOWN-COMMAND-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNKNOWN-COMMAND-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when the given command is unknown to the server (or hidden because of lack of access rights)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNKNOWN-MODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNKNOWN-MODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when a given mode is unknown</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNKNOWN-MODES-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNKNOWN-MODES-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returns a full list of modes that are unknown when a client issues a MODE command (rather than one numeric per mode)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UNKNOWN-SERVER-MODE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">UNKNOWN-SERVER-MODE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by MODE to inform the client they used an unknown server mode character.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="UPSTREAM-SENDQ"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">UPSTREAM-SENDQ</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USEC-PING"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">USEC-PING</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USER"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">USER</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USER-MODE-PARAMS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">USER-MODE-PARAMS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USER-MODES"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">USER-MODES</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USER-MODES-WITH-PARAMS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">USER-MODES-WITH-PARAMS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USER-NOT-IN-CHANNEL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USER-NOT-IN-CHANNEL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by the server to indicate that the target user of the command is not on the given channel</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USER-ON-CHANNEL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USER-ON-CHANNEL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned when a client tries to invite a user to a channel they're already on</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USERHOST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USERHOST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply used by USERHOST (see RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USERS"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">USERS</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USERS-DISABLED-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USERS-DISABLED-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by USERS when it has been disabled or not implemented</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USERS-DONT-MATCH-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USERS-DONT-MATCH-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Error sent to any user trying to view or change the user mode for a user other than themselves</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USERS-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USERS-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Termination of an RPL_USERS list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USERS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USERS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Response to the USERS command (See RFC)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="USERS-START-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">USERS-START-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Start of an RPL_USERS list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="VERSION"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">VERSION</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="VERSION-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">VERSION-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply by the server showing its version details, however this format is not often adhered to</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="VISIBLE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">VISIBLE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="VPROTOCOL-VERSION"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">VPROTOCOL-VERSION</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="VWORLD-WARN-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">VWORLD-WARN-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Warning about Virtual-World being turned off. Obsoleted in favour for RPL_MODECHANGEWARN Also see #662 .</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WAS-NO-SUCH-NICK-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WAS-NO-SUCH-NICK-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by WHOWAS to indicate there was no history information for a given nickname</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="WELCOME-EVENT"/>
@@ -1859,7 +5207,55 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on successful logon.</pre>
+              <pre class="funcdesc">The first message sent after client registration. The text used varies widely</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHO-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHO-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used to terminate a list of RPL_WHOREPLY replies</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHO-REPLY-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHO-REPLY-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to vanilla WHO (See RFC). This format can be very different if the 'WHOX' version of the command is used (see ircu).</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHO-TYPE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL GENERIC</span>
+                <code>
+                  <h3 class="funcname">WHO-TYPE</h3>
+                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-ACCOUNT-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-ACCOUNT-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="WHOIS-CHANNELS-EVENT"/>
@@ -1871,7 +5267,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on WHOISCHANNELS response.</pre>
+              <pre class="funcdesc">Reply to WHOIS - Channel list for user (See RFC)</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="WHOIS-END-EVENT"/>
@@ -1883,7 +5279,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on ENDOFWHOIS response.</pre>
+              <pre class="funcdesc">Reply to WHOIS - End of list</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="WHOIS-IDLE-EVENT"/>
@@ -1895,7 +5291,43 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on WHOISIDLE response.</pre>
+              <pre class="funcdesc">Reply to WHOIS - Idle information</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-LANGUAGE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-LANGUAGE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to WHOIS command - A list of languages someone can speak. The language codes are comma delimitered.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-OPERATOR-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-OPERATOR-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to WHOIS - User has IRC Operator privileges</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-SECURE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-SECURE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to WHOIS command - Returned if the target is connected securely, eg. type may be TLSv1, or SSLv2 etc. If the type is unknown, a '*' may be used.</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="WHOIS-SERVER-EVENT"/>
@@ -1907,7 +5339,19 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on WHOISSERVER response.</pre>
+              <pre class="funcdesc">Reply to WHOIS - What server they're on</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOIS-STAFF-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOIS-STAFF-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">The user is a staff member. The information may explain the user's job role, or simply state that they are a part of the network staff. Staff members are not IRC operators, but rather people who have special access in association with network services. KineIRCd uses this numeric instead of the existing numerics due to the overwhelming number of conflicts.</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="WHOIS-USER-EVENT"/>
@@ -1919,7 +5363,127 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs"></span>
                 </code>
               </header>
-              <pre class="funcdesc">Event on WHOISUSER response.</pre>
+              <pre class="funcdesc">Reply to WHOIS - Information about the user</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOWAS-DETAILS-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOWAS-DETAILS-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned by WHOWAS to return extended information (if available). The type field is a number indication what kind of information.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOWAS-END-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOWAS-END-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to WHOWAS - End of list</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WHOWAS-USER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WHOWAS-USER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to WHOWAS - Information about the user</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="WILD-TOP-LEVEL-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">WILD-TOP-LEVEL-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Used when a message is being sent to a mask with a wild-card for a top level domain (i.e. *.*)</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="YOUR-HOST-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">YOUR-HOST-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Part of the post-registration greeting. Text varies widely</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="YOUR-ID-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">YOUR-ID-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="YOUR-LANGUAGE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">YOUR-LANGUAGE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Reply to the LANGUAGE command, informing the client of the language(s) it has set</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="YOURE-BANNED-CREEP-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">YOURE-BANNED-CREEP-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Returned to a client after an attempt to register on a server configured to ban connections from that client</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="YOURE-OPER-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">YOURE-OPER-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Successful reply from OPER</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="YOURE-SERVICE-EVENT"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">YOURE-SERVICE-EVENT</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Sent upon successful registration of a service</pre>
             </article>
           </li></ul>
       </article>
