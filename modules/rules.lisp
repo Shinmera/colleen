@@ -90,7 +90,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
       
       (loop for rule being the hash-value of (rules module)
          if (and (find server-format (active-on rule) :test #'string-equal)
-                 (cl-ppcre:scan (regex rule) (message event)))
+                 (cl-ppcre:scan (regex rule) (string-downcase (message event))))
          do 
            (let ((probation-count (gethash name-format (users-on-probation rule))))
              (unless probation-count
@@ -131,7 +131,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
                :type type
                :regex regex
                :active-on (list (format NIL "~a/~a" (name (server event)) (channel event)))))
-        (respond event "Added new rule: ~a" regex))))
+        (respond event "Added new rule ~a (~a) matching regex \"~a\"" name type regex))))
 
 (define-command (rules remove) (name) (:authorization T :documentation "Remove a rule.")
   (if (gethash name (rules module))
