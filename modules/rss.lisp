@@ -96,7 +96,7 @@
                                                    (name feed) (title update) (link update)) 
                                            :server (get-server (car channel))))))
                       (error (err)
-                        (v:warn :rss "Error in check-loop: ~a" err)))))
+                        (v:warn :rss "<~a> Error in check-loop: ~a" feed err)))))
           (recheck (err) 
             (declare (ignore err))
             (v:debug :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately.")))
