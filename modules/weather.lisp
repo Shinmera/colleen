@@ -6,18 +6,18 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.weather
-  (:use :cl :colleen :events)
-  (:shadowing-import-from :colleen :restart))
+  (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.weather)
 
 (define-module weather () ()
   (:documentation "Check the weather status on locations."))
 
-(defvar *location-api* "https://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=~a")
+(defvar *location-api* "https://maps.googleapis.com/maps/api/geocode/json")
 (defvar *weather-api* "https://api.forecast.io/forecast/~a/~a,~a,~a?units=si&exclude=hourly,daily,flags")
 
 (defun get-coordinates (location)
-  (let* ((stream (drakma:http-request (format NIL *location-api* location) :want-stream T :external-format-in :utf-8 :external-format-out :utf-8))
+  (let* ((stream (drakma:http-request *location-api* :parameters `(("sensor" . "false") ("address" . ,location))
+                                      :want-stream T :external-format-in :utf-8 :external-format-out :utf-8))
          (result (json:decode-json stream))
          (data (cdr (assoc :location 
                (cdr (assoc :geometry 
