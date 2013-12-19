@@ -44,6 +44,8 @@
   (:documentation "Return the hash-map defining the group."))
 (defgeneric get-group-command (module group-symbol commandname)
   (:documentation "Return the function symbol to the group-command."))
+(defgeneric get-module (module-name)
+  (:documentation "Return a module by its name."))
 
 (defmethod start :around ((module module))
   (call-next-method)
@@ -130,9 +132,13 @@
   (let ((group (get-group module group-symbol)))
     (when group (gethash commandname group))))
 
-(defun get-module (modulename)
-  "Return a module by its keyword name."
-  (gethash modulename *bot-modules*))
+(defmethod get-module ((module-name string))
+  (get-module (find-symbol (string-upcase module-name) :KEYWORD)))
+
+(defmethod get-module ((module-name symbol))
+  (unless (keywordp module-name)
+    (get-module (symbol-name module-name)))
+  (gethash module-name *bot-modules*))
 
 (defun package-symbol (package)
   "Returns the symbol of a package."
