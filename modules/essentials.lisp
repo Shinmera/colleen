@@ -44,14 +44,20 @@
            (format-timestring NIL (now) :format 
                               '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space (:hour 2) #\: (:min 2) #\: (:sec 2) #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
 
-(define-command help (command) (:documentation "Display help on a command.")
-  (loop for module being the hash-values of *bot-modules*
-     do (when (active module)
-          (let ((method (gethash (string-downcase command) (colleen::commands module))))
-            (when method
-              (respond event "~a" (docu method))
-              (respond event "USAGE: ~a ~{~a~^ ~}" (name method) (cmd-args method))
-              (return NIL))))))
+(define-command help (&optional command) (:documentation "Display help on a command.")
+  (if command
+      (loop for module being the hash-values of *bot-modules*
+         do (when (active module)
+              (let ((method (gethash (string-downcase command) (colleen::commands module))))
+                (when method
+                  (respond event "~a" (docu method))
+                  (respond event "USAGE: ~a ~{~a~^ ~}" (name method) (cmd-args method))
+                  (return NIL)))))
+      (loop with commands = () 
+         for module being the hash-values of *bot-modules*
+         if (active module)
+         do (appendf commands (alexandria:hash-table-keys (colleen::commands module)))
+         finally (respond event "Available commands: ~{~a~^, ~}" commands))))
 
 ;; MODULE COMMANDS
 (define-group module :documentation "Manage bot modules.")
@@ -67,6 +73,14 @@
   (handler-case
       (progn (stop-module (find-symbol (string-upcase module-name) "KEYWORD"))
              (respond event "Module stopped."))
+    (error (err)
+      (respond event "Error: ~a" err))))
+
+(define-command (module restart) (module-name) (:authorization T :documentation "Stop&Start a module.")
+  (handler-case
+      (progn (stop-module (find-symbol (string-upcase module-name) "KEYWORD"))
+             (start-module (find-symbol (string-upcase module-name) "KEYWORD"))
+             (respond event "Module restarted."))
     (error (err)
       (respond event "Error: ~a" err))))
 
