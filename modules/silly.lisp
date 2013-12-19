@@ -17,7 +17,11 @@
     (respond event (format NIL "~a: ~a ~a" 
                            (nick event) 
                            (alexandria:random-elt '("I love you too." "Aww!" "Oh you~~" "Haha, oh you." "I wub wuu twoo~~" "I love you too!" "Tee hee." "I love you too."))
-                           (alexandria:random-elt '("" "" "" "" ":)" "(ɔˆ ³(ˆ⌣ˆc)" "(ღ˘⌣˘ღ)" "(っ˘з(˘⌣˘ )" "(˘▼˘>ԅ( ˘⌣ƪ)"))))))
+                           (alexandria:random-elt '("" "" "" "" ":)" "(ɔˆ ³(ˆ⌣ˆc)" "(ღ˘⌣˘ღ)" "(っ˘з(˘⌣˘ )" "(˘▼˘>ԅ( ˘⌣ƪ)")))))
+
+  (when (cl-ppcre:scan "(i|you|he|she|it|we|they)( all)? know(s?) now" (string-downcase (message event)))
+    (sleep 2)
+    (respond event (alexandria:random-elt '("...now we know." "... oh yeah we know now." "NOW WE KNOW!" "NOW WE KNOOOW!!" "...yeah that's good. Now we know.")))))
 
 (define-command sandwich () (:documentation "Make a sandwich.")
   (if (auth-p (nick event))
