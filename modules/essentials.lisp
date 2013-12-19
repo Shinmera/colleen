@@ -84,14 +84,24 @@
     (error (err)
       (respond event "Error: ~a" err))))
 
-(define-command (module list) () (:documentation "List available modules.")
-  (respond event "Modules: ~{~a~^ ~}" (hash-table-keys *bot-modules*)))
+(defun format-module (stream module-name &rest rest)
+  (declare (ignore rest))
+  (format stream "~:[~a~;*~a~]" (active (get-module module-name)) module-name))
 
-(define-command (module help) (module) (:documentation "Show the docstring for a module.")
-  (let ((instance (get-module (find-symbol (string-upcase module) "KEYWORD"))))
+(define-command (module list) () (:documentation "List available modules.")
+  (respond event "Modules [* activated]: ~{~/org.tymoonnext.colleen.mod.essentials::format-module/~^ ~}" (hash-table-keys *bot-modules*)))
+
+(define-command (module help) (module-name) (:documentation "Show the docstring for a module.")
+  (let ((instance (get-module (find-symbol (string-upcase module-name) "KEYWORD"))))
     (if instance
-        (respond event "~a: ~a" module (or (documentation (class-of instance) T) "No help available."))
-        (respond event "No such module \"~a\"." module))))
+        (respond event "~a: ~a" module-name (or (documentation (class-of instance) T) "No help available."))
+        (respond event "No such module \"~a\"." module-name))))
+
+(define-command (module commands) (module-name) (:documentation "List the commands a module provides.")
+  (let ((commands (alexandria:hash-table-keys (colleen::commands (get-module module-name)))))
+    (if commands
+        (respond event "~a provides: ~{~a~^, ~}" module-name commands)
+        (respond event "~a does not provide any commands." module-name))))
 
 ;; IRC COMMANDS
 (define-group irc :documentation "Manage IRC commands.")
