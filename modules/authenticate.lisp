@@ -13,11 +13,12 @@
 (define-module auth () ())
 
 (define-handler (nick-event event) ()
-  (with-accessors ((prevnick old-nick) (newnick nick)) event
-    (when (find prevnick (auth-users (server event)) :test #'string=)
+  (let ((prevnick (nick event))
+        (newnick (new-nick event)))
+    (when (find prevnick (auth-users (server event)) :test #'string-equal)
       (v:info (name (server event)) "Changing ~a to ~a in authenticated list due to NICK." prevnick newnick)
       (setf (auth-users (server event))
-            (cons newnick (delete prevnick (auth-users (server event)) :test #'string=))))))
+            (cons newnick (delete prevnick (auth-users (server event)) :test #'string-equal))))))
 
 (define-handler (part-event event) ()
   (when (auth-p (nick event))

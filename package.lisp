@@ -378,7 +378,7 @@
    :reason
    :server1
    :server2
-   :old-nick
+   :new-nick
    :target
    :mode
    :parameter

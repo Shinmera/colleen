@@ -17,7 +17,7 @@
     (:documentation "Event on a PONG request."))
 
 (define-event nick-event :NICK (user-event)
-    (old-nick)
+    (new-nick)
     (:documentation "Event on nick change."))
 
 (define-event privmsg-event :PRIVMSG (channel-event)
