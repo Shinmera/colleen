@@ -20,7 +20,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
                    ("sa" . "さ") ("shi". "し") ("su" . "す") ("se" . "せ") ("so" . "そ")
                    ("ta" . "た") ("chi". "ち") ("tsu". "つ") ("te" . "て") ("to" . "と")
                    ("na" . "な") ("ni" . "に") ("nu" . "ぬ") ("ne" . "ね") ("no" . "の")
-                   ("ha" . "は") ("hi" . "ひ") ("fu" . "ふ") ("he" . "へ") ("ho" . "ほ")
+                   ("ha" . "は") ("hi" . "ひ") ("fu" . "ふ") ("he" . "へ") ("ho" . "ほ") ("hu" . "ふ")
                    ("ma" . "ま") ("mi" . "み") ("mu" . "む") ("me" . "め") ("mo" . "も")
                    ("ya" . "や")               ("yu" . "ゆ")               ("yo" . "よ")
                    ("ra" . "ら") ("ri" . "り") ("ru" . "る") ("re" . "れ") ("ro" . "ろ")
@@ -122,7 +122,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
           ((find message used-words :test #'string=)
            (respond event "~a repeated a word and thus loses!")
            (remhash game-id (games module)))
-          ((and last-kana (not (string= message last-kana :end1 (length last-kana))))           
+          ((and last-kana (not (string= message last-kana :end1 (length last-kana))))
            (respond event "~a's word does not begin with ~a. Game over!" (nick event) last-kana)
            (remhash game-id (games module)))
           (T
