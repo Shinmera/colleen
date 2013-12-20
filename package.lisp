@@ -102,6 +102,7 @@
   (:import-from :colleen :*current-server* :name :channels)
   (:nicknames :irc)
   (:export
+   :*privmsg-line-limit*
    :send-raw
    :pass
    :nick
