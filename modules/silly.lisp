@@ -21,7 +21,10 @@
 
   (when (cl-ppcre:scan "(i|you|he|she|it|we|they)( all)? know(s?) now" (string-downcase (message event)))
     (sleep 2)
-    (respond event (alexandria:random-elt '("...now we know." "... oh yeah we know now." "NOW WE KNOW!" "NOW WE KNOOOW!!" "...yeah that's good. Now we know.")))))
+    (respond event (alexandria:random-elt '("...now we know." "... oh yeah we know now." "NOW WE KNOW!" "NOW WE KNOOOW!!" "...yeah that's good. Now we know."))))
+  (when (cl-ppcre:scan "(what|who) did you expect" (string-downcase (message event)))
+    (sleep 2)
+    (respond event "Who were you expecting.... the easter bunny>")))
 
 (define-command sandwich () (:documentation "Make a sandwich.")
   (if (auth-p (nick event))
