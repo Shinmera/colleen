@@ -91,9 +91,33 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
      do (setf (aref new-string i) (or (gethash char *katakana->hiragana-map*) char))
      finally (return new-string)))
 
-(define-command shiritori () (:documentation "Start a game of shiritori.")
-  (setf (gethash (format NIL "~a/~a" (name (server event)) (channel event)) (games module)) (list ""))
-  (respond event "Game started! Any future messages until the game ends will be considered to be part of the Shiritori."))
+(define-command shiritori (&optional command) (:documentation "Start a game of Shiritori. Shiritori (しりとり) is a Japanese word game in which the players are required to say a word which begins with the final kana of the previous word.")
+  (let ((game-id (format NIL "~a/~a" (name (server event)) (channel event))))
+    (cond
+      ((or (not command) (string-equal command "start") (string-equal command "begin"))
+       (if (gethash game-id (games module))
+           (respond event "A game is already running!")
+           (progn
+             (setf (gethash game-id (games module)) (list ""))
+             (respond event "Game started! Any future single-word messages until the game ends will be considered to be part of the Shiritori."))))
+      ((or (string-equal command "stop") (string-equal command "end"))
+       (if (gethash game-id (games module))
+           (progn
+             (remhash game-id (games module))
+             (respond event "Game ended. Everybody wins!"))
+           (respond event "Nobody is playing right now!")))
+      ((string-equal command "rules")
+       (let ((irc:*privmsg-line-limit* 6))
+         (respond event "Rules for Shiritori: 
+1) Players take turns.
+2) Each word has to begin with the last word's last kana.
+3) Words cannot end on ん.
+4) Words may not be repeated. 
+5) Once a game is started, any message without a space is considered to be part of the Shiritori game.")))
+      ((string-equal command "about")
+       (respond event "Shiritori (しりとり) is a Japanese word game in which the players are required to say a word which begins with the final kana of the previous word. [ http://en.wikipedia.org/wiki/Shiritori ]"))
+      (T
+       (respond event "I don't know what you want. (Try one of NIL, start, begin, stop, end, rules, about)")))))
 
 (defun last-kana (string)
   (let ((length (length string)))
@@ -107,7 +131,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 (define-handler (privmsg-event event) ()
   (let* ((game-id (format NIL "~a/~a" (name (server event)) (channel event)))
          (game (gethash game-id (games module))))
-    (when game
+    (when (and game (not (find #\Space (message event) :test #'char=)))
       (let* ((message (katakana->hiragana (romaji->hiragana (message event))))
              (last-player (car game))
              (used-words (cdr game))
