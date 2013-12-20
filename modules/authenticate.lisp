@@ -15,7 +15,7 @@
 (define-handler (nick-event event) ()
   (let ((prevnick (nick event))
         (newnick (new-nick event)))
-    (when (find prevnick (auth-users (server event)) :test #'string-equal)
+    (when (auth-p prevnick)
       (v:info (name (server event)) "Changing ~a to ~a in authenticated list due to NICK." prevnick newnick)
       (setf (auth-users (server event))
             (cons newnick (delete prevnick (auth-users (server event)) :test #'string-equal))))))

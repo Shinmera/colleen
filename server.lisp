@@ -47,16 +47,18 @@
 
 (defun remove-from-auth (nick &optional reason)
   "Remove the user from the authenticated list. The optional reason string is only for logging."
-  (v:info (name *current-server*) "Removing ~a from authenticated list (~a)." nick reason)
-  (setf (auth-users *current-server*)
-        (delete nick (auth-users *current-server*) :test #'equal))
-  nick)
+  (when (auth-p nick)
+    (v:info (name *current-server*) "Removing ~a from authenticated list (~a)." nick reason)
+    (setf (auth-users *current-server*)
+          (delete nick (auth-users *current-server*) :test #'equal))
+    nick))
 
 (defun add-to-auth (nick &optional reason)
   "Add the user to the authenticated list. The optional reason string is only for logging."
-  (v:info (name *current-server*) "Adding ~a to authenticated list (~a)." nick reason)
-  (pushnew nick (auth-users *current-server*) :test #'equal)
-  NIL)
+  (unless (auth-p nick)
+    (v:info (name *current-server*) "Adding ~a to authenticated list (~a)." nick reason)
+    (pushnew nick (auth-users *current-server*) :test #'equal)
+    nick))
 
 (defun make-server-thread (server slot function)
   "Convenience function to create and set new server threads with correct initial-bindings."
