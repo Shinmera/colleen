@@ -56,6 +56,9 @@
    ;; MODULE
    :module
    :active
+   :commands
+   :handlers
+   :threads
    :start
    :stop
    :command
@@ -66,6 +69,7 @@
    :add-group-command
    :add-command
    :add-handler
+   :with-module-thread
    :dispatch
    :get-module
    :display-help
