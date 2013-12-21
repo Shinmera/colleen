@@ -125,7 +125,7 @@
   (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
   (disconnect (gethash server *servers*) :quit-message quit-message))
 
-(defmethod disconnect ((server server) &key (quit-message (config-tree :messages :quit)) (kill-reconnect T))
+(defmethod disconnect ((server server) &key (quit-message (config-tree :messages :quit)) (kill-reconnect T) (quit T))
   (flet ((terminate-server-thread (slot)
            (when (and (slot-value server slot) (thread-alive-p (slot-value server slot)))
              (v:debug (name server) "Interrupting ~a" slot)
@@ -137,8 +137,9 @@
 
   (when (socket server)
     (v:info (name server) "Disconnecting...")
-    (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server)
-    (finish-output (socket-stream server))
+    (when quit
+      (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server)
+      (finish-output (socket-stream server)))
     (close (socket-stream server))
     (usocket:socket-close (socket server)))
   (setf (socket server) NIL)
