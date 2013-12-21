@@ -81,14 +81,23 @@
   (setf (gethash (string-downcase eventtype) (handlers module)) method))
 
 (defmacro with-module-thread (module &body thread-body)
-  (let ((uidgens (gensym "UUID")))
-    `(let ((,uidgens (uuid:make-v4-uuid)))
-       (setf (gethash ,uidgens (threads ,module))
+  (let ((uidgens (gensym "UUID"))
+        (modgens (gensym "MODULE"))
+        (modnamegens (gensym "MODULE-NAME")))
+    `(let* ((,uidgens (uuid:make-v4-uuid))
+            (,modgens ,module)
+            (,modnamegens (name ,modgens)))
+       (setf (gethash ,uidgens (threads ,modgens))
              (make-thread #'(lambda ()
-                              ,@thread-body
-                              (remhash ,uidgens (threads ,module)))
+                              (handler-case
+                                  ,@thread-body
+                                (error (err)
+                                  (v:severe ,modnamegens "Unexpected error at thread-level: ~a" err)))
+                              (v:trace ,modnamegens "Ending thread ~a." ,uidgens)
+                              (remhash ,uidgens (threads ,modgens)))
                           :initial-bindings `((*current-server* . ,*current-server*)
-                                              (*servers* . ,*servers*)))))))
+                                              (*servers* . ,*servers*))))
+       ,uidgens)))
 
 (defmethod dispatch ((module T) (event event) &key ignore-errors)
   (loop for module being the hash-values of *bot-modules*
@@ -101,6 +110,7 @@
 (defmethod dispatch ((module module) (event event) &key)
   (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
     (when handler
+      (v:trace (name module) "Dispatching: ~a" event)
       (with-module-thread module
         (funcall handler module event))
       NIL)))
@@ -108,6 +118,7 @@
 (defmethod dispatch ((module module) (event command-event) &key)
   (let ((handler (gethash (command event) (commands module))))
     (when handler
+      (v:trace (name module) "Dispatching: ~a" event)
       (with-module-thread module
         (handler-case
             (funcall (cmd-fun handler) module event)
@@ -133,12 +144,17 @@
     (when group (gethash commandname group))))
 
 (defmethod get-module ((module-name string))
-  (get-module (find-symbol (string-upcase module-name) :KEYWORD)))
+  (let ((symbol (find-symbol (string-upcase module-name) :KEYWORD)))
+    (when symbol
+      (get-module symbol))))
 
 (defmethod get-module ((module-name symbol))
   (unless (keywordp module-name)
     (get-module (symbol-name module-name)))
   (gethash module-name *bot-modules*))
+
+(defmethod name ((module module))
+  (find-symbol (format NIL "~a" (class-name (class-of module))) :KEYWORD))
 
 (defun package-symbol (package)
   "Returns the symbol of a package."
