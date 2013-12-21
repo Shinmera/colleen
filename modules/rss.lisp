@@ -12,8 +12,7 @@
 (defparameter *save-file* (merge-pathnames "rss-feed-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
 (define-module rss () 
-  ((%feeds :initform (make-hash-table :test 'equalp) :accessor feeds)
-   (%thread :accessor thread))
+  ((%feeds :initform (make-hash-table :test 'equalp) :accessor feeds))
   (:documentation "Update about new RSS feed items."))
 
 (defclass feed ()
@@ -41,14 +40,11 @@
 
 (defmethod start ((rss rss))
   (load-feeds rss)
-  (setf (thread rss) (bordeaux-threads:make-thread 
-                      #'(lambda () (check-loop rss))
-                      :initial-bindings `((*servers* . ,*servers*)))))
+  (with-module-thread rss
+    (check-loop rss)))
 
 (defmethod stop ((rss rss))
-  (save-feeds rss)
-  (when (bordeaux-threads:thread-alive-p (thread rss))
-    (bordeaux-threads:destroy-thread (thread rss))))
+  (save-feeds rss))
 
 (defmethod save-feeds ((rss rss))
   (v:info :rss "Saving feeds...")

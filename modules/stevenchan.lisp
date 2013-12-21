@@ -12,14 +12,11 @@
 
 (define-module stevenchan ()
   ((%rss-url :initarg :rss-url :initform "http://api.tymoon.eu/chan/rss" :accessor rss-url :allocation :class)
-   (%last-id :initarg :last-id :initform 0 :accessor last-id :allocation :class)
-   (%thread :allocation :class :accessor thread)))
+   (%last-id :initarg :last-id :initform 0 :accessor last-id :allocation :class)))
 
 (defmethod start ((stevenchan stevenchan))
-  (setf (thread stevenchan)
-        (bordeaux-threads:make-thread #'(lambda () (check-loop stevenchan)))))
-
-(defmethod stop ((stevenchan stevenchan)))
+  (with-module-thread stevenchan
+    (check-loop stevenchan)))
 
 (defun check-loop (module)
   (v:trace :stevenchan "Entering check-loop!")
