@@ -48,7 +48,7 @@
   (if command
       (loop for module being the hash-values of *bot-modules*
          do (when (active module)
-              (let ((method (gethash (string-downcase command) (colleen::commands module))))
+              (let ((method (gethash (string-downcase command) (colleen:commands module))))
                 (when method
                   (respond event "~a" (docu method))
                   (respond event "USAGE: ~a ~{~a~^ ~}" (name method) (cmd-args method))
@@ -56,7 +56,7 @@
       (loop with commands = () 
          for module being the hash-values of *bot-modules*
          if (active module)
-         do (appendf commands (alexandria:hash-table-keys (colleen::commands module)))
+         do (appendf commands (alexandria:hash-table-keys (colleen:commands module)))
          finally (respond event "Available commands: ~{~a~^, ~}" commands))))
 
 ;; MODULE COMMANDS
@@ -91,17 +91,36 @@
 (define-command (module list) () (:documentation "List available modules.")
   (respond event "Modules [* activated]: ~{~/org.tymoonnext.colleen.mod.essentials::format-module/~^ ~}" (hash-table-keys *bot-modules*)))
 
+(defmacro with-module ((module-name modulevar) &body body)
+  `(let ((,modulevar (get-module ,module-name)))
+     (if ,modulevar
+        (progn ,@body)
+        (respond event "No such module \"~a\"." ,module-name))))
+
 (define-command (module help) (module-name) (:documentation "Show the docstring for a module.")
-  (let ((instance (get-module (find-symbol (string-upcase module-name) "KEYWORD"))))
-    (if instance
-        (respond event "~a: ~a" module-name (or (documentation (class-of instance) T) "No help available."))
-        (respond event "No such module \"~a\"." module-name))))
+  (with-module (module-name instance)
+    (respond event "~a: ~a" module-name (or (documentation (class-of instance) T) "No help available."))))
 
 (define-command (module commands) (module-name) (:documentation "List the commands a module provides.")
-  (let ((commands (alexandria:hash-table-keys (colleen::commands (get-module module-name)))))
-    (if commands
-        (respond event "~a provides: ~{~a~^, ~}" module-name commands)
-        (respond event "~a does not provide any commands." module-name))))
+  (with-module (module-name instance)
+    (let ((commands (alexandria:hash-table-keys (colleen:commands instance))))
+      (if commands
+          (respond event "~a provides: ~{~a~^, ~}" module-name commands)
+          (respond event "~a does not provide any commands." module-name)))))
+
+(define-command (module handlers) (module-name) (:documentation "List all the events this module handles.")
+  (with-module (module-name instance)
+    (let ((handlers (alexandria:hash-table-keys (colleen:handlers instance))))
+      (if handlers
+          (respond event "~a handles: ~{~a~^, ~}" module-name handlers)
+          (respond event "~a does not provide any commands." module-name)))))
+
+(define-command (module threads) (module-name) (:documentation "List threads that are currently active in this module.")
+  (with-module (module-name instance)
+    (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
+      (if threads
+          (respond event "~a runs the following threads: ~{~a~^, ~}" module-name threads)
+          (respond event "~a does not have any running threads." module-name)))))
 
 ;; IRC COMMANDS
 (define-group irc :documentation "Manage IRC commands.")
