@@ -385,6 +385,7 @@
    :server2
    :new-nick
    :target
+   :targets
    :mode
    :parameter
    :topic
@@ -424,6 +425,8 @@
    :sent-bytes
    :recvd-msgs
    :rcvd-bytes
+   :invitee
+   :sender
    :time-open
    :cmd-count
    :byte-count
@@ -469,6 +472,7 @@
    :hop
    :address
    :usec-ping
+   :target-trace
    :target-fqdn
    :target-address
    :max-hops
