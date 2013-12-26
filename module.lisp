@@ -56,9 +56,11 @@
 
 (defmethod stop :around ((module module))
   (setf (active module) NIL)
-  (loop for thread being the hash-values of (threads module)
-     do (when (thread-alive-p thread)
-          (interrupt-thread thread #'(lambda () (error 'module-stop)))))
+  (loop for uid being the hash-keys of (threads module)
+     for thread being the hash-values of (threads module)
+     do (if (thread-alive-p thread)
+            (interrupt-thread thread #'(lambda () (error 'module-stop)))
+            (remhash uid (threads module))))
   (call-next-method)
   module)
 
