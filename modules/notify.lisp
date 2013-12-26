@@ -68,17 +68,20 @@
         (v:info :notify "Loaded ~d notes." (length newlist))))))
 
 (define-command notify (recipient &rest message) (:modulevar notify)
-  (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-  (appendf (notes notify) 
-           (list (make-instance 
-                  'note 
-                  :message (format NIL "~{~a~^ ~}" message) 
-                  :sender (nick event) 
-                  :nick recipient 
-                  :channel (channel event) 
-                  :server (string-upcase (name (server event)))
-                  :timestamp (format-timestring NIL (now) :format *timestamp-format*))))
-  (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))
+  (if (string-equal recipient (nick (server event)))
+      (respond event "~a: I'm right here." (nick event))
+      (progn
+        (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+        (appendf (notes notify) 
+                 (list (make-instance 
+                        'note 
+                        :message (format NIL "~{~a~^ ~}" message) 
+                        :sender (nick event) 
+                        :nick recipient 
+                        :channel (channel event) 
+                        :server (string-upcase (name (server event)))
+                        :timestamp (format-timestring NIL (now) :format *timestamp-format*))))
+        (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))))
 
 (define-handler (privmsg-event event) (:modulevar notify)
   (let ((newlist ()))
