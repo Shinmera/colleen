@@ -57,7 +57,8 @@
 (defmethod stop :around ((module module))
   (setf (active module) NIL)
   (loop for thread being the hash-values of (threads module)
-     do (when (thread-alive-p thread) (destroy-thread thread)))
+     do (when (thread-alive-p thread)
+          (interrupt-thread thread #'(lambda () (error 'module-stop)))))
   (call-next-method)
   module)
 
@@ -91,6 +92,8 @@
              (make-thread #'(lambda ()
                               (handler-case
                                   ,@thread-body
+                                (module-stop (err)
+                                  (v:debug ,modnamegens "Received module-stop condition, leaving thread ~a." ,uidgens))
                                 (error (err)
                                   (v:severe ,modnamegens "Unexpected error at thread-level: ~a" err)))
                               (v:trace ,modnamegens "Ending thread ~a." ,uidgens)

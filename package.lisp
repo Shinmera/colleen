@@ -22,6 +22,7 @@
    :connection-failed
    :nickname-in-use
    :not-authorized
+   :module-stop
    ;; REPLY-CODES
    :reply->keyword
    ;; CONFIG

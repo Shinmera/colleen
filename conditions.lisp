@@ -33,3 +33,6 @@
 
 (define-condition ping-timeout (network-error) ()
   (:documentation "Condition signalled when a ping-timeout is noticed."))
+
+(define-condition module-stop (condition) ()
+  (:documentation "Condition signalled when a thread is interrupted due to a module-stop."))
