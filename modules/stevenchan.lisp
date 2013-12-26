@@ -30,7 +30,7 @@
                 (irc:privmsg "#Stevenchan" (format NIL "New post: ~a by ~a: ~a" id author link) :server (get-server :tynet))))
           (error (err)
             (v:warn :Stevenchan "Error in check-loop: ~a" err)))
-       (sleep 10)
+       (sleep 30)
      while (active module))
   (v:trace :stevenchan "Leaving check-loop!"))
 

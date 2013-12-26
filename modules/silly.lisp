@@ -19,7 +19,8 @@
                            (alexandria:random-elt '("I love you too." "Aww!" "Oh you~~" "Haha, oh you." "I wub wuu twoo~~" "I love you too!" "Tee hee." "I love you too."))
                            (alexandria:random-elt '("" "" "" "" ":)" "(ɔˆ ³(ˆ⌣ˆc)" "(ღ˘⌣˘ღ)" "(っ˘з(˘⌣˘ )" "(˘▼˘>ԅ( ˘⌣ƪ)")))))
 
-  (when (cl-ppcre:scan "(i|you|he|she|it|we|they)( all)? know(s?) now" (string-downcase (message event)))
+  (when (or (cl-ppcre:scan "(i|you|he|she|it|we|they)( all)? know(s?) now" (string-downcase (message event)))
+            (cl-ppcre:scan "now (i|you|he|she|it|we|they)( all)? know(s?)" (string-downcase (message event))))
     (sleep 2)
     (respond event (alexandria:random-elt '("...now we know." "... oh yeah we know now." "NOW WE KNOW!" "NOW WE KNOOOW!!" "...yeah that's good. Now we know."))))
   (when (cl-ppcre:scan "(what|who) did you expect" (string-downcase (message event)))
