@@ -119,7 +119,8 @@
   (with-module (module-name instance)
     (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
       (if threads
-          (respond event "~a runs the following threads: ~{~a~^, ~}" module-name threads)
+          (respond event "~a runs the following threads: ~{~a~^, ~}" module-name
+                   (mapcar #'(lambda (a) (format NIL "~:[~a~;*~a~]" (bordeaux-threads:thread-alive-p (gethash a (colleen:threads instance))) a)) threads))
           (respond event "~a does not have any running threads." module-name)))))
 
 ;; IRC COMMANDS
