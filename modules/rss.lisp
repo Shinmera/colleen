@@ -171,7 +171,7 @@
         (setf (report-to (gethash name (feeds module))) 
               (delete-if #'(lambda (el) (and (eql (name (server event)) (car el))
                                              (string-equal (channel event) (cdr el))))
-                                            (report-to module)))
+                         (report-to (gethash name (feeds module)))))
         (respond event "No longer watching ~a on this channel." name))
       (respond event "No feed called \"~a\" could be found!" name)))
 
