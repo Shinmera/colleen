@@ -35,11 +35,11 @@
 ;;;;;;;;;;;; RECENT CHANGES
 (define-group ed :documentation "Interact or change ED settings.")
 
-(define-command (ed recent-changes) (&optional start-or-stop) (:authorization T :documentation "Start or stop the recent-changes polling.")
+(define-command (ed recent-changes) (&optional start-or-stop) (:authorization T :documentation "Start or stop the recent-changes polling." :modulevar dramatica)
   (cond
     ((string-equal start-or-stop "start")
      (if (log-loop dramatica)
-         (respond event "Polling is already activated!")
+         (respond event "Polling is already activated! (TID ~a)" (log-loop dramatica))
          (progn 
            (start-log-loop dramatica)
            (respond event "Recent-changes polling activated."))))
@@ -51,25 +51,18 @@
            (respond event "Recent-changes polling deactivated."))
          (respond event "Polling is already deactivated!")))
     
-    (T (respond event "Recent changes polling is ~:[deactivated~;activated~]" (log-loop dramatica)))))
+    (T (respond event "Recent changes polling is ~:[deactivated~;activated ~:*(TID~a)~]" (log-loop dramatica)))))
 
 (defun start-log-loop (dramatica)
   (v:info :dramatica.recentchanges "Starting log-loop.")
   (setf (log-running dramatica) T
-        (log-loop dramatica) (bordeaux-threads:make-thread #'(lambda () (wiki-log-loop dramatica)))))
+        (log-loop dramatica)
+        (with-module-thread dramatica
+          (wiki-log-loop dramatica))))
 
 (defun stop-log-loop (dramatica)
   (v:info :dramatica.recentchanges "Stopping log-loop.")
-  (setf (log-running dramatica) NIL)
-  ;; Wait for timeout or terminate.
-  (loop for i from 0 to 10
-     while (and (log-loop dramatica)
-                (bordeaux-threads:thread-alive-p (log-loop dramatica)))
-     do (sleep 1)
-     finally (progn 
-               (when (and (>= i 10) (log-loop dramatica) (bordeaux-threads:thread-alive-p (log-loop dramatica))) 
-                 (bordeaux-threads:destroy-thread (log-loop dramatica)))
-               (setf (log-loop dramatica) NIL))))
+  (setf (log-running dramatica) NIL))
 
 (defun wiki-log-loop (dramatica)
   (let ((latest-timestamp
