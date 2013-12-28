@@ -41,6 +41,8 @@
   (let ((data (apply #'get-weather (get-coordinates location))))
     (flet ((d (field) (cdr (assoc field data))))
       (if data
-          (respond event "Weather for ~a: ~a at ~a°C (feels like ~a°C), ~a% humidity, ~akm/h wind, ~ahPa pressure."
-                   location (d :summary) (d :temperature) (d :apparent-temperature) (round (* 100 (d :humidity))) (d :wind-speed) (d :pressure)) 
+          (respond event "Weather for ~a: ~a at ~a°C~:[ (feels like ~a°C)~;~*~], ~a% humidity, ~akm/h wind, ~ahPa pressure."
+                   location (d :summary) (d :temperature)
+                   (= (d :temperature) (d :apparent-temperature)) (d :apparent-temperature)
+                   (round (* 100 (d :humidity))) (d :wind-speed) (d :pressure)) 
           (respond event "Sorr, I couldn't find any data for ~a." location)))))
