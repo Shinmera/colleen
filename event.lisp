@@ -11,7 +11,7 @@
   (let ((class (gethash event-name *event-map*)))
     (if class
         (make-instance class :server server :prefix prefix :arguments arguments)
-        (v:warn (name server) "Inexistent event: ~a" event-name))))
+        (v:warn (name server) "Inexistent event: ~a ~a ~a" event-name prefix arguments))))
 
 (defclass event ()
   ((%server :initarg :server :reader server)
