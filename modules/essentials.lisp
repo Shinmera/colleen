@@ -12,7 +12,8 @@
 (in-package :org.tymoonnext.colleen.mod.essentials)
 
 (define-module essentials ()
-  ((%last-seen :initform (make-hash-table :test 'equalp) :accessor last-seen))
+    ((%last-seen :initform (make-hash-table :test 'equalp) :accessor last-seen)
+     (%startup :initform (get-universal-time) :accessor startup-time))
   (:documentation "A few essential bot and irc commands."))
 
 (define-command reload () (:authorization T :documentation "Reload the configuration.")
@@ -188,3 +189,15 @@
   (if (gethash nick (last-seen module))
       (respond event "I have last seen ~a ~a ago." nick (format-time-since (- (get-universal-time) (gethash nick (last-seen module)))))
       (respond event "I don't know anyone called ~a." nick)))
+
+(define-command uptime () (:documentation "Report how long Colleen has been started up for (or more specifically, the Essentials module).")
+  (respond event "Uptime: ~a" (format-time-since (- (get-universal-time) (startup-time module)))))
+
+
+
+
+
+
+
+
+
