@@ -50,6 +50,9 @@
 (define-command (search ed) (&rest query) (:documentation "Search encyclopediadramatica, the number one wiki for internet drama.")
   (mediawiki-search-wrap event query "http://encyclopediadramatica.es/" "http://encyclopediadramatica.es/api.php" 0))
 
+(define-command (search touhou) (&rest query) (:documentation "Search en.touhouwiki.net.")
+  (mediawiki-search-wrap event query "http://en.touhouwiki.net/wiki/" "http://en.touhouwiki.net/api.php" 1 "title"))
+
 (define-command (search kanjidamage) (&rest query) (:documentation "Return information about a kanji symbol crawled from Kanjidamage.com")
   (setf query (format NIL "~{~a~^ ~}" query))
   (let ((lquery:*lquery-master-document*))
@@ -118,15 +121,15 @@
       (values (cl-ppcre:register-groups-bind (url) ("\\?q=(.*?)&" ($ node "h3 a" (attr :href) (node))) url)
               (cl-ppcre:regex-replace-all "\\n" ($ node ".s .st" (text) (node)) "")))))
 
-(defun mediawiki-search-wrap (event query base api &optional (section 0))
-  (let ((result (mediawiki-search query base api section)))
+(defun mediawiki-search-wrap (event query base api &optional (section 0) (what "text"))
+  (let ((result (mediawiki-search query base api section what)))
     (if result 
         (respond event result)
         (respond event "Nothing found for ~{~a~^ ~}" query))))
 
-(defun mediawiki-search (query page-root api-root &optional (section 0))
+(defun mediawiki-search (query page-root api-root &optional (section 0) (what "text"))
   (let* ((wiki:*wiki-api* api-root)
-         (title (cdr (assoc :TITLE (first (wiki:wiki-search (format NIL "~{~a~^ ~}" query) :limit 1 :what "text"))))))
+         (title (cdr (assoc :TITLE (first (wiki:wiki-search (format NIL "~{~a~^ ~}" query) :limit 1 :what what))))))
     (when title
       (progn
         (setf title (cl-ppcre:regex-replace-all " " title "_"))
