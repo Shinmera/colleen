@@ -25,7 +25,13 @@
     (respond event (alexandria:random-elt '("...now we know." "... oh yeah we know now." "NOW WE KNOW!" "NOW WE KNOOOW!!" "...yeah that's good. Now we know."))))
   (when (cl-ppcre:scan "(what|who) did you expect" (string-downcase (message event)))
     (sleep 2)
-    (respond event "Who were you expecting.... the easter bunny>")))
+    (respond event "Who were you expecting.... the easter bunny>"))
+
+  (when (cl-ppcre:scan "that (was|is) the plan" (string-downcase (message event)))
+    (sleep 1)
+    (respond event "...to give you a boner.")
+    (sleep 1.5)
+    (respond event "And you got one!")))
 
 (define-command sandwich () (:documentation "Make a sandwich.")
   (if (auth-p (nick event))
