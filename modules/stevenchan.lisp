@@ -51,5 +51,5 @@
 (define-command (stevenchan movie) (&optional user) (:documentation "Get information about the movie night.")
   (unless user (setf user (nick event)))
   ($ (initialize (drakma:http-request "http://movies.tymoon.eu" :external-format-in :utf-8) :type :HTML))
-  (respond event "~a: ~a. Movie nights always on Saturdays, 22:00 CE(S)T. http://justin.tv/stc_mv (pw: faggotry)"
+  (respond event "~a: ~a. Movie nights always on Saturdays, 22:00 CE(S)T. http://livestream.com/shinmera"
            user ($ "#content .box .largeCenter" (text) (node))))
