@@ -15,7 +15,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (:documentation "Primitive rule enforcement module."))
 
 (defparameter *types* '(:KICK :BAN :KILL :MUTE :SCOLD :REWARD))
-(defparameter *fields* '(regex type probation breach-msg apology-msg punish-msg))
+(defparameter *fields* '(:regex :type :probation :breach-msg :apology-msg :punish-msg))
 (defparameter *save-file* (merge-pathnames "rules-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
 (defclass rule ()
@@ -164,16 +164,16 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
     (if rule
         (progn
           (setf value (format NIL "~{~a~^ ~}" value)
-                field (find-symbol (string-upcase field)))
-          (assert (find field *fields*) () "Field has to be one of ~{~a~^, ~}." *fields*)
+                field (find-symbol (string-upcase field) :KEYWORD))
+          (assert (and field (find field *fields*)) () "Field has to be one of ~{~a~^, ~}." *fields*)
           (cond
-            ((eql field 'TYPE)
+            ((eql field :TYPE)
              (setf value (find-symbol (string-upcase value) :KEYWORD))
              (assert (find value *types*) () "Type has to be one of ~{~a~^, ~}." *types*))
-            ((eql field 'PROBATION)
+            ((eql field :PROBATION)
              (setf value (parse-integer value :junk-allowed T))
              (assert (not (null value)) () "Probation has to be an integer.")))
-          (setf (slot-value rule (find-symbol (format NIL "%~a" field)))
+          (setf (slot-value rule (find-symbol (format NIL "%~a" field) :org.tymoonnext.colleen.mod.rules))
                 value)
           (respond event "Rule ~a edited." name))
         (respond event "A rule with that name does not exist!"))))
