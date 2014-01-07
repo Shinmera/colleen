@@ -11,16 +11,16 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (defvar *save-file* (merge-pathnames "emoticons-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
-(define-module emoticons ()
+(define-module emoticon ()
   ((%db :initform (make-hash-table :test 'equal) :accessor db))
   (:documentation "Simple database for :emoticon:s."))
 
-(defmethod start ((module emoticons))
+(defmethod start ((module emoticon))
   (with-open-file (stream *save-file* :if-does-not-exist NIL)
     (when stream
       (setf (db module) (yason:parse stream)))))
 
-(defmethod stop ((module emoticons))
+(defmethod stop ((module emoticon))
   (with-open-file (stream *save-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
     (yason:encode (db module) stream)))
 
@@ -52,5 +52,5 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
         (respond event "Emoticon ~a removed." name))
       (respond event "No such emoticon exists.")))
 
-(define-command (emoticon list) () (:documentation "List saved emoticons.")
+(define-command (emoticon list) () (:documentation "List saved emoticon.")
   (respond event "~{~a~^, ~}" (alexandria:hash-table-keys (db module))))
