@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.search
-  (:use :cl :colleen :events :lquery)
+  (:use :cl :colleen :events :lquery :split-sequence)
   (:shadow :search))
 (in-package :org.tymoonnext.colleen.mod.search)
 
@@ -15,6 +15,19 @@
 
 (define-module search () ()
   (:documentation "Perform searches on various sites."))
+
+(define-handler (privmsg-event event) ()
+  (when (and (>= (length (message event)) 4)
+             (string-equal (message event) "clhs" :end1 4))
+    (if (string-equal (message event) "clhs")
+        (respond event "The Common Lisp Hyperspec http://www.lispworks.com/documentation/HyperSpec/Front/index.htm")
+        (colleen:dispatch
+         T (make-instance 'command-event
+                          :server (server event)
+                          :arguments (arguments event)
+                          :prefix (prefix event)
+                          :command "search"
+                          :cmd-args (split-sequence #\Space (string-trim " " (message event))))))))
 
 (define-group search :documentation "Perform a search on a variety of sites.")
 
