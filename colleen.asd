@@ -35,6 +35,7 @@
                                      (:file "dramatica")
                                      (:file "emoticon")
                                      (:file "essentials")
+                                     (:file "google")
                                      (:file "markov")
                                      (:file "medals")
                                      (:file "notify")
