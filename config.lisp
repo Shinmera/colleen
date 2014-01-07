@@ -9,7 +9,9 @@
 (defun load-config (&optional (config-file *conf-file*))
   "(Re)load the static configuration."
   (when (not config-file)
-    (setf config-file (merge-pathnames "bot-config.json" (asdf:system-source-directory :colleen))))
+    (setf config-file (merge-pathnames
+                       "colleen.json"
+                       (merge-pathnames "config/" (asdf:system-source-directory :colleen)))))
 
   (with-open-file (file config-file :if-does-not-exist :ERROR)
     (setf *conf* (json:decode-json file))
