@@ -21,6 +21,14 @@
     (respond event (fstd-message event :config-reload "Reloading configuration."))
     (load-config)))
 
+(define-command connect (server) (:authorization T :documentation "Connect to a server configuration.")
+  (let ((serverkey (find-symbol (string-upcase server) :KEYWORD)))
+    (if serverkey
+        (progn
+          (connect serverkey)
+          (respond event "Connected to ~a." serverkey))
+        (respond event "No such server found."))))
+
 (define-command shutdown () (:authorization T :documentation "Disconnect from all servers.")
   (when (auth-p (nick event))
     (irc:broadcast (fstd-message event :shutdown))
