@@ -8,6 +8,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 (defpackage org.tymoonnext.colleen.mod.google
   (:use :cl :colleen :events :split-sequence))
 (in-package :org.tymoonnext.colleen.mod.google)
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (ql:quickload :parse-number))
 
@@ -57,10 +58,21 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 (define-command (google geocode) (&rest address) (:documentation "Look up geocoding information about an address.")
   (dolist (result (geocode (format NIL "~{~a~^ ~}" address)))
     (respond event "Address: ~a | Type: ~{~a~^, ~} | Coordinates: ~f/~f"
-             (cdr (assoc :types result))
              (cdr (assoc :formatted--address result))
+             (cdr (assoc :types result))
              (cdr (assoc :lat (cdr (assoc :location (cdr (assoc :geometry result))))))
              (cdr (assoc :lng (cdr (assoc :location (cdr (assoc :geometry result)))))))))
+
+(define-command (google coordinates) (&rest address) (:documentation "Retrieve the latitude and longitude of an address.")
+  (multiple-value-bind (lat lng) (coordinates (format NIL "~{~a~^ ~}" address))
+    (if lat
+        (respond event "Coordinates: ~a lat, ~a lng" lat lng)
+        (respond event "Address not found."))))
+
+(defun coordinates (address)
+  (let ((result (first (geocode address))))
+    (values (cdr (assoc :lat (cdr (assoc :location (cdr (assoc :geometry result))))))
+            (cdr (assoc :lng (cdr (assoc :location (cdr (assoc :geometry result)))))))))
 
 (defun geocode (address)
   (let ((json (json-request "http://maps.googleapis.com/maps/api/geocode/json"
@@ -72,12 +84,10 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 (defvar *unix-epoch-difference* (encode-universal-time 0 0 0 1 1 1970 0))
 (defun get-unix-time ()
   (- (get-universal-time) *unix-epoch-difference*))
-(define-command (google timezone) (latitude longitude &optional timestamp) (:documentation "Retrieve timezone data about a geographical location.")
-  (let ((latitude (parse-number:parse-number latitude))
-        (longitude (parse-number:parse-number longitude))
-        (timestamp (if timestamp (parse-integer timestamp) (get-unix-time))))
-    (multiple-value-bind (id name dst raw) (timezone latitude longitude timestamp)
-      (respond event "~a, ~a (dst: ~d, raw: ~d)" id name dst raw))))
+(define-command (google timezone) (&rest address) (:documentation "Retrieve timezone data about a geographical location.")
+  (multiple-value-bind (latitude longitude) (coordinates (format NIL "~{~a~^ ~}" address))
+    (multiple-value-bind (id name dst raw) (timezone latitude longitude)
+      (respond event "~a, ~a (UTC~@f, DST~@f)" id name (/ raw 60 60) (/ dst 60 60)))))
 
 (defun timezone (latitude longitude &optional (timestamp (get-unix-time)))
   (let ((json (json-request "https://maps.googleapis.com/maps/api/timezone/json"
@@ -92,7 +102,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 
 (define-command (google distance) (origin destination &optional (mode "driving") departure-timestamp) (:documentation "Look up google maps distance data.")
-  (assert (find mode '("walking" "driving" "bicycling") :test #'string-equal) () "Mode has to be one of walking, driving, bycicling.")
+  (assert (find mode '("walking" "driving" "bicycling") :test #'string-equal) () "Mode has to be one of walking, driving, bicycling.")
   (let ((departure-timestamp (if departure-timestamp (parse-integer departure-timestamp) (get-unix-time))))
     (let ((data (distance origin destination :mode mode :departure-timestamp departure-timestamp)))
       (loop for row in data
@@ -105,9 +115,13 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
                                origin destination i
                                (cdr (assoc :text (cdr (assoc :duration element))))
                                (cdr (assoc :text (cdr (assoc :distance element)))))
-                      (respond event "[~a  → ~a] Error: ~a"
-                               origin destination
-                               (cdr (assoc :status element)))))))))
+                      (progn
+                        (respond event "[~a  → ~a] Error: ~a"
+                                 origin destination
+                                 (cdr (assoc :status element)))
+                        (respond event "[~a  → ~a] Est: ~a"
+                                 origin destination
+                                 (estimated-distance origin destination)))))))))
 
 (defun distance (origin destination &key (mode "driving") (departure-timestamp (get-unix-time)))
   (let ((json (json-request "https://maps.googleapis.com/maps/api/distancematrix/json"
@@ -118,3 +132,36 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
         (mapcar #'(lambda (a) (cdr (assoc :elements a))) (cdr (assoc :rows json)))
         (error (cdr (assoc :status json))))))
 
+(defun great-circle-distance (lng1 lat1 lng2 lat2)
+  (flet ((rad (x) (/ (* x Pi) 180))
+         (haversine (x) (expt (sin (/ x 2)) 2)))
+    (let ((earth-radius 6371)
+          (lat1 (rad lat1)) (lng1 (rad lng1))
+          (lat2 (rad lat2)) (lng2 (rad lng2)))
+      (* 2
+         earth-radius
+         (asin (sqrt (+ (haversine (- lat2 lat1))
+                        (* (cos lat1) (cos lat2)
+                           (haversine (- lng2 lng1))))))))))
+
+(defun transport-time (distance)
+  (flet ((format-and-print (divisor transport-method)
+           (format NIL "Human terms: ~,3f hours away by ~a, using an average speed of ~d km/h."
+                   (/ distance divisor) transport-method divisor)))
+    (cond
+      ((< distance 0))
+      ((< distance 150)
+       (format-and-print 50 "car"))
+      ((< distance 2500)
+       (format-and-print 130 "train"))
+      ((< distance 12500)
+       (format-and-print 800 "plane"))
+      (T
+       (format-and-print 18000 "ICBM")))))
+
+(defun estimated-distance (origin destination)
+  (multiple-value-bind (from-latitude from-longitude) (coordinates origin)
+    (multiple-value-bind (to-latitude to-longitude) (coordinates destination)
+      (let ((distance (great-circle-distance from-longitude from-latitude to-longitude to-latitude)))
+        (format NIL "Distance: ~,2f km, ~a" distance
+                (transport-time distance))))))
