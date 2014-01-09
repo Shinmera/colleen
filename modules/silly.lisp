@@ -36,7 +36,11 @@
 
     (when (cl-ppcre:scan "(/burn)|(sick burn)|(o+h+ burn)" message)
       (sleep (/ (random 10) 20))
-      (respond event "OOOOOOHH SICK BURN!!"))))
+      (respond event "OOOOOOHH SICK BURN!!"))
+
+    (when (cl-ppcre:scan "muffin" message)
+      (sleep (/ (random 10) 20))
+      (respond event "Aw yeeeee. Muffiiins."))))
 
 (define-command sandwich () (:documentation "Make a sandwich.")
   (if (auth-p (nick event))
