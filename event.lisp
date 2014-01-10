@@ -10,7 +10,9 @@
   "Makes an event instance from the given parameters."
   (let ((class (gethash event-name *event-map*)))
     (if class
-        (make-instance class :server server :prefix prefix :arguments arguments)
+        (progn
+          (v:debug (intern (format NIL "~a.EVENT.~a" (name server) event-name) :KEYWORD) "~a ~{~a~^ ~}" prefix arguments)
+          (make-instance class :server server :prefix prefix :arguments arguments))
         (v:warn (name server) "Inexistent event: ~a ~a ~a" event-name prefix arguments))))
 
 (defclass event ()
