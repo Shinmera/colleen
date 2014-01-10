@@ -80,7 +80,7 @@
      do (handler-case
             (progn
               (sleep (* 60 5))
-              (v:info :rss "[Check-Loop] Checking all...")
+              (v:debug :rss "[Check-Loop] Checking all...")
               (loop for feed being the hash-values of (feeds rss)
                  do (handler-case 
                         (let ((update (update feed)))
