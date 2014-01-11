@@ -40,7 +40,13 @@
 
     (when (cl-ppcre:scan "muffin" message)
       (sleep (/ (random 10) 20))
-      (respond event "Aw yeeeee. Muffiiins."))))
+      (respond event "Aw yeeeee. Muffiiins."))
+
+    (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
+      (sleep (/ (random 10) 20))
+      (respond event "The ~a ruse was a.........." thing)
+      (sleep (/ (random 10) 10))
+      (respond event "DISTACTION"))))
 
 (define-command sandwich () (:documentation "Make a sandwich.")
   (if (auth-p (nick event))
