@@ -121,8 +121,8 @@
        for i from 0
        while (or (not limit) (< i limit))
        collect (make-instance 'feed-item 
-                              :title ($ node "title" (text) (node))
-                              :description ($ node "description" (text) (node))
+                              :title (string-trim (format NIL "~% ") ($ node "title" (text) (node)))
+                              :description (string-trim (format NIL "~% ") ($ node "description" (text) (node)))
                               :link ($ node "link" (text) (node))
                               :guid ($ node "guid" (text) (node))
                               :publish-date ($ node "pubDate" (text) (node))))))
