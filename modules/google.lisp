@@ -9,9 +9,6 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (:use :cl :colleen :events :split-sequence))
 (in-package :org.tymoonnext.colleen.mod.google)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (ql:quickload :parse-number))
-
 (define-module google ()
   ((%translate-key :initform NIL :accessor translate-key))
   (:documentation "Interact with various Google APIs."))
@@ -45,6 +42,16 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (with-key (translate-key)
     (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (translate-key module) :to target-language)
       (respond event "[~a → ~a] ~a" language target-language translation))))
+
+(define-command (google translate-from) (source-language &rest text) (:documentation "Translate a given text from a specific language into english.")
+  (with-key (translate-key)
+    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (translate-key module) :from source-language)
+      (respond event "[~a → en] ~a" source-language translation))))
+
+(define-command (google translate-from-to) (source-language target-language &rest text) (:documentation "Translate a given text from a language into another.")
+  (with-key (translate-key)
+    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (translate-key module) :from source-language :to target-language)
+      (respond event "[~a → ~a] ~a" source-language target-language translation))))
 
 (defun translate (text api-key &key (to "en") from)
   (let ((parameters `(("key" . ,api-key) ("q" . ,text) ("target" . ,to))))
@@ -127,7 +134,6 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (let ((json (json-request "https://maps.googleapis.com/maps/api/distancematrix/json"
                             `(("sensor" . "false") ("origins" . ,origin) ("destinations" . ,destination)
                               ("mode" . ,mode) ("departure_time" . ,(format NIL "~d" departure-timestamp))))))
-    (v:info :bla "~s" json)
     (if (string-equal (cdr (assoc :status json)) "ok")
         (mapcar #'(lambda (a) (cdr (assoc :elements a))) (cdr (assoc :rows json)))
         (error (cdr (assoc :status json))))))
