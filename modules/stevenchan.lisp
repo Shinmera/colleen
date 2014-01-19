@@ -12,7 +12,9 @@
 
 (define-module stevenchan ()
   ((%rss-url :initarg :rss-url :initform "http://api.tymoon.eu/chan/rss" :accessor rss-url :allocation :class)
-   (%last-id :initarg :last-id :initform 0 :accessor last-id :allocation :class)))
+   (%last-id :initarg :last-id :initform 0 :accessor last-id :allocation :class)
+   (%stream-api :initarg :stream-api :initform "http://xshinmerax.api.channel.livestream.com/2.0/livestatus.xml" :accessor stream-api :allocation :class)
+   (%stream-live :initform NIL :accessor stream-live :allocation :class)))
 
 (defmethod start ((stevenchan stevenchan))
   (with-module-thread stevenchan
@@ -30,6 +32,20 @@
                 (irc:privmsg "#Stevenchan" (format NIL "New post: ~a by ~a: ~a" id author link) :server (get-server :tynet))))
           (error (err)
             (v:warn :Stevenchan "Error in check-loop: ~a" err)))
+
+       (v:debug :stevenchan "Checking livestream...")
+       (handler-case
+           (let ((lquery:*lquery-master-document*)
+                 (data (drakma:http-request (stream-api module))))
+             ($ (initialize (cl-ppcre:regex-replace-all "ls:" data "")))
+             (let ((status ($ "isLive" (text) (node))))
+               (unless (string-equal status (stream-live module))
+                 (setf (stream-live module) status)
+                 (when (string-equal status "true")
+                   (v:info :Stevenchan "Stream is now live!")
+                   (irc:privmsg "#Stevenchan" "[livestream] Stream is now live!" :server (get-server :tynet))))))
+         (error (err)
+           (v:warn :Stevenchan "Error in check-loop: ~a" err)))
        (sleep 30)
      while (active module))
   (v:trace :stevenchan "Leaving check-loop!"))
