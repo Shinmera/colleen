@@ -29,9 +29,9 @@
       (respond event "Who were you expecting.... the easter bunny>"))
 
     (when (cl-ppcre:scan "that (was|is) the plan" message)
-      (sleep (/ (random 10) 10))
+      (sleep (/ (random 20) 10))
       (respond event "...to give you a boner.")
-      (sleep (/ (random 10) 7))
+      (sleep (/ (random 20) 7))
       (respond event "And you got one!"))
 
     (when (cl-ppcre:scan "(/burn)|(sick burn)|(o+h+ burn)" message)
@@ -41,6 +41,14 @@
     (when (cl-ppcre:scan "muffin" message)
       (sleep (/ (random 10) 20))
       (respond event "Aw yeeeee. Muffiiins."))
+
+    (when (cl-ppcre:scan "i'm batman" message)
+      (sleep (/ (random 10) 5))
+      (respond event "I'M BATMAN."))
+
+    (when (cl-ppcre:scan "kill myself" message)
+      (sleep (/ (random 10) 10))
+      (respond event "DO IT FGT!"))
 
     (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
       (sleep (/ (random 10) 20))
@@ -92,3 +100,7 @@
               (respond event "...")
               (return T)))
     (respond event "Get the hell away from me you creep!")))
+
+(define-command kill (who) (:authorization T :documentation "Kill someone.")
+  (respond event "~a: Bang!" who)
+  (irc:kick (channel event) who :reason "You're dead."))
