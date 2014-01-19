@@ -57,6 +57,9 @@
 (define-command (search wikipedia) (&rest query) (:documentation "Search wikipedia.")
   (mediawiki-search-wrap event query "http://en.wikipedia.org/wiki/" "http://en.wikipedia.org/w/api.php" 0))
 
+(define-command (search wikipedia-de) (&rest query) (:documentation "Search the German wikipedia.")
+  (mediawiki-search-wrap event query "http://de.wikipedia.org/wiki/" "http://de.wikipedia.org/w/api.php" 0))
+
 (define-command (search wiktionary) (&rest query) (:documentation "Search wiktionary.")
   (mediawiki-search-wrap event query "http://en.wiktionary.org/wiki/" "http://en.wiktionary.org/w/api.php" 1))
 
@@ -64,7 +67,7 @@
   (mediawiki-search-wrap event query "http://encyclopediadramatica.es/" "http://encyclopediadramatica.es/api.php" 0))
 
 (define-command (search touhou) (&rest query) (:documentation "Search en.touhouwiki.net.")
-  (mediawiki-search-wrap event query "http://en.touhouwiki.net/wiki/" "http://en.touhouwiki.net/api.php" 1 "title"))
+  (mediawiki-search-wrap event query "http://en.touhouwiki.net/wiki/" "http://en.touhouwiki.net/api.php" 0 "title"))
 
 (define-command (search kanjidamage) (&rest query) (:documentation "Return information about a kanji symbol crawled from Kanjidamage.com")
   (setf query (format NIL "~{~a~^ ~}" query))
@@ -147,10 +150,9 @@
       (progn
         (setf title (cl-ppcre:regex-replace-all " " title "_"))
         (let ((data (wiki:wiki-parse :page title :section section)))
-          (v:info :AAA data)
           ($ (initialize (format NIL "<html><head></head><body>~a</body></html>" 
                                  (cl-ppcre:regex-replace-all "xml:" data "")) :type :HTML))
-          (format NIL "~a~a : ~a" page-root title ($ "p" (node) (text) (node))))))))
+          (format NIL "~a~a : ~a" page-root title (first (split-sequence #\Newline ($ "p" (node) (text) (node))))))))))
 
 (defun shorten-url (url)
   (labels ((g (data &rest path)
