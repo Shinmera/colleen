@@ -132,6 +132,30 @@
                    (mapcar #'(lambda (a) (format NIL "~:[~a~;*~a~]" (bordeaux-threads:thread-alive-p (gethash a (colleen:threads instance))) a)) threads))
           (respond event "~a does not have any running threads." module-name)))))
 
+(define-command (module interrupt) (module-name) (:documentation "Interrupt all the module threads.")
+  (with-module (module-name instance)
+    (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
+      (if threads
+          (loop for uid in threads
+             for thread = (gethash uid (colleen:threads instance))
+             do (if (bordeaux-threads:thread-alive-p thread)
+                    (bordeaux-threads:interrupt-thread thread #'(lambda () (error 'module-stop)))
+                    (remhash uid (threads module)))
+               (respond event "Thread ~a interrupted." uid))
+          (respond event "~a does not have any running threads." module-name)))))
+
+(define-command (module kill) (module-name) (:documentation "Kill all the module threads.")
+  (with-module (module-name instance)
+    (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
+      (if threads
+          (loop for uid in threads
+             for thread = (gethash uid (colleen:threads instance))
+             do (when (bordeaux-threads:thread-alive-p thread)
+                  (bordeaux-threads:destroy-thread thread))
+               (remhash uid (threads module))
+               (respond event "Thread ~a killed." uid))
+          (respond event "~a does not have any running threads." module-name)))))
+
 ;; IRC COMMANDS
 (define-group irc :documentation "Manage IRC commands.")
 
@@ -191,7 +215,7 @@
   (multiple-value-bind (s m h dd yy) (decode-universal-time secs)
     (declare (ignore s))
     (setf yy (- yy 1) dd (- dd 1) m (- m 1) h (- h 1))
-    (format NIL "~D years, ~D days, ~D hours, ~D minutes" yy dd h m)))
+    (format NIL "~:[~D years, ~;~*~]~:[~D days, ~;~*~]~:[~D hours, ~;~*~]~D minutes" (= yy 0) yy (= dd 0) dd (= h 0) h m)))
 
 (define-command last-seen (nick) (:documentation "Tell how long it has been since the bot last saw the requested nick.")
   (if (gethash nick (last-seen module))
