@@ -107,6 +107,16 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
                 (cdr (assoc :raw-offset json)))
         (error (cdr (assoc :status json))))))
 
+(define-command (google time) (&rest address) (:documentation "Retrieve the current local time of a geographical location using the timezone api.")
+  (setf address (format NIL "~{~a~^ ~}" address))
+  (multiple-value-bind (latitude longitude) (coordinates address)
+    (multiple-value-bind (id name dst raw) (timezone latitude longitude)
+      (let ((local-time:*default-timezone* local-time:+utc-zone+))
+        (respond event "Time for ~a: ~a ~a, ~a (UTC~@f, DST~@f)"
+                 address (local-time:format-timestring
+                          NIL (local-time:adjust-timestamp! (local-time:now) (offset :sec raw))
+                          :format '((:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2)))
+                 id name (/ raw 60 60) (/ dst 60 60))))))
 
 (define-command (google distance) (origin destination &optional (mode "driving") departure-timestamp) (:documentation "Look up google maps distance data.")
   (assert (find mode '("walking" "driving" "bicycling") :test #'string-equal) () "Mode has to be one of walking, driving, bicycling.")
