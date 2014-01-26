@@ -9,6 +9,8 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (:use :cl :colleen :events :split-sequence))
 (in-package :org.tymoonnext.colleen.mod.google)
 
+(defvar *language-code-map*)
+
 (define-module google ()
   ((%translate-key :initform NIL :accessor translate-key))
   (:documentation "Interact with various Google APIs."))
@@ -32,7 +34,6 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
     (cl-json:decode-json-from-string data)))
 
 
-
 (define-command (google translate) (&rest text) (:documentation "Translate a given text into english.")
   (with-key (translate-key)
     (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (translate-key module))
@@ -53,9 +54,14 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
     (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (translate-key module) :from source-language :to target-language)
       (respond event "[~a → ~a] ~a" source-language target-language translation))))
 
+(defun ensure-known-language (language)
+  (let ((short (or (gethash language *language-code-map*) language)))
+    (assert (find short (alexandria:hash-table-values *language-code-map*) :test #'string-equal) () "No such language: ~a" language)
+    short))
+
 (defun translate (text api-key &key (to "en") from)
-  (let ((parameters `(("key" . ,api-key) ("q" . ,text) ("target" . ,to))))
-    (when from (push `("source" . ,from) parameters))
+  (let ((parameters `(("key" . ,api-key) ("q" . ,text) ("target" . ,(ensure-known-language to)))))
+    (when from (push `("source" . ,(ensure-known-language from)) parameters))
     (let ((json (json-request "https://www.googleapis.com/language/translate/v2" parameters)))
       (let ((data (first (cdr (assoc :translations (cdr (assoc :data json)))))))
         (values (cdr (assoc :translated-text data))

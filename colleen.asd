@@ -36,6 +36,7 @@
                                      (:file "emoticon")
                                      (:file "essentials")
                                      (:file "google")
+                                     (:file "google-lng")
                                      (:file "markov")
                                      (:file "medals")
                                      (:file "notify")
