@@ -35,6 +35,7 @@
                                      (:file "dramatica")
                                      (:file "emoticon")
                                      (:file "essentials")
+                                     (:file "eval")
                                      (:file "google")
                                      (:file "google-lng")
                                      (:file "markov")
