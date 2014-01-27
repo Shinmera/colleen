@@ -25,14 +25,16 @@
       (setf (ignored-users markov) (config-tree :markov :ignored-users)))
   (with-open-file (stream *registry-file* :if-does-not-exist NIL)
     (when stream
-      (setf (registry markov) (yason:parse stream))))
+      (setf (registry markov) (yason:parse stream))
+      (v:info :markov "Loaded ~a entries." (hash-table-count (registry markov)))))
   markov)
 
 (defmethod stop ((markov markov))
   (setf (config-tree :markov :probability) (probability markov)
         (config-tree :markov :ignored-users) (ignored-users markov))
   (with-open-file (stream *registry-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
-    (cl-json:encode-json (registry markov) stream)))
+    (cl-json:encode-json (registry markov) stream)
+    (v:info :markov "Saved ~a entries." (hash-table-count (registry markov)))))
 
 (define-handler (privmsg-event event) (:modulevar markov)
   (when (char= (aref (channel event) 0) #\#)
