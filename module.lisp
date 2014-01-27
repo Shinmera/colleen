@@ -184,7 +184,8 @@
 
 (defmacro define-module (name direct-superclasses direct-slots &body options)
   "Define a new module class. See DEFCLASS."
-  (let ((instancesym (gensym "INSTANCE")))
+  (let ((instancesym (gensym "INSTANCE"))
+        (definesym (gensym "DEFINED")))
     `(progn 
        (defclass ,name (module ,@direct-superclasses)
          ((%active :initform NIL :reader active :allocation :class)
@@ -193,9 +194,14 @@
           (%groups :initform (make-hash-table) :reader groups :allocation :class)
           ,@direct-slots)
          ,@options)
-       (let ((,instancesym (make-instance ',name)))
+       (let ((,instancesym (make-instance ',name))
+             (,definedsym (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*)))
+         (when (active ,definedsym)
+           (v:warn :colleen "Redefining started module ~a. Performing automatic stop and start." ,definedsym)
+           (stop ,definedsym))
          (setf (get (package-symbol *package*) :module) ,instancesym
-               (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*) ,instancesym)))))
+               (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*) ,instancesym)
+         (when (active ,definedsym (start ,instancesym))))))) 
 
 (defmacro define-group (name &key (module `(get-current-module)) documentation)
   "Define a new command group for a module.
