@@ -15,6 +15,7 @@
 (define-module markov ()
   ((%probability :initarg :probability :initform 25 :accessor probability)
    (%ignored-users :initarg :ignored-users :initform () :accessor ignored-users)
+   (%active-in :initarg :active-in :initform () :accessor active-in)
    (%registry :initarg :registry :initform (make-hash-table :test 'equal) :accessor registry))
   (:documentation "Simple markov chain module."))
 
@@ -23,6 +24,8 @@
       (setf (probability markov) (config-tree :markov :probability)))
   (if (config-tree :markov :ignored-users)
       (setf (ignored-users markov) (config-tree :markov :ignored-users)))
+  (if (config-tree :markov :active-in)
+      (setf (active-in markov) (config-tree :markov :active-in)))
   (with-open-file (stream *registry-file* :if-does-not-exist NIL)
     (when stream
       (setf (registry markov) (yason:parse stream))
@@ -31,13 +34,15 @@
 
 (defmethod stop ((markov markov))
   (setf (config-tree :markov :probability) (probability markov)
-        (config-tree :markov :ignored-users) (ignored-users markov))
+        (config-tree :markov :ignored-users) (ignored-users markov)
+        (config-tree :markov :active-in) (active-in markov))
   (with-open-file (stream *registry-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
     (cl-json:encode-json (registry markov) stream)
     (v:info :markov "Saved ~a entries." (hash-table-count (registry markov)))))
 
 (define-handler (privmsg-event event) (:modulevar markov)
-  (when (char= (aref (channel event) 0) #\#)
+  (when (and (char= (aref (channel event) 0) #\#)
+             (find (format NIL "~a/~a" (name (server event)) (channel event)) (active-in markov) :test #'string-equal))
     (unless (char= (aref (message event) 0) #\!)
       (learn markov (message event)))
 
@@ -62,6 +67,17 @@
 
 (define-command (markov list-ignored) () (:authorization T :documentation "List all ignored users." :modulevar markov)
   (respond event "Ignored users: ~:[None~;~:*~{~a~^, ~}~]" (ignored-users markov)))
+
+(define-command (markov activate) (&optional channel server) (:authorization T :documentation "Activate markov learning and spouting for a channel." :modulevar markov)
+  (let ((name (format NIL "~a/~a" (or server (name (server event))) (or channel (channel event)))))
+    (pushnew name (active-in markov) :test #'string-equal)
+    (respond event "Learning/Spouting now activated on ~a." name)))
+
+(define-command (markov deactivate) (&optional channel server) (:authorization T :documentation "Deactivate markov learning and spouting for a channel." :modulevar markov)
+  (let ((name (format NIL "~a/~a" (or server (name (server event))) (or channel (channel event)))))
+    (setf (active-in markov)
+          (delete name (active-in markov) :test #'string-equal))
+    (respond event "No longer learning/spouting on ~a." name)))
 
 (define-command (markov probability) (&optional new-value) (:authorization T :documentation "Set or view the probability of invoking markov." :modulevar markov)
   (when new-value
