@@ -14,6 +14,8 @@
    (%threads :initform (make-hash-table) :accessor threads))
   (:documentation "Base module class."))
 
+(defmethod active ((null null)) NIL)
+
 (defmethod print-object (module stream)
   (format stream "<[~a]>" (class-name (class-of module))))
 
@@ -185,7 +187,7 @@
 (defmacro define-module (name direct-superclasses direct-slots &body options)
   "Define a new module class. See DEFCLASS."
   (let ((instancesym (gensym "INSTANCE"))
-        (definesym (gensym "DEFINED")))
+        (definedsym (gensym "DEFINED")))
     `(progn 
        (defclass ,name (module ,@direct-superclasses)
          ((%active :initform NIL :reader active :allocation :class)
@@ -201,7 +203,7 @@
            (stop ,definedsym))
          (setf (get (package-symbol *package*) :module) ,instancesym
                (gethash ,(intern (string-upcase name) "KEYWORD") *bot-modules*) ,instancesym)
-         (when (active ,definedsym (start ,instancesym))))))) 
+         (when (active ,definedsym) (start ,instancesym)))))) 
 
 (defmacro define-group (name &key (module `(get-current-module)) documentation)
   "Define a new command group for a module.
