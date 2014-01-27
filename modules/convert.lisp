@@ -24,11 +24,27 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (define-group convert-to :documentation "Convert between various formats and units.")
 
+;;                          A    B       A->B                        B->A
+(defparameter *metrics* '(("mm" "in"    #'(lambda (x) (* x 0.0394)) #'(lambda (x) (/ x 0.03937)))
+                          ("cm" "ft"    #'(lambda (x) (* x 3.2808)) #'(lambda (x) (/ x 3.2808)))
+                          ("m"  "yd"    #'(lambda (x) (* x 1.0936)) #'(lambda (x) (/ x 1.0936)))
+                          ("km" "mile"  #'(lambda (x) (* x 0.6214)) #'(lambda (x) (/ x 0.6214)))
+                          ("mg" "grain" #'(lambda (x) (* x 0.0154)) #'(lambda (x) (/ x 0.0154)))
+                          ("g"  "oz"    #'(lambda (x) (* x 0.0353)) #'(lambda (x) (/ x 0.0353)))
+                          ("kg" "lb"    #'(lambda (x) (* x 2.2046)) #'(lambda (x) (/ x 2.2046)))
+                          ("t"  "ton"   #'(lambda (x) (* x 0.9842)) #'(lambda (x) (/ x 0.9842)))
+                          ("c"  "f"     #'(lambda (x) (+ (* x (/ 9 5)) 32)) #'(lambda (x) (* (- x 32) (/ 5 9))))))
+
 (define-command (convert-to metric) (unit amount) (:documentation "Convert to metric units.")
-  )
+  (let ((amount (parse-number:parse-number amount)))
+    (let ((amount (parse-number:parse-number amount))
+          (conv (find unit *metrics* :test #'(lambda (x y) (string-equal x (second y))))))
+      (respond event "~f ~a" (funcall (fourth conv) amount) (first conv)))))
 
 (define-command (convert-to imperial) (unit amount) (:documentation "Convert to imperial units.")
-  )
+  (let ((amount (parse-number:parse-number amount))
+        (conv (find unit *metrics* :test #'(lambda (x y) (string-equal x (first y))))))
+    (respond event "~f ~a" (funcall (third conv) amount) (second conv))))
 
 (define-command (convert-to tiny) (&rest text) (:documentation "Convert to unicode superscript characters.")
   (respond event "~a" (%map-string text
