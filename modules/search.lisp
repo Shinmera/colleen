@@ -13,6 +13,11 @@
 (defun drakma-utf8 (url &rest params)
   (apply #'drakma:http-request url :external-format-in :utf-8 :external-format-out :utf-8 :user-agent :chrome :preserve-uri T params))
 
+(defun trunc-text (text &optional (maxchars 200))
+  (if (> (length text) maxchars)
+      (concatenate 'string (subseq text 0 maxchars) "...")
+      text))
+
 (define-module search () ()
   (:documentation "Perform searches on various sites."))
 
@@ -36,7 +41,7 @@
 
 (define-command (search google) (&rest query) (:documentation "Query google and return the first search result link.")
   (multiple-value-bind (url description) (google-term (format NIL "~{~a~^ ~}" query))
-    (respond event "~a : ~a" url description)))
+    (respond event "~a : ~a" url (trunc-text description))))
 
 (define-command (search image) (&rest query) (:documentation "Query google images and return the link to the first image in the results.")
   (setf query (format NIL "~{~a~^ ~}" query))
@@ -81,7 +86,7 @@
                uri
                ($ "h1 .kanji_character" (text) (node))
                ($ "h1 .translation" (text) (node))
-               (cl-ppcre:regex-replace-all "\\s\\s" ($ ".span12 .definition p" (text) (node)) " ")))))
+               (trunc-text (cl-ppcre:regex-replace-all "\\s\\s" ($ ".span12 .definition p" (text) (node)) " "))))))
 
 (define-command (search jigen) (symbol &optional n) (:documentation "Search Jigen.net, a kanji character database.")
   (let ((lquery:*lquery-master-document*))
@@ -105,14 +110,14 @@
 (define-command (search cliki) (&rest query) (:documentation "Search CLiki.net, a wiki dedicated to open source lisp projects and such..")
   (setf query (format NIL "~{~a~^+~}" query))
   (let ((lquery:*lquery-master-document*))
-    ($ (initialize (drakma:http-request "http://www.cliki.net/site/search" :parameters `(("query" . ,query)) :external-format-in :utf-8) :type :HTML))
+    ($ (initialize (drakma-utf8 "http://www.cliki.net/site/search" :parameters `(("query" . ,query))) :type :HTML))
     (let ((results ($ "#content-area li")))
       (if results
           (let ((page (format NIL "http://www.cliki.net~a" ($ results (eq 0) "a" (attr :href) (node)))))
             ($ (initialize (drakma-utf8 page) :type :HTML))
             (cl-ppcre:register-groups-bind (html NIL) ("<div id=\"article\">(.*?)<" ($ "#article" (serialize) (node)))
               ($ (initialize (format NIL "<html><head></head><body>~a</body></html>" html) :type :HTML))
-              (respond event "~a : ~a" page ($ "body" (text) (node)))))
+              (respond event "~a : ~a" page (trunc-text ($ "body" (text) (node))))))
           (respond event "Nothing found for ~a." query)))))
 
 (define-command (search clhs) (&rest query) (:documentation "Search the Common Lisp Hyperspec and return the short explanation.")
@@ -126,6 +131,20 @@
     (if short
         (respond event short)
         (respond event "Url-shortening failed!"))))
+
+(define-command (search steam) (&rest query) (:documentation "Search the steam store for games.")
+  (setf query (format NIL "~{~a~^ ~}" query))
+  (let ((lquery:*lquery-master-document*))
+    ($ (initialize (drakma-utf8 "http://store.steampowered.com/search/" :parameters `(("term" . ,query))) :type :HTML))
+    (let ((results ($ ".search_result_row")))
+      (if results
+          (let ((page ($ (first results) (attr :href) (node))))
+            ($ (initialize (drakma-utf8 page) :type :HTML))
+            (respond event "~a : ~a ~a"
+                     ($ ".apphub_AppName" (text) (node))
+                     (trunc-text ($ ".game_description_snippet" (text) (node)))
+                     page))
+          (respond event "Nothing found for ~a." query)))))
 
 (defun google-term (term)
   (let ((lquery:*lquery-master-document*))
@@ -152,7 +171,7 @@
         (let ((data (wiki:wiki-parse :page title :section section)))
           ($ (initialize (format NIL "<html><head></head><body>~a</body></html>" 
                                  (cl-ppcre:regex-replace-all "xml:" data "")) :type :HTML))
-          (format NIL "~a~a : ~a" page-root title (first (split-sequence #\Newline ($ "p" (node) (text) (node))))))))))
+          (format NIL "~a~a : ~a" page-root title (trunc-text (first (split-sequence #\Newline ($ "p" (node) (text) (node)))))))))))
 
 (defun shorten-url (url)
   (labels ((g (data &rest path)
