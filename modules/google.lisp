@@ -6,7 +6,8 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.google
-  (:use :cl :colleen :events :split-sequence))
+  (:use :cl :colleen :events :split-sequence)
+  (:shadow :timezone))
 (in-package :org.tymoonnext.colleen.mod.google)
 
 (defvar *language-code-map*)
