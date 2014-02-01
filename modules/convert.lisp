@@ -9,10 +9,6 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.convert)
 
-(ql:quickload :ironclad)
-(ql:quickload :parse-number)
-(ql:quickload :ieee-floats)
-
 (defun json-request (url &rest drakma-params)
   (let ((drakma:*text-content-types* (cons '("application" . "json")
                                            (cons '("text" . "json")

@@ -9,9 +9,6 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.twitter)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (ql:quickload :cl-oauth))
-
 (define-module twitter ()
     ((%))
   (:documentation "Twitter module for streaming timelines or posting to a twitter account."))

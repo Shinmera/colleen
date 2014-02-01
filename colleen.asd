@@ -31,6 +31,7 @@
                         :components ((:file "authenticate")
                                      (:file "blants")
                                      (:file "chatlog")
+                                     (:file "convert")
                                      (:file "core")
                                      (:file "dramatica")
                                      (:file "emoticon")
@@ -57,7 +58,15 @@
                :lquery
                :alexandria
                :usocket
-               :uuid))
+               :uuid
+               ;; module deps
+               :ironclad
+               :ieee-floats
+               :parse-number
+               :clsql
+               :clsql-mysql
+               :cl-wiki
+               :xencl))
 
 (defsystem colleen-doc
   :name "Colleen Doc"
