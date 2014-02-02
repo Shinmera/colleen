@@ -44,7 +44,7 @@
   (flet ((report (level message &rest formatargs)
            (apply #'respond event (format NIL "[update][~a] ~a" level message) formatargs)
            (apply #'v:log level :essentials.update message formatargs)))
-    (let ((running-modules (remove-if-not #'active (remove :essentials (hash-table-keys *bot-modules*)))))
+    (let ((running-modules (remove-if-not #'active (remove :core (remove :essentials (hash-table-keys *bot-modules*))))))
       (report :info "Force-stopping all modules...")
       (dolist (module running-modules)
         (handler-bind ((error #'(lambda (err)
