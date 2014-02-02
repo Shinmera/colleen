@@ -91,6 +91,9 @@
         (respond event "~a" message)
         (respond event (fstd-message event :markov-nothing)))))
 
+(define-command (markov registry) () (:documentation "Report the markov registry size." :modulevar markov)
+  (respond event "Markov registry size: ~,,'':d" (hash-table-count (registry markov))))
+
 (defmethod learn ((markov markov) message)
   (let ((wordlist (split-sequence:split-sequence #\Space message :remove-empty-subseqs T)))
     (when (cddr wordlist)
