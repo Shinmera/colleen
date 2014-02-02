@@ -23,8 +23,10 @@
                (cdr (assoc :geometry 
                (first (cdr (assoc :results result)))))))))
     (close stream)
-    (list (cdr (assoc :lat data))
-          (cdr (assoc :lng data)))))
+    (values
+     (list (cdr (assoc :lat data))
+           (cdr (assoc :lng data)))
+     (cdr (assoc :long--name (first (cdr (assoc :address--components (first (cdr (assoc :results result)))))))))))
 
 (defvar *unix-epoch-difference* (encode-universal-time 0 0 0 1 1 1970 0))
 (defun get-unix-time ()
@@ -38,11 +40,12 @@
 
 (define-command weather (&rest location) (:documentation "Retrieve the current weather data of a location.")
   (setf location (format NIL "~{~a~^ ~}" location))
-  (let ((data (apply #'get-weather (get-coordinates location))))
-    (flet ((d (field) (cdr (assoc field data))))
-      (if data
-          (respond event "Weather for ~a: ~a at ~a°C~:[ (feels like ~a°C)~;~*~], ~a% humidity, ~akm/h wind, ~ahPa pressure."
-                   location (d :summary) (d :temperature)
-                   (= (d :temperature) (d :apparent-temperature)) (d :apparent-temperature)
-                   (round (* 100 (d :humidity))) (d :wind-speed) (d :pressure)) 
-          (respond event "Sorr, I couldn't find any data for ~a." location)))))
+  (multiple-value-bind (coords location) (get-coordinates location)
+    (let ((data (apply #'get-weather coords)))
+      (flet ((d (field) (cdr (assoc field data))))
+        (if data
+            (respond event "Weather for ~a: ~a at ~a°C~:[ (feels like ~a°C)~;~*~], ~a% humidity, ~akm/h wind, ~ahPa pressure."
+                     location (d :summary) (d :temperature)
+                     (= (d :temperature) (d :apparent-temperature)) (d :apparent-temperature)
+                     (round (* 100 (d :humidity))) (d :wind-speed) (d :pressure)) 
+            (respond event "Sorr, I couldn't find any data for ~a." location))))))
