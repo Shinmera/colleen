@@ -78,6 +78,9 @@
    :define-group
    :define-command
    :define-handler
+   :skip
+   :force
+   :retry
    ;; SERVER
    :name
    :auth-users
