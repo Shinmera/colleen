@@ -15,6 +15,10 @@
   (:documentation "Base module class."))
 
 (defmethod active ((null null)) NIL)
+(defmethod active ((module-name symbol))
+  (active (get-module module-name)))
+(defmethod active ((module-name string))
+  (active (get-module module-name)))
 
 (defmethod print-object (module stream)
   (format stream "<[~a]>" (class-name (class-of module))))
