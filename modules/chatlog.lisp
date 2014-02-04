@@ -62,7 +62,7 @@
 (defmethod insert-record ((chatlog chatlog) server channel user type message)
   (when (find (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal)
     (bordeaux-threads:with-lock-held ((lock chatlog))
-      (connect-db chatlog)
+      (unless (clsql:connected-databases) (connect-db chatlog))
       (handler-bind ((clsql-sys:sql-database-error
                       #'(lambda (err)
                           (v:severe :chatlog "SQL ERROR: ~a" err)
@@ -75,8 +75,7 @@
                (clsql:insert-records :into 'chatlog
                                      :attributes '(server channel user time type message)
                                      :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message))
-               T)))
-      (disconnect-db chatlog))))
+               T))))))
 
 (define-group chatlog :documentation "Change chatlog settings.")
 
@@ -136,3 +135,30 @@
 
 (define-handler (topic-set-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "t" (format NIL " ** TOPIC ~a" (topic event))))
+
+(define-command (chatlog stats) (&optional channel server) (:documentation "Retrieve short statistics about the recorded chatlog history.")
+  (flet ((channel-char-p (c) (find (char-downcase c) "abcdefghijklmnopqrstuvwxyz-#_")))
+    (setf channel (if channel
+                      (remove-if-not #'channel-char-p channel)
+                      (channel event)))
+    (setf server (if server
+                     (remove-if-not #'channel-char-p server)
+                     (name (server event))))
+    (unless (clsql:connected-databases) (connect-db module))
+    (let ((most-active-user (first (clsql:select 'user (clsql:sql-operation 'count '*)
+                                                 :from 'chatlog
+                                                 :where (clsql:sql-operation 'and (clsql:sql-operation '= 'channel channel)
+                                                                             (clsql:sql-operation '= 'server server))
+                                                 :group-by 'user :order-by `((,(clsql:sql-operation 'count '*) desc)) :limit 1)))
+          (total-messages (first (clsql:select (clsql:sql-operation 'count '*)
+                                               :from 'chatlog
+                                               :where (clsql:sql-operation 'and (clsql:sql-operation '= 'channel channel)
+                                                                           (clsql:sql-operation '= 'server server)))))
+          (earliest-time (first (clsql:select 'time
+                                              :from 'chatlog
+                                              :where (clsql:sql-operation 'and (clsql:sql-operation '= 'channel channel)
+                                                                          (clsql:sql-operation '= 'server server))
+                                              :order-by '((time asc)) :limit 1))))
+      (respond event "Log stats for ~a/~a: Most active user is ~a with ~,,'':d entries. A total of ~,,'':d entries have been recorded for this channel since ~a."
+               server channel (first most-active-user) (second most-active-user) (first total-messages)
+               (local-time:format-timestring NIL (local-time:unix-to-timestamp (first earliest-time)) :format '((:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2)))))))
