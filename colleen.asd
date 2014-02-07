@@ -50,6 +50,7 @@
                              (:file "shiritori")
                              (:file "silly")
                              (:file "stevenchan")
+                             (:file "syslog")
                              (:file "weather"))))
   :depends-on (:bordeaux-threads
                :drakma
