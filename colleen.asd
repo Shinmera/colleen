@@ -14,7 +14,7 @@
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
-  :description "Irc bot with various functions."
+  :description "Common Lisp IRC bot with a modular framework."
   :serial T
   :components ((:file "package")
                (:file "globals")
