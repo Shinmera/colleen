@@ -28,27 +28,30 @@
                (:file "events")
                (:file "launcher")
                (:module "modules"
-                        :components ((:file "authenticate")
-                                     (:file "blants")
-                                     (:file "chatlog")
-                                     (:file "convert")
-                                     (:file "core")
-                                     ;(:file "dramatica")
-                                     (:file "emoticon")
-                                     (:file "essentials")
-                                     (:file "eval")
-                                     (:file "google")
-                                     (:file "google-lng")
-                                     (:file "markov")
-                                     (:file "medals")
-                                     (:file "notify")
-                                     (:file "rss")
-                                     (:file "rules")
-                                     (:file "search")
-                                     (:file "shiritori")
-                                     (:file "silly")
-                                     (:file "stevenchan")
-                                     (:file "weather"))))
+                :components ((:file "authenticate")
+                             (:file "backup")
+                             (:file "blants")
+                             (:file "chatlog")
+                             (:file "convert")
+                             (:file "core")
+                             (:file "counter")
+                             (:file "dramatica")
+                             (:file "emoticon")
+                             (:file "essentials")
+                             (:file "eval")
+                             (:file "google")
+                             (:file "google-lng")
+                             (:file "markov")
+                             (:file "medals")
+                             (:file "notify")
+                             (:file "rss")
+                             (:file "rules")
+                             (:file "search")
+                             (:file "shiritori")
+                             (:file "silly")
+                             (:file "stevenchan")
+                             (:file "syslog")
+                             (:file "weather"))))
   :depends-on (:bordeaux-threads
                :drakma
                :cl-json :yason
@@ -66,8 +69,9 @@
                :clsql
                :clsql-mysql
                :cl-wiki
-               ;:xencl
-               ))
+               :cl-fad
+               :xencl
+               :trivial-timers))
 
 (defsystem colleen-doc
   :name "Colleen Doc"
