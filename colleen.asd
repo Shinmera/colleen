@@ -35,7 +35,7 @@
                              (:file "convert")
                              (:file "core")
                              (:file "counter")
-                             (:file "dramatica")
+                             ;(:file "dramatica")
                              (:file "emoticon")
                              (:file "essentials")
                              (:file "eval")
@@ -70,7 +70,7 @@
                :clsql-mysql
                :cl-wiki
                :cl-fad
-               :xencl
+               ;:xencl
                :trivial-timers))
 
 (defsystem colleen-doc
