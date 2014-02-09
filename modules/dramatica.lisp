@@ -90,7 +90,7 @@
                     (setf latest-timestamp (cdr (assoc :timestamp (first query))))
                     (v:trace :dramatica.recentchanges "Log return: ~a" query)
                     (dolist (log query)
-                      (when (> last-id (cdr (assoc :logid log)))
+                      (when (< last-id (cdr (assoc :logid log)))
                         (setf last-id (cdr (assoc :logid log)))
                         (v:info :dramatica.recentchanges "New log entry: ~a" log)
                         
