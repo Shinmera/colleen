@@ -78,8 +78,8 @@
   (let ((wiki:*wiki-api* (config-tree :dramatica :wiki :api))
         (latest-timestamp
           (multiple-value-bind (query timestamp) (wiki:recent-changes :limit 1 :type :log)
-            (declare (ignore query)) timestamp)
-        (last-id 0)))
+            (declare (ignore query)) timestamp))
+        (last-id 0))
     (loop while (log-running dramatica)
           do (sleep 10)
              (v:debug :dramatica.recentchanges "Querying log.")
@@ -98,8 +98,8 @@
                (error (err)
                  (v:warn :dramatica.recentchanges "ERROR: ~a" err)
                  (wiki:login (config-tree :dramatica :wiki :user)
-                             (config-tree :dramatica :wiki :pass)))))
-    (setf (log-loop dramatica) NIL))
+                             (config-tree :dramatica :wiki :pass))))))
+  (setf (log-loop dramatica) NIL))
 
 (defvar *ip-match* (cl-ppcre:create-scanner "(\\d{1,4}\\.){3}\\d{1,4}"))
 (defun handle-log (logtype title comment)
