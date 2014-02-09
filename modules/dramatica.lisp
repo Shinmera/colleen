@@ -91,7 +91,7 @@
     ((string= logtype "block")
      (let ((page title))
        (if (cl-ppcre:scan *ip-match* page)
-           (log:info "[Log-Loop] <~a> Ban message skipped due to IP block." page)
+           (v:info :dramatica.handle-log "<~a> Ban message skipped due to IP block." page)
            (let ((page-content (wiki:page-get page)))
              (if (search "{{banned}}" page-content)
                  (v:warn :dramatica.handle-log "<~a> Ban message already set!" page)
