@@ -16,11 +16,11 @@
         },
         "tynet": {
             "host": "irc.tymoon.eu",
-            "channels": [],
+            "channels": []
         },
         "freenode": {
             "host": "irc.freenode.org",
-            "channels": [],
+            "channels": []
         }
     },
     "messages": {
@@ -54,25 +54,13 @@
     "weather": {
         "apikey": ""
     },
-    "dramatica": {
-        "wiki": {
-            "api": "http://encyclopediadramatica.es/api.php",
-            "user": "",
-            "pass": ""
-        },
-        "forum": {
-            "url": "https://forum.encyclopediadramatica.es",
-            "user": "",
-            "pass": ""
-        }
-    },
     "chatlog": {
-        "db": "irc",
+        "db": "",
         "host": "localhost",
         "port": 3306,
-        "user": "test",
-        "pass": "test",
-        "active": ["TYNET/#Stevenchan"]
+        "user": "",
+        "pass": "",
+        "active": []
     },
     "rules": {
         "whitelist": []
