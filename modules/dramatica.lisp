@@ -99,7 +99,8 @@
                (error (err)
                  (v:warn :dramatica.recentchanges "ERROR: ~a" err)
                  (wiki:login (config-tree :dramatica :wiki :user)
-                             (config-tree :dramatica :wiki :pass))))))
+                             (config-tree :dramatica :wiki :pass)))))
+    (v:info :dramatica.recentchanges "Leaving log-loop with last-id ~a" last-id))
   (setf (log-loop dramatica) NIL))
 
 (defvar *ip-match* (cl-ppcre:create-scanner "(\\d{1,4}\\.){3}\\d{1,4}"))
