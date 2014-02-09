@@ -53,18 +53,16 @@
 (defun start-log-loop (dramatica)
   (v:info :dramatica.recentchanges "Starting log-loop.")
   (setf (log-running dramatica) T
-        (log-loop dramatica)
-        (with-module-thread dramatica
-          (wiki-log-loop dramatica))))
+        (log-loop dramatica) (with-module-thread dramatica
+                               (wiki-log-loop dramatica))))
 
 (defun stop-log-loop (dramatica)
   (v:info :dramatica.recentchanges "Stopping log-loop.")
   (setf (log-running dramatica) NIL))
 
 (defun wiki-log-loop (dramatica)
-  (let ((latest-timestamp
-         (multiple-value-bind (query timestamp) (wiki:recent-changes :limit 1 :type :log)
-           (declare (ignore query)) timestamp))
+  (let ((wiki:*wiki-api* (config-tree :dramatica :wiki :api))
+        (latest-timestamp NIL)
         (last-id 0))
     (loop while (log-running dramatica)
        do (sleep 10)
@@ -74,28 +72,35 @@
                (setf latest-timestamp (cdr (assoc :timestamp (first query))))
                (v:trace :dramatica.recentchanges "Log return: ~a" query)
                (dolist (log query)
-                 (when (> (cdr (assoc :logid log)) last-id)
+                 (when (> last-id (cdr (assoc :logid log)))
                    (setf last-id (cdr (assoc :logid log)))
                    (v:info :dramatica.recentchanges "New log entry: ~a" log)
                    
                    (handle-log (cdr (assoc :logtype log))
                                (cdr (assoc :title log))
-                               (cdr (assoc :comment log)))))))))
+                               (cdr (assoc :comment log))))))
+           (error (err)
+             (v:warn :dramatica.recentchanges "ERROR: ~a" err)
+             (wiki:login (config-tree :dramatica :wiki :user)
+                         (config-tree :dramatica :wiki :pass))))))
   (setf (log-loop dramatica) NIL))
 
+(defvar *ip-match* (cl-ppcre:create-scanner "(\\d{1,4}\\.){3}\\d{1,4}"))
 (defun handle-log (logtype title comment)
   (cond
     ((string= logtype "block")
-     (let* ((page title)
-            (page-content (wiki:page-get page)))
-       (if (search "{{banned}}" page-content)
-           (v:warn :dramatica.handle-log "<~a> Ban message already set!" page)
-           (handler-case
-               (progn
-                 (if (search "spam" comment :test #'char-equal)
-                     (wiki:page-edit page "{{banned}}")
-                     (wiki:page-prepend page "{{banned}}"))
-                 (v:info :dramatica.handle-log "<~a> Ban page created." page))))))
+     (let ((page title))
+       (if (cl-ppcre:scan *ip-match* page)
+           (log:info "[Log-Loop] <~a> Ban message skipped due to IP block." page)
+           (let ((page-content (wiki:page-get page)))
+             (if (search "{{banned}}" page-content)
+                 (v:warn :dramatica.handle-log "<~a> Ban message already set!" page)
+                 (handler-case
+                     (progn
+                       (if (search "spam" comment :test #'char-equal)
+                           (wiki:page-edit page "{{banned}}")
+                           (wiki:page-prepend page "{{banned}}"))
+                       (v:info :dramatica.handle-log "<~a> Ban page created." page))))))))
     
     ((string= logtype "newusers")
      (let* ((page (format NIL "User_Talk:~a" (subseq title 5)))
