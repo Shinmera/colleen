@@ -52,7 +52,7 @@
 
     (when (cl-ppcre:scan "yukkuri|take it easy|ゆっくり" message)
       (sleep (/ (random 20) 10))
-      (if (< 2 (random 10))
+      (if (< 1 (random 20))
           (respond event "ゆっくりしていってね！")
           (let ((irc:*privmsg-line-limit* 14))
             (respond event "　　 _,,....,,_　 ＿人人人人人人人人人人人人人人人＿
@@ -68,6 +68,10 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 ,'　 ﾉ 　 !'\"　 　 ,＿__,　 \"' i .ﾚ'　　　　L.',.　 　ヽ _ﾝ　　　　L」 ﾉ| .|
 　（　　,ﾊ　　　　ヽ _ﾝ　 　人! 　　　　 | ||ヽ、　　　　　　 ,ｲ| ||ｲ| /
 ,.ﾍ,）､　　）＞,､ _____,　,.イ　 ハ　　　　レ ル｀ ー--─ ´ルﾚ　ﾚ´"))))
+
+    (when (cl-ppcre:scan "how ((is (this|that) (even )?possible)|the hell|in the world)" message)
+      (sleep (/ (random 20) 10))
+      (respond event "NANO MACHINES, SON"))
 
     (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
       (sleep (/ (random 10) 20))
