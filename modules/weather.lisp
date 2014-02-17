@@ -48,4 +48,4 @@
                      location (d :summary) (d :temperature)
                      (= (d :temperature) (d :apparent-temperature)) (d :apparent-temperature)
                      (round (* 100 (d :humidity))) (d :wind-speed) (d :pressure)) 
-            (respond event "Sorr, I couldn't find any data for ~a." location))))))
+            (respond event "Sorry, I couldn't find any data for ~a." location))))))
