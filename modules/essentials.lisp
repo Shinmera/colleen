@@ -77,15 +77,23 @@
            (format-timestring NIL (now) :format 
                               '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space (:hour 2) #\: (:min 2) #\: (:sec 2) #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
 
-(define-command help (&optional command) (:documentation "Display help on a command.")
+(define-command help (&optional command sub-command) (:documentation "Display help on a command.")
   (if command
       (loop for module being the hash-values of *bot-modules*
          do (when (active module)
               (let ((method (gethash (string-downcase command) (colleen:commands module))))
                 (when method
-                  (respond event "~a" (docu method))
-                  (respond event "USAGE: ~a ~{~a~^ ~}" (name method) (cmd-args method))
-                  (return NIL)))))
+                  (if sub-command
+                      (let ((group-command (colleen::get-group-command module (string-downcase command) sub-command)))
+                        (if group-command
+                            (progn
+                              (respond event "~a" (colleen:docu group-command))
+                              (respond event "USAGE: ~a ~a ~{~a~^ ~}" command (name group-command) (cmd-args group-command)))
+                            (respond event "No such sub-command found: ~a ~a" command sub-command)))
+                      (progn
+                        (respond event "~a" (docu method))
+                        (respond event "USAGE: ~a ~{~a~^ ~}" (name method) (cmd-args method))
+                        (return NIL)))))))
       (loop with commands = () 
          for module being the hash-values of *bot-modules*
          if (active module)
