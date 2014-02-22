@@ -58,20 +58,14 @@
 
 (defun stop-log-loop (dramatica)
   (v:info :dramatica.recentchanges "Stopping log-loop.")
-  (setf (log-running dramatica) NIL)
   (let* ((threadid (log-loop dramatica))
          (thread (gethash threadid (threads dramatica))))
-    (loop for i from 0 to 15
-          always (and (log-loop dramatica)
-                      (bordeaux-threads:thread-alive-p thread))
-          do (sleep 1)
-          finally (if (bordeaux-threads:thread-alive-p thread)
-                      (bordeaux-threads:interrupt-thread thread #'(lambda () (error 'module-stop)))
-                      (remhash threadid (threads module))))
     (when (bordeaux-threads:thread-alive-p thread)
       (v:warn :dramatica.recentchanges "Log-loop did not terminate normally.")
       (bordeaux-threads:destroy-thread thread)
       (remhash threadid (threads module))))
+  (setf (log-running dramatica) NIL
+        (log-loop dramatica) NIL)
   (v:info :dramatica.recentchanges "Log-loop stopped."))
 
 (defun wiki-log-loop (dramatica)
