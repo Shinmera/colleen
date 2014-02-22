@@ -150,11 +150,11 @@
 (defmethod get-command ((module module) commandname)
   (gethash (string-downcase commandname) (commands module)))
 
-(defmethod get-group ((module module) group-symbol)
-  (gethash group-symbol (groups module)))
+(defmethod get-group ((module module) group)
+  (gethash (string-downcase group) (groups module)))
 
-(defmethod get-group-command ((module module) group-symbol commandname)
-  (let ((group (get-group module group-symbol)))
+(defmethod get-group-command ((module module) group commandname)
+  (let ((group (get-group module group)))
     (when group (gethash commandname group))))
 
 (defmethod get-module ((module-name string))
@@ -219,13 +219,14 @@ MODULE binds the group to this module, defaults to the current package-context m
 DOCUMENTATION is an optional string giving some information about the command group."
   (let ((documentation (if documentation (format NIL "~a (Group)" documentation) "(Group)")))
     (destructuring-bind (method &optional (command method)) (if (listp name) name (list name))
+      (setf command (string-downcase command))
       `(progn
-         (add-group ,module ',command)
+         (add-group ,module ,command)
          (add-command 
-          ,module ',command '(&rest rest) 
+          ,module ,command '(&rest rest) 
           #'(lambda (module event)
               (let* ((subcmd (or (first (cmd-args event)) "help"))
-                     (command (gethash subcmd (gethash ',command (groups module)))))
+                     (command (gethash subcmd (gethash ,command (groups module)))))
                 (if command
                     (progn
                       (setf (command event) (format NIL ,(format NIL "~a ~~a" command) subcmd))
