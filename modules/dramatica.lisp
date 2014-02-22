@@ -63,7 +63,7 @@
     (when (bordeaux-threads:thread-alive-p thread)
       (v:warn :dramatica.recentchanges "Log-loop did not terminate normally.")
       (bordeaux-threads:destroy-thread thread)
-      (remhash threadid (threads module))))
+      (remhash threadid (threads dramatica))))
   (setf (log-running dramatica) NIL
         (log-loop dramatica) NIL)
   (v:info :dramatica.recentchanges "Log-loop stopped."))
