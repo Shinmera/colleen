@@ -107,7 +107,9 @@
                                   (declare (ignore err))
                                   (v:debug ,modnamegens "Received module-stop condition, leaving thread ~a." ,uidgens))
                                 (error (err)
-                                  (v:severe ,modnamegens "Unexpected error at thread-level: ~a" err)))
+                                  (v:severe ,modnamegens "Unexpected error at thread-level: ~a" err)
+                                  (when *debugger*
+                                    (invoke-debugger err))))
                               (v:trace ,modnamegens "Ending thread ~a." ,uidgens)
                               (remhash ,uidgens (threads ,modgens)))
                           :initial-bindings `((*current-server* . ,*current-server*)
