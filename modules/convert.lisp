@@ -20,16 +20,16 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (define-group convert-to :documentation "Convert between various formats and units.")
 
-;;                          A    B       A->B                        B->A
-(defparameter *metrics* '(("mm" "in"    #'(lambda (x) (* x 0.0394)) #'(lambda (x) (/ x 0.03937)))
-                          ("cm" "ft"    #'(lambda (x) (* x 3.2808)) #'(lambda (x) (/ x 3.2808)))
-                          ("m"  "yd"    #'(lambda (x) (* x 1.0936)) #'(lambda (x) (/ x 1.0936)))
-                          ("km" "mile"  #'(lambda (x) (* x 0.6214)) #'(lambda (x) (/ x 0.6214)))
-                          ("mg" "grain" #'(lambda (x) (* x 0.0154)) #'(lambda (x) (/ x 0.0154)))
-                          ("g"  "oz"    #'(lambda (x) (* x 0.0353)) #'(lambda (x) (/ x 0.0353)))
-                          ("kg" "lb"    #'(lambda (x) (* x 2.2046)) #'(lambda (x) (/ x 2.2046)))
-                          ("t"  "ton"   #'(lambda (x) (* x 0.9842)) #'(lambda (x) (/ x 0.9842)))
-                          ("c"  "f"     #'(lambda (x) (+ (* x (/ 9 5)) 32)) #'(lambda (x) (* (- x 32) (/ 5 9))))))
+;;                                  A    B       A->B                        B->A
+(defparameter *metrics* (list (list "mm" "in"    #'(lambda (x) (* x 0.0394)) #'(lambda (x) (/ x 0.03937)))
+                              (list "cm" "ft"    #'(lambda (x) (* x 3.2808)) #'(lambda (x) (/ x 3.2808)))
+                              (list "m"  "yd"    #'(lambda (x) (* x 1.0936)) #'(lambda (x) (/ x 1.0936)))
+                              (list "km" "mile"  #'(lambda (x) (* x 0.6214)) #'(lambda (x) (/ x 0.6214)))
+                              (list "mg" "grain" #'(lambda (x) (* x 0.0154)) #'(lambda (x) (/ x 0.0154)))
+                              (list "g"  "oz"    #'(lambda (x) (* x 0.0353)) #'(lambda (x) (/ x 0.0353)))
+                              (list "kg" "lb"    #'(lambda (x) (* x 2.2046)) #'(lambda (x) (/ x 2.2046)))
+                              (list "t"  "ton"   #'(lambda (x) (* x 0.9842)) #'(lambda (x) (/ x 0.9842)))
+                              (list "c"  "f"     #'(lambda (x) (+ (* x (/ 9 5)) 32)) #'(lambda (x) (* (- x 32) (/ 5 9))))))
 
 (define-command (convert-to metric) (unit amount) (:documentation "Convert to metric units.")
   (let ((amount (parse-number:parse-number amount)))
@@ -61,7 +61,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (let ((data (json-request "http://rate-exchange.appspot.com/currency" :parameters `(("from" . ,(string-upcase currency)) ("to" . "USD")))))
     (if (cdr (assoc :err data))
         (respond event "Failed to convert: Is the currency correct?")
-        (let ((amount (parse-number:parse-number amount)))
+        (let ((amount (parse-number:parse-number (format NIL "~{~a~^ ~}" amount))))
           (respond event "In USD: ~f" (* (cdr (assoc :rate data)) amount))))))
 
 (define-command (convert-to ascii) (&rest text) (:documentation "Convert into hex ascii.")
