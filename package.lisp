@@ -14,6 +14,7 @@
    :*bot-modules*
    :*conf-file*
    :*current-server*
+   :*debugger*
    ;; CONDITIONS
    :invalid-arguments
    :network-error
