@@ -55,7 +55,7 @@
     (respond event "~:[New~;Old~] term ~:*~:[~;re~]defined." old-definition)))
 
 (define-handler (privmsg-event event) ()
-  (let ((regex (format NIL "~a:? (define (.*?):(.*)|(tell me |tell |define |explain )?(about )?(.*))" (nick (server event)))))
+  (let ((regex (format NIL "^~a:? (define (.*?):(.*)|(tell me |tell |define |explain )?(about )?(.*))" (nick (server event)))))
     (cl-ppcre:register-groups-bind (clause to-define definition fill0 fill1 term) (regex (message event))
       (declare (ignore clause fill0 fill1))
       (if term
