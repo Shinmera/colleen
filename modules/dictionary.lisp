@@ -1,7 +1,7 @@
 #|
-This file is a part of Colleen
-(c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
-Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
 (in-package :org.tymoonnext.colleen)
@@ -30,17 +30,17 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (with-open-file (stream *save-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
     (yason:encode (dictionary module) stream)))
 
+(defun link-p (definition)
+  (and (< 2 (length definition))
+       (string= definition "=>" :end1 2)
+       (string-trim " " (subseq definition 2))))
+
 (defun about-term (module event term)
   (let* ((term (string-trim " " term))
          (definition (gethash term (dictionary module))))
     (when-let ((link (link-p definition)))
       (setf definition (gethash link (dictionary module))))
     (respond event (format-message event (format NIL "~a: ~:[Unknown term.~;~:*~a~]" term definition)))))
-
-(defun link-p (definition)
-  (and (< 2 (length definition))
-       (string= definition "=>" :end1 2)
-       (string-trim " " (subseq definition 2))))
 
 (defun define-term (module event term definition)
   (let ((term (string-trim " " term))
@@ -74,3 +74,13 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (let ((term (format NIL "~{~a~^ ~}" term)))
     (remhash term (dictionary module))
     (respond event "Term removed.")))
+
+(define-command (dictionary size) () (:documentation "Returns the number of known terms.")
+  (respond event "Dictionary size: ~d terms." (hash-table-count (dictionary module))))
+
+(define-command (dictionary search) (&rest term) (:documentation "Search for matching terms.")
+  (let ((term (format NIL "~{~a~^ ~}" term)))
+    (respond event "Matching terms: ~{~a~^, ~}"
+             (loop for item in (hash-table-keys (dictionary module))
+                   if (search term item :test #'equalp)
+                     collect item))))
