@@ -53,11 +53,12 @@
       (config-tree :servers :default var)))
 
 (defun format-message (event message &rest other-replaces)
-  "Format the given message, replacing $NICK$, $CHANNEL$ and $MYSELF$ with the according values."
+  "Format the given message, replacing $NICK$, $CHANNEL$, $SERVER$ and $MYSELF$ with the according values."
   (let ((replaces (append other-replaces
-                          (list (cons "\\$NICK\\$" (nick event))
-                                (cons "\\$CHANNEL\\$" (channel event))
-                                (cons "\\$MYSELF\\$" (nick (server event)))))))
+                          `(("\\$NICK\\$" ,(nick event))
+                            ("\\$CHANNEL\\$" ,(channel event))
+                            ("\\$SERVER\\$" ,(string (name (server event))))
+                            ("\\$MYSELF\\$" ,(nick (server event)))))))
     (flet ((rep (search replace message)
              (cl-ppcre:regex-replace-all search message replace)))
       (loop for replace in replaces
