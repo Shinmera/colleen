@@ -36,6 +36,7 @@
                              (:file "core")
                              (:file "counter")
                              ;(:file "dramatica")
+                             (:file "dictionary")
                              (:file "emoticon")
                              (:file "essentials")
                              (:file "eval")
