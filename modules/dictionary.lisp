@@ -39,7 +39,8 @@
   (let* ((term (string-trim " " term))
          (definition (gethash term (dictionary module))))
     (when-let ((link (link-p definition)))
-      (setf definition (gethash link (dictionary module))))
+      (setf definition (gethash link (dictionary module))
+            term link))
     (respond event (format-message event (format NIL "~a: ~:[Unknown term.~;~:*~a~]" term definition)))))
 
 (defun define-term (module event term definition)
