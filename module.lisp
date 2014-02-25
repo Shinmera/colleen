@@ -270,9 +270,10 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                       ,@body)
                   ((or #+sbcl sb-kernel::arg-count-error 
                        #+sbcl sb-kernel::defmacro-lambda-list-broken-key-list-error
-                       #+abcl program-error
                        #+cmucl LISP::DEFMACRO-LL-ARG-COUNT-ERROR
-                       #+cmucl LISP::DEFMACRO-LL-BROKEN-KEY-LIST-ERROR]
+                       #+cmucl LISP::DEFMACRO-LL-BROKEN-KEY-LIST-ERROR
+                       #+abcl program-error
+                       #+ccl CCL::SIMPLE-PROGRAM-ERROR
                        end-of-file) (,errgens)
                     (declare (ignore ,errgens))
                    (error 'invalid-arguments :command ',name :argslist ',args))))))

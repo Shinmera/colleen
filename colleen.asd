@@ -64,6 +64,7 @@
                :usocket
                :uuid
                ;; module deps
+               :uiop
                :ironclad
                :ieee-floats
                :parse-number

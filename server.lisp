@@ -92,7 +92,7 @@
 (defmethod connect ((server server) &key (start-thread T))
   "Connects with the given credentials and returns the connection object."
   (let ((*current-server* server)
-        (sb-impl::*default-external-format* :UTF-8)) ; Fix for non-UTF-8 defaults.
+        #+sbcl (sb-impl::*default-external-format* :UTF-8)) ; Fix for non-UTF-8 defaults.
     (with-accessors ((nick nick) (realname realname)
                      (username username) (password password) 
                      (host host) (port port) (socket socket) (socket-stream socket-stream)) server
@@ -209,7 +209,7 @@
 
 (defun receive-raw-message (&optional (server *current-server*))
   "Reads a raw message from the stream."
-  (handler-bind ((sb-int:stream-decoding-error
+  (handler-bind (#+sbcl (sb-int:stream-decoding-error
                   #'(lambda (err)
                       (v:warn (name server) "Stream decoding error: ~a" err)
                       (invoke-restart 'sb-int:attempt-resync))))
