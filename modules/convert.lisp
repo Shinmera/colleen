@@ -31,16 +31,19 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
                               (list "t"  "ton"   #'(lambda (x) (* x 0.9842)) #'(lambda (x) (/ x 0.9842)))
                               (list "c"  "f"     #'(lambda (x) (+ (* x (/ 9 5)) 32)) #'(lambda (x) (* (- x 32) (/ 5 9))))))
 
-(define-command (convert-to metric) (unit amount) (:documentation "Convert to metric units.")
-  (let ((amount (parse-number:parse-number amount)))
-    (let ((amount (parse-number:parse-number amount))
-          (conv (find unit *metrics* :test #'(lambda (x y) (string-equal x (second y))))))
-      (respond event "~f ~a" (funcall (fourth conv) amount) (first conv)))))
+(define-command (convert-to metric) (unit amount) (:documentation "Convert to metric units. (mm, cm, m, km, mg, g, kg, t, c)")
+  (let ((amount (parse-number:parse-number amount))
+        (conv (find unit *metrics* :test #'(lambda (x y) (string-equal x (second y))))))
+    (if conv
+        (respond event "~f ~a" (funcall (fourth conv) amount) (first conv))
+        (respond event "Unknown unit."))))
 
-(define-command (convert-to imperial) (unit amount) (:documentation "Convert to imperial units.")
+(define-command (convert-to imperial) (unit amount) (:documentation "Convert to imperial units. (in, ft, yd, mile, grain, oz, lb, ton, f)")
   (let ((amount (parse-number:parse-number amount))
         (conv (find unit *metrics* :test #'(lambda (x y) (string-equal x (first y))))))
-    (respond event "~f ~a" (funcall (third conv) amount) (second conv))))
+    (if conv
+        (respond event "~f ~a" (funcall (third conv) amount) (second conv))
+        (respond event "Unknown unit."))))
 
 (define-command (convert-to tiny) (&rest text) (:documentation "Convert to unicode superscript characters.")
   (respond event "~a" (%map-string text
