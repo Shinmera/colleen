@@ -268,9 +268,12 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 (handler-case
                     (destructuring-bind (,@args) (cmd-args ,eventvar)
                       ,@body)
-                  ((or sb-kernel::arg-count-error 
-                    sb-kernel::defmacro-lambda-list-broken-key-list-error
-                    end-of-file) (,errgens)
+                  ((or #+sbcl sb-kernel::arg-count-error 
+                       #+sbcl sb-kernel::defmacro-lambda-list-broken-key-list-error
+                       #+abcl program-error
+                       #+cmucl LISP::DEFMACRO-LL-ARG-COUNT-ERROR
+                       #+cmucl LISP::DEFMACRO-LL-BROKEN-KEY-LIST-ERROR]
+                       end-of-file) (,errgens)
                     (declare (ignore ,errgens))
                    (error 'invalid-arguments :command ',name :argslist ',args))))))
          ,(if group
