@@ -8,7 +8,10 @@
 
 (defun parse-json (stream)
   (flet ((object-key-fn (name)
-           (intern (string-upcase name) "KEYWORD")))
+           (let ((name (with-output-to-string (stream)
+                         (loop for char across name
+                               do (format stream "~:[~a~;-~a~]" (upper-case-p char) (char-upcase char))))))
+             (intern name "KEYWORD"))))
     (yason:parse stream :object-key-fn #'object-key-fn :object-as :alist)))
 
 (defun load-config (&optional (config-file *conf-file*))
