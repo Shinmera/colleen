@@ -11,7 +11,7 @@
   (v:info :startup "Loading config...")
   (load-config)
   (v:info :startup "Starting modules...")
-  (dolist (module (config-tree :startup :modules))
+  (dolist (module (cons "core" (config-tree :startup :modules)))
     (handler-case (progn (load-module module)
                          (start-module module))
       (module-system-not-found (err)
