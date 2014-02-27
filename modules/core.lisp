@@ -7,7 +7,6 @@
 (in-package :org.tymoonnext.colleen)
 
 (define-module core () () (:documentation "Colleen core module, handling a few standard events."))
-(start (get-module :core))
 
 (defmethod stop ((core core))
   (v:info :core "Saving colleen config.")
