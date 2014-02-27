@@ -36,3 +36,7 @@
 
 (define-condition module-stop (condition) ()
   (:documentation "Condition signalled when a thread is interrupted due to a module-stop."))
+
+(define-condition module-system-not-found (error)
+  ((%name :initarg :name :reader name))
+  (:documentation "Condition signalled when LOAD-MODULE is called on an unknown module system."))
