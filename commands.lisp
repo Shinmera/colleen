@@ -174,7 +174,7 @@
   "Broadcast a message across all channels or even all servers."
   (when message
     (v:debug :colleen.client "Broadcasting message (all-servers ~a): ~a" all-servers message)
-    (maphash-values 
+    (alexandria:maphash-values 
      #'(lambda (server)
          (dolist (channel (channels server))
            (privmsg channel message :server server)))
