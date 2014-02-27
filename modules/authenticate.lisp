@@ -6,8 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.auth
-  (:use :cl :colleen :events)
-  (:shadowing-import-from :colleen :restart))
+  (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.auth)
 
 (define-module auth () ())

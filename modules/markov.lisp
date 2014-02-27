@@ -6,8 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.markov
-  (:use :cl :colleen :events :alexandria)
-  (:shadowing-import-from :colleen :restart))
+  (:use :cl :colleen :events :alexandria))
 (in-package :org.tymoonnext.colleen.mod.markov)
 
 (defvar *registry-file* (merge-pathnames "markov-registry.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))

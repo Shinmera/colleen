@@ -6,8 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.medals
-  (:use :cl :colleen :events)
-  (:shadowing-import-from :colleen :restart))
+  (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.medals)
 
 (defvar *save-file* (merge-pathnames "medals-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))

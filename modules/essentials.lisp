@@ -7,7 +7,6 @@
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.essentials
   (:use :cl :colleen :events :local-time :alexandria)
-  (:shadowing-import-from :colleen :restart)
   (:shadow :shutdown))
 (in-package :org.tymoonnext.colleen.mod.essentials)
 
