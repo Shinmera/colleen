@@ -6,7 +6,7 @@
 
 (in-package :cl)
 (defpackage org.tymoonnext.colleen
-  (:use :cl :split-sequence :lquery :bordeaux-threads :alexandria)
+  (:use :cl :split-sequence :bordeaux-threads :alexandria)
   (:nicknames :colleen)
   (:export 
    ;; GLOBALS

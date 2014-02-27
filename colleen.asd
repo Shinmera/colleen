@@ -34,11 +34,10 @@
                :yason
                :verbose
                :split-sequence
-               :local-time
-               :lquery
                :alexandria
                :usocket
-               :uuid))
+               :uuid
+               :cl-ppcre))
 
 (defsystem colleen-doc
   :name "Colleen Doc"
