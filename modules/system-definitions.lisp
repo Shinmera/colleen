@@ -17,7 +17,7 @@
 (define-module-system emoticon ("emoticon") (:yason))
 (define-module-system essentials ("essentials") (:uiop :local-time :alexandria))
 (define-module-system eval ("eval"))
-(define-module-system google ("google" "google-lng") (:split-sequence :drakma))
+(define-module-system google ("google" "google-lng") (:split-sequence :drakma :cl-json))
 (define-module-system markov ("markov") (:cl-json))
 (define-module-system medals ("medals") (:yason))
 (define-module-system notify ("notify") (:yason))
