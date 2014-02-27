@@ -53,4 +53,4 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
       (respond event "No such emoticon exists.")))
 
 (define-command (emoticon list) () (:documentation "List saved emoticon.")
-  (respond event "~{~a~^, ~}" (alexandria:hash-table-keys (db module))))
+  (respond event "~{~a~^, ~}" (loop for a being the hash-keys of (db module) collect a)))
