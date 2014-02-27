@@ -6,25 +6,28 @@
 
 (in-package :org.tymoonnext.colleen)
 
+(defun parse-json (stream)
+  (flet ((object-key-fn (name)
+           (intern (string-upcase name) "KEYWORD")))
+    (yason:parse stream :object-key-fn #'object-key-fn :object-as :alist)))
+
 (defun load-config (&optional (config-file *conf-file*))
   "(Re)load the static configuration."
   (when (not config-file)
-    (setf config-file (merge-pathnames
-                       "colleen.json"
-                       (merge-pathnames "config/" (asdf:system-source-directory :colleen)))))
+    (setf config-file *default-conf-file*))
 
-  (with-open-file (file config-file :if-does-not-exist :ERROR)
-    (setf *conf* (json:decode-json file))
+  (with-open-file (stream config-file :if-does-not-exist :ERROR)
+    (setf *conf* (parse-json stream))
     (setf *conf-file* config-file)
     (v:info :colleen.main "Loaded config from ~a" config-file)))
 
 (defun save-config (&optional (config-file *conf-file*))
   "Save the static configuration to file."
   (when (not config-file)
-    (setf config-file (merge-pathnames "bot-config.json" (asdf:system-source-directory :colleen))))
+    (setf config-file *default-conf-file*))
   
   (with-open-file (stream config-file :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (json:encode-json-alist *conf* stream)
+    (yason:encode-alist *conf* stream)
     (v:info :colleen.main "Saved config to ~a" config-file)))
 
 (defun config (setting &optional new-value (config-file *conf-file*))

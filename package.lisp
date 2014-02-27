@@ -6,15 +6,20 @@
 
 (in-package :cl)
 (defpackage org.tymoonnext.colleen
-  (:use :cl :drakma :cl-json :split-sequence :lquery :bordeaux-threads :alexandria)
+  (:use :cl :split-sequence :lquery :bordeaux-threads :alexandria)
   (:nicknames :colleen)
   (:export 
    ;; GLOBALS
    :*servers*
    :*bot-modules*
    :*conf-file*
+   :*default-conf-file*
    :*current-server*
    :*debugger*
+   ;; ASDF-EXTRA
+   :module-system
+   :define-module-system
+   :load-module
    ;; CONDITIONS
    :invalid-arguments
    :network-error
@@ -24,6 +29,7 @@
    :nickname-in-use
    :not-authorized
    :module-stop
+   :module-system-not-found
    ;; REPLY-CODES
    :reply->keyword
    ;; CONFIG
