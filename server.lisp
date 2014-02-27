@@ -100,7 +100,7 @@
       
       (handler-case
           (progn 
-            (setf socket (usocket:socket-connect host port))
+            (setf socket (usocket:socket-connect (copy-seq host) port))
             (setf socket-stream (usocket:socket-stream socket))
             (unless username (setf username nick))
             ;; Initiate
@@ -185,7 +185,9 @@
        (declare (ignore e))
        (v:warn (name ,servervar) "Leaving reconnect-handler due to disconnect condition..."))
      (error (e)
-       (v:severe (name ,servervar) "Uncaught error in reconnect-handler: ~a" e))))
+       (v:severe (name ,servervar) "Uncaught error in reconnect-handler: ~a" e)
+       (when *debugger*
+         (invoke-debugger e)))))
 
 (defvar *irc-message-regex* (cl-ppcre:create-scanner "^(:([^ ]+) +)?([^ ]+)( +(.+))?"))
 (defun read-loop (&optional (server *current-server*))
