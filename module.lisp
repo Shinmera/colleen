@@ -20,7 +20,7 @@
 (defmethod active ((module-name string))
   (active (get-module module-name)))
 
-(defmethod print-object (module stream)
+(defmethod print-object ((module module) stream)
   (format stream "<[~a]>" (class-name (class-of module))))
 
 (defclass command ()
@@ -63,10 +63,10 @@
 (defmethod stop :around ((module module))
   (setf (active module) NIL)
   (loop for uid being the hash-keys of (threads module)
-     for thread being the hash-values of (threads module)
-     do (if (thread-alive-p thread)
-            (interrupt-thread thread #'(lambda () (error 'module-stop)))
-            (remhash uid (threads module))))
+        for thread being the hash-values of (threads module)
+        do (if (thread-alive-p thread)
+               (interrupt-thread thread #'(lambda () (error 'module-stop)))
+               (remhash uid (threads module))))
   (call-next-method)
   module)
 
@@ -118,11 +118,11 @@
 
 (defmethod dispatch ((module T) (event event) &key ignore-errors)
   (loop for module being the hash-values of *bot-modules*
-     if (active module)
-     do (when (if ignore-errors 
-                  (ignore-errors (dispatch module event)) 
-                  (dispatch module event))
-          (return-from dispatch))))
+        if (active module)
+          do (when (if ignore-errors 
+                       (ignore-errors (dispatch module event)) 
+                       (dispatch module event))
+               (return-from dispatch))))
 
 (defmethod dispatch ((module module) (event event) &key)
   (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
@@ -260,23 +260,23 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
     (let ((methodgens (gensym "METHOD"))
           (errgens (gensym "ERROR")))
       `(let ((,methodgens
-              (lambda (,modulevar ,eventvar)
-                (declare (ignorable ,modulevar))
-                ,(when authorization
-                       `(unless (auth-p (nick ,eventvar))
-                          (error 'not-authorized :event ,eventvar)))
-                (handler-case
-                    (destructuring-bind (,@args) (cmd-args ,eventvar)
-                      ,@body)
-                  ((or #+sbcl sb-kernel::arg-count-error 
-                       #+sbcl sb-kernel::defmacro-lambda-list-broken-key-list-error
-                       #+cmucl LISP::DEFMACRO-LL-ARG-COUNT-ERROR
-                       #+cmucl LISP::DEFMACRO-LL-BROKEN-KEY-LIST-ERROR
-                       #+abcl program-error
-                       #+ccl CCL::SIMPLE-PROGRAM-ERROR
-                       end-of-file) (,errgens)
-                    (declare (ignore ,errgens))
-                   (error 'invalid-arguments :command ',name :argslist ',args))))))
+               (lambda (,modulevar ,eventvar)
+                 (declare (ignorable ,modulevar))
+                 ,(when authorization
+                    `(unless (auth-p (nick ,eventvar))
+                       (error 'not-authorized :event ,eventvar)))
+                 (handler-case
+                     (destructuring-bind (,@args) (cmd-args ,eventvar)
+                       ,@body)
+                   ((or #+sbcl sb-kernel::arg-count-error 
+                        #+sbcl sb-kernel::defmacro-lambda-list-broken-key-list-error
+                        #+cmucl LISP::DEFMACRO-LL-ARG-COUNT-ERROR
+                        #+cmucl LISP::DEFMACRO-LL-BROKEN-KEY-LIST-ERROR
+                        #+abcl program-error
+                        #+ccl CCL::SIMPLE-PROGRAM-ERROR
+                        end-of-file) (,errgens)
+                     (declare (ignore ,errgens))
+                     (error 'invalid-arguments :command ',name :argslist ',args))))))
          ,(if group
               `(add-group-command ,module ',group ',name ',args ,methodgens ,documentation)
               `(add-command ,module ',name ',args ,methodgens ,documentation))))))
