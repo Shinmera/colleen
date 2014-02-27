@@ -26,54 +26,19 @@
                (:file "server")
                (:file "commands")
                (:file "events")
+               (:file "asdf-extra")
                (:file "launcher")
                (:module "modules"
-                :components ((:file "authenticate")
-                             (:file "backup")
-                             (:file "blants")
-                             (:file "chatlog")
-                             (:file "convert")
-                             (:file "core")
-                             (:file "counter")
-                             ;(:file "dramatica")
-                             (:file "dictionary")
-                             (:file "emoticon")
-                             (:file "essentials")
-                             (:file "eval")
-                             (:file "google")
-                             (:file "google-lng")
-                             (:file "markov")
-                             (:file "medals")
-                             (:file "notify")
-                             (:file "rss")
-                             (:file "rules")
-                             (:file "search")
-                             (:file "shiritori")
-                             (:file "silly")
-                             (:file "stevenchan")
-                             (:file "syslog")
-                             (:file "weather"))))
-  :depends-on (:bordeaux-threads
-               :drakma
-               :cl-json :yason
+                :components ((:file "system-definitions"))))
+  :depends-on (:bordeaux-threads 
+               :yason
                :verbose
                :split-sequence
                :local-time
                :lquery
                :alexandria
                :usocket
-               :uuid
-               ;; module deps
-               :uiop
-               :ironclad
-               :ieee-floats
-               :parse-number
-               :clsql
-               :clsql-mysql
-               :cl-wiki
-               :cl-fad
-               ;:xencl
-               :trivial-timers))
+               :uuid))
 
 (defsystem colleen-doc
   :name "Colleen Doc"
