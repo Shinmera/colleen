@@ -94,10 +94,10 @@
                         (respond event "USAGE: ~a ~{~a~^ ~}" (name method) (cmd-args method))
                         (return NIL)))))))
       (loop with commands = () 
-         for module being the hash-values of *bot-modules*
-         if (active module)
-         do (appendf commands (alexandria:hash-table-keys (colleen:commands module)))
-         finally (respond event "Available commands: ~{~a~^, ~}" commands))))
+            for module being the hash-values of *bot-modules*
+            if (active module)
+              do (appendf commands (alexandria:hash-table-keys (colleen:commands module)))
+            finally (respond event "Available commands: ~{~a~^, ~}" commands))))
 
 ;; MODULE COMMANDS
 (define-group module :documentation "Manage bot modules.")
@@ -121,6 +121,12 @@
       (progn (stop-module (find-symbol (string-upcase module-name) "KEYWORD"))
              (start-module (find-symbol (string-upcase module-name) "KEYWORD"))
              (respond event "Module restarted."))
+    (error (err)
+      (respond event "Error: ~a" err))))
+
+(define-command (module load) (module-system-name) (:authorization T :documentation "Initiate a load-module command. Note: Will not start any module and may stop running modules.")
+  (handler-case
+      (load-module module-system-name)
     (error (err)
       (respond event "Error: ~a" err))))
 
