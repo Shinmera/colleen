@@ -31,7 +31,7 @@
     (yason:encode (dictionary module) stream)))
 
 (defun link-p (definition)
-  (and (< 2 (length definition))
+  (and definition (< 2 (length definition))
        (string= definition "=>" :end1 2)
        (string-trim " " (subseq definition 2))))
 
@@ -40,7 +40,7 @@
          (definition (gethash term (dictionary module))))
     (when-let ((link (link-p definition)))
       (setf definition (gethash link (dictionary module))
-            term link))
+            term (format NIL "~a: ~a" term link)))
     (respond event (format-message event (format NIL "~a: ~:[Unknown term.~;~:*~a~]" term definition)))))
 
 (defun define-term (module event term definition)
@@ -50,7 +50,8 @@
     (when-let ((link (link-p definition)))
       (let ((definition (gethash link (dictionary module))))
         (when-let ((definition (and definition (link-p definition))))
-          (error "Cannot link to a link. Please link to ~a instead." definition))))
+          (respond event "Cannot link to a link. Linking to ~a instead." definition)
+          (setf term definition))))
     (setf (gethash term (dictionary module)) definition)
     (respond event "~:[New~;Old~] term ~:*~:[~;re~]defined." old-definition)))
 
@@ -81,7 +82,19 @@
 
 (define-command (dictionary search) (&rest term) (:documentation "Search for matching terms.")
   (let ((term (format NIL "~{~a~^ ~}" term)))
-    (respond event "Matching terms: ~{~a~^, ~}"
-             (loop for item in (hash-table-keys (dictionary module))
-                   if (search term item :test #'equalp)
-                     collect item))))
+    (if (< (length term) 1)
+        (respond event "Search term too short.")
+        (respond event "Matching terms: ~{~a~^, ~}"
+                 (loop for item in (hash-table-keys (dictionary module))
+                       if (search term item :test #'equalp)
+                         collect item)))))
+
+(define-command (dictionary random) () (:documentation "Show a random entry from the dictionary.")
+  (let ((key (random-elt (hash-table-keys (dictionary module)))))
+    (about-term module event key)))
+
+(define-command (dictionary link) (from to) (:documentation "Create a link from one term to another.")
+  (define-term module event from (format NIL "=> ~a" to)))
+
+(define-command (dictionary is-link) (term) (:documentation "If the term is a link, returns the original term or otherwise NIL.")
+  (respond event "~a" (link-p (gethash term (dictionary module)))))
