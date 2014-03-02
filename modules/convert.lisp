@@ -52,12 +52,13 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (define-command (convert-to fullwidth) (&rest text) (:documentation "Convert to unicode full-width characters.")
   (respond event "~a" (%map-string text
-                                   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-=()<>[]{}\/_:;$!?^~&%°@# "
-                                   "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９＊ －＝（）＜＞[]｛｝＼／＿：；＄！？＾~＆％°＠＃ ")))
+                                   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*+-=()<>[]{}\\/_:;$!?^~&%°@# "
+                                   "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９＊＋－＝（）＜＞[]｛｝＼／＿：；＄！？＾~＆％°＠＃ ")))
 
 (defun %map-string (text from to)
   (flet ((mapper (char)
-           (elt to (position char from))))
+           (let ((pos (position char from)))
+             (if pos (elt to pos) char))))
     (map 'string #'mapper (format NIL "~{~a~^ ~}" text))))
 
 (define-command (convert-to usd) (currency &rest amount) (:documentation "Convert a currency into dollar.")
