@@ -161,3 +161,11 @@
       (respond event "Log stats for ~a/~a: Most active user is ~a with ~,,'':d entries. A total of ~,,'':d entries have been recorded for this channel since ~a."
                server channel (first most-active-user) (second most-active-user) (first total-messages)
                (local-time:format-timestring NIL (local-time:unix-to-timestamp (first earliest-time)) :format '((:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2)))))))
+
+(define-command (chatlog count) (nick) (:documentation "Counts the amount of recorded messages for a nick.")
+  (unless (clsql:connected-databases) (connect-db module))
+  (let ((messages (first (clsql:select (clsql:sql-operation 'count '*)
+                                       :from 'chatlog
+                                       :where (clsql:sql-operation '= 'user nick)
+                                       :limit 1))))
+    (respond event "Recorded messages for ~a: ~,,'':d" nick (first messages))))
