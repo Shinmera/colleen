@@ -1,7 +1,7 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
 (in-package :org.tymoonnext.colleen)
@@ -75,7 +75,7 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 
     (when (cl-ppcre:scan "power glove" message)
       (sleep (/ (random 20) 10))
-      (respond event "I love the powerglove... it's so bad.")
+      (respond event "I love the powerglove... it's so bad."))
 
     (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
       (sleep (/ (random 10) 20))
@@ -123,9 +123,9 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
   (setf who (string-downcase (format NIL "~{~a~^ ~}" who)))
   (unless
       (loop for authd in (auth-users (server event))
-         do (when (search (string-downcase authd) who)
-              (respond event "...")
-              (return T)))
+            do (when (search (string-downcase authd) who)
+                 (respond event "...")
+                 (return T)))
     (respond event "Get the hell away from me you creep!")))
 
 (define-command kill (who) (:authorization T :documentation "Kill someone.")
