@@ -22,11 +22,11 @@
 (defmethod start ((chatlog chatlog))
   (setf (active-in chatlog) (config-tree :chatlog :active))
   (connect-db chatlog
-              :db (config-tree :chatlog :db)
-              :host (config-tree :chatlog :host)
-              :port (config-tree :chatlog :port)
-              :user (config-tree :chatlog :user)
-              :pass (config-tree :chatlog :pass))
+              :db (copy-seq (config-tree :chatlog :db))
+              :host (copy-seq (config-tree :chatlog :host))
+              :port (copy-seq (config-tree :chatlog :port))
+              :user (copy-seq (config-tree :chatlog :user))
+              :pass (copy-seq (config-tree :chatlog :pass)))
   (disconnect-db chatlog))
 
 (defmethod stop ((chatlog chatlog))
