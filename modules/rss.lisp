@@ -112,20 +112,32 @@
   (let* ((lquery:*lquery-master-document*)
          (drakma:*text-content-types* (cons '("application" . "xml")
                                             (cons '("application" . "rss+xml")
-                                                  drakma:*text-content-types*)))
+                                                  (cons '("application" . "atom+xml")
+                                                        drakma:*text-content-types*))))
          (data (drakma:http-request (url feed))))
     (unless (stringp data)
       (error "Feed data seems to be incompatible! (Are you sure it is an RSS feed?)"))
     ($ (initialize data :type :XML))
-    (loop for node in ($ "item")
-       for i from 0
-       while (or (not limit) (< i limit))
-       collect (make-instance 'feed-item 
-                              :title (string-trim (format NIL "~% ") ($ node "title" (text) (node)))
-                              :description (string-trim (format NIL "~% ") ($ node "description" (text) (node)))
-                              :link ($ node "link" (text) (node))
-                              :guid ($ node "guid" (text) (node))
-                              :publish-date ($ node "pubDate" (text) (node))))))
+    (append
+     (loop for node in ($ "item")
+           for i from 0
+           while (or (not limit) (< i limit))
+           collect (make-instance 'feed-item 
+                                  :title (string-trim (format NIL "~% ") ($ node "title" (text) (node)))
+                                  :description (string-trim (format NIL "~% ") ($ node "description" (text) (node)))
+                                  :link ($ node "link" (text) (node))
+                                  :guid ($ node "guid" (text) (node))
+                                  :publish-date ($ node "pubDate" (text) (node))))
+     ;; Atom
+     (loop for node in ($ "entry")
+           for i from 0
+           while (or (not limit) (< i limit))
+           collect (make-instance 'feed-item 
+                                  :title (string-trim (format NIL "~% ") ($ node "title" (text) (node)))
+                                  :description (string-trim (format NIL "~% ") ($ node "content" (text) (node)))
+                                  :link ($ node "link" (attr :href) (node))
+                                  :guid ($ node "id" (text) (node))
+                                  :publish-date ($ node "updated" (text) (node)))))))
 
 (define-group rss :documentation "Manage RSS feeds.")
 
