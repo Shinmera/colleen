@@ -28,4 +28,5 @@
 (define-module-system silly ("silly") (:cl-ppcre))
 (define-module-system stevenchan ("stevenchan") (:lquery :drakma :alexandria))
 (define-module-system syslog ("syslog"))
+(define-module-system weather ("twitter") (:chirp :yason))
 (define-module-system weather ("weather") (:drakma :cl-json))
