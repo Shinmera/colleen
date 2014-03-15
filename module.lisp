@@ -11,7 +11,7 @@
    (%handlers :initform (make-hash-table :test 'equal) :reader handlers :allocation :class)
    (%commands :initform (make-hash-table :test 'equal) :reader commands :allocation :class)
    (%groups :initform (make-hash-table :test 'equal) :reader groups :allocation :class)
-   (%threads :initform (make-hash-table) :accessor threads))
+   (%threads :initform (make-hash-table :test 'equalp) :accessor threads))
   (:documentation "Base module class."))
 
 (defmethod active ((null null)) NIL)
@@ -96,7 +96,7 @@
   (let ((uidgens (gensym "UUID"))
         (modgens (gensym "MODULE"))
         (modnamegens (gensym "MODULE-NAME")))
-    `(let* ((,uidgens (uuid:make-v4-uuid))
+    `(let* ((,uidgens (princ-to-string (uuid:make-v4-uuid)))
             (,modgens ,module)
             (,modnamegens (name ,modgens)))
        (setf (gethash ,uidgens (threads ,modgens))
