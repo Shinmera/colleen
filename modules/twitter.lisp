@@ -1,6 +1,6 @@
 #|
  This file is a part of Colleen
- (c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
+ (c) 2014 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
@@ -14,7 +14,9 @@
 
 (defvar *config-file* (merge-pathnames "twitter.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
-(define-module twitter () ())
+(define-module twitter ()
+    ((streams :initform () :accessor streams))
+  (:documentation "Provides access to the twitter API."))
 
 (defmethod start ((twitter twitter))
   (with-open-file (stream *config-file* :if-does-not-exist NIL)
@@ -53,4 +55,20 @@
 (define-command (twitter tweet) (text) (:authorization T :documentation "Tweet on behalf of the linked user.")
   (chirp:tweet text))
 
+(define-command (twitter stream-home) () (:authorization T :documentation "Stream the home timeline to the current channel.")
+  (push (list (with-module-thread (get-module :twitter)
+                (chirp:stream/user #'(lambda (o)
+                                       (when (and o (typep o 'chirp:status))
+                                         (respond event "[Twitter] ~a: ~a" (chirp:screen-name (chirp:user o)) (text o)))
+                                       T)))
+              (colleen:name (server event))
+              (channel event))
+        (streams module)))
 
+(define-command (twitter list-streams) () (:authorization T :documentation "List all working streams.")
+  (respond event "~a" (streams module)))
+
+(define-command (twitter stop-stream) (id) (:authorization T :documentation "Stop the given stream.")
+  (bordeaux-threads:destroy-thread (gethash id (threads module)))
+  (setf (threads module) (delete id (threads module) :key #'first :test #'string-equal))
+  (respond event "Stream stopped."))
