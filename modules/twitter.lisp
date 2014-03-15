@@ -52,8 +52,8 @@
   (let ((user (chirp:account/verify-credentials)))
     (respond event "Successfully authenticated as ~a" (screen-name user))))
 
-(define-command (twitter tweet) (text) (:authorization T :documentation "Tweet on behalf of the linked user.")
-  (chirp:tweet text))
+(define-command (twitter tweet) (&rest text) (:authorization T :documentation "Tweet on behalf of the linked user.")
+  (chirp:tweet (format NIL "~{~a~^ ~}" text)))
 
 (define-command (twitter stream-home) () (:authorization T :documentation "Stream the home timeline to the current channel.")
   (push (list (with-module-thread (get-module :twitter)
