@@ -137,6 +137,30 @@
               <pre class="funcdesc"></pre>
             </article>
           </li><li id="template">
+            <a class="anchor" name="*DEBUGGER*"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL SPECIAL</span>
+                <code>
+                  <h3 class="funcname">*DEBUGGER*</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Boolean indicating whether to invoke the debugger on an unhandled condition.</pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="*DEFAULT-CONF-FILE*"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL SPECIAL</span>
+                <code>
+                  <h3 class="funcname">*DEFAULT-CONF-FILE*</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
             <a class="anchor" name="*SERVERS*"/>
             <article>
               <header>
@@ -155,7 +179,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">ACTIVE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -227,7 +251,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">ARGUMENTS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -251,7 +275,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">AUTH-USERS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -263,7 +287,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CHANNEL</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -287,7 +311,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CHANNELS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -299,7 +323,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CHANNELS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -311,7 +335,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CMD-ARGS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -323,7 +347,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CMD-FUN</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -371,7 +395,7 @@
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">COMMANDS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -509,6 +533,18 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Define a new module class. See DEFCLASS.</pre>
             </article>
           </li><li id="template">
+            <a class="anchor" name="DEFINE-MODULE-SYSTEM"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL MACRO</span>
+                <code>
+                  <h3 class="funcname">DEFINE-MODULE-SYSTEM</h3>
+                  <span class="funcargs">(NAME COMPONENTS &amp;OPTIONAL DEPENDS-ON)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
             <a class="anchor" name="DISCONNECT"/>
             <article>
               <header>
@@ -527,7 +563,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">DISCONNECT</h3>
-                  <span class="funcargs">(SERVER-OR-NAME &amp;KEY QUIT-MESSAGE (QUIT-MESSAGE (CONFIG-TREE :MESSAGES :QUIT))
+                  <span class="funcargs">(SERVER-OR-NAME &amp;KEY QUIT-MESSAGE (QUIT-MESSAGE (CONFIG-TREE MESSAGES QUIT))
  (KILL-RECONNECT T) (QUIT T) &amp;ALLOW-OTHER-KEYS)</span>
                 </code>
               </header>
@@ -564,7 +600,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">DOCU</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -603,7 +639,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                   <span class="funcargs">(EVENT MESSAGE &amp;REST OTHER-REPLACES)</span>
                 </code>
               </header>
-              <pre class="funcdesc">Format the given message, replacing $NICK$, $CHANNEL$ and $MYSELF$ with the according values.</pre>
+              <pre class="funcdesc">Format the given message, replacing $NICK$, $CHANNEL$, $SERVER$ and $MYSELF$ with the according values.</pre>
             </article>
           </li><li id="template">
             <a class="anchor" name="FSTD-MESSAGE"/>
@@ -648,7 +684,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HANDLERS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -660,7 +696,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HOST</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -672,7 +708,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HOSTMASK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -702,13 +738,25 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">(Re)load the static configuration.</pre>
             </article>
           </li><li id="template">
+            <a class="anchor" name="LOAD-MODULE"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL FUNCTION</span>
+                <code>
+                  <h3 class="funcname">LOAD-MODULE</h3>
+                  <span class="funcargs">(NAME)</span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
             <a class="anchor" name="MESSAGE"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MESSAGE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -738,13 +786,37 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
               <pre class="funcdesc">Condition signalled when a thread is interrupted due to a module-stop.</pre>
             </article>
           </li><li id="template">
+            <a class="anchor" name="MODULE-SYSTEM"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MODULE-SYSTEM</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc"></pre>
+            </article>
+          </li><li id="template">
+            <a class="anchor" name="MODULE-SYSTEM-NOT-FOUND"/>
+            <article>
+              <header>
+                <span class="functype">EXTERNAL CLASS</span>
+                <code>
+                  <h3 class="funcname">MODULE-SYSTEM-NOT-FOUND</h3>
+                  <span class="funcargs"></span>
+                </code>
+              </header>
+              <pre class="funcdesc">Condition signalled when LOAD-MODULE is called on an unknown module system.</pre>
+            </article>
+          </li><li id="template">
             <a class="anchor" name="NAME"/>
             <article>
               <header>
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(CONDITION)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -756,7 +828,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(CONDITION)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -780,7 +852,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NICK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -804,7 +876,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PASSWORD</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -828,7 +900,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PORT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -840,7 +912,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PREFIX</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -864,7 +936,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">REALNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -948,7 +1020,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1056,7 +1128,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">THREADS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1080,7 +1152,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">USERNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1641,7 +1713,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">ACTIVE-TYPE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1653,7 +1725,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">ADDRESS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1701,7 +1773,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">ADMIN-LOCATION</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1737,7 +1809,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">AUTHNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1761,7 +1833,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">BACKSTREAM-SENDQ</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1821,7 +1893,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">BANID</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1893,7 +1965,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">BYTE-COUNT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -1989,7 +2061,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CHAN-CHAR</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2001,7 +2073,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CHAN-MODES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2061,7 +2133,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CHANNEL-MODES-WITH-PARAMS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2085,7 +2157,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CHARSET</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2097,7 +2169,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CLASS-COUNT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2109,7 +2181,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CLIENT-NAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2121,7 +2193,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CMD-COUNT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2133,7 +2205,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CODE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2145,7 +2217,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CODES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2157,7 +2229,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">COMMENTS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2169,7 +2241,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CONFIG-FILE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2181,7 +2253,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CONNECT-FREQ</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2193,7 +2265,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">CONNECTION-ADDRESS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2217,7 +2289,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">DEBUG-LEVEL</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2229,7 +2301,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">DESTINATION</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2253,7 +2325,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">EMAIL-ADDRESS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2301,7 +2373,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">EXCEPTIONMASK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2337,7 +2409,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">FILE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2361,7 +2433,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">FLAGS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2397,7 +2469,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">GROUP</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2445,7 +2517,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HOP</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2457,7 +2529,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HOPCOUNT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2469,7 +2541,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HOPS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2493,7 +2565,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HOST2</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2505,7 +2577,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">HOSTNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2541,7 +2613,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">INT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2553,7 +2625,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">INTC</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2565,7 +2637,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">INTS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2589,7 +2661,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">INVITEE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2625,7 +2697,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">INVITEMASK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2769,7 +2841,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">LANGUAGE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2781,7 +2853,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">LANGUAGE-CODE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2805,7 +2877,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">LINK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2817,7 +2889,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">LINK-UPTIME-IN-SECONDS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2829,7 +2901,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">LINKNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2913,7 +2985,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">LOGFILE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -2997,7 +3069,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MAINTAINER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3009,7 +3081,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MASK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3021,7 +3093,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MAX-HOPS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3033,7 +3105,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MAX-LANGS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3045,7 +3117,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MAX-SENDQ</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3057,7 +3129,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MAXDEPTH</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3069,7 +3141,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MODE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3093,7 +3165,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MODE-CHAR</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3117,7 +3189,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MODE-PARAMS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3141,7 +3213,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MODECHAR</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3153,7 +3225,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">MODES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3237,7 +3309,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NAME-TYPE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3273,7 +3345,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NANOSECONDS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3309,7 +3381,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NEW-CHAN</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3321,7 +3393,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NEW-NICK</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3333,7 +3405,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NEWTYPE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3345,7 +3417,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NEXT-SERVER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3381,7 +3453,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NICKINFO</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3393,7 +3465,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">NICKNAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3729,7 +3801,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">OLD-CHAN</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3777,7 +3849,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">OPER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3801,7 +3873,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PARAMETER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3813,7 +3885,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PARAMETERS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3825,7 +3897,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PARAMS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3885,7 +3957,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PING-FREQ</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3909,7 +3981,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">PRIVILEGES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3933,7 +4005,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">QUERY</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3957,7 +4029,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">RCVD-BYTES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3969,7 +4041,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">REAL-NAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3981,7 +4053,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">REASON</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -3993,7 +4065,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">RECVD-MSGS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4017,7 +4089,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">REMOTE-COUNT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4041,7 +4113,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">RESOURCE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4065,7 +4137,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">REVISION</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4089,7 +4161,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SECONDS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4101,7 +4173,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SENDER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4113,7 +4185,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SENDQ</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4125,7 +4197,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SENT-BYTES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4137,7 +4209,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SENT-MSGS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4149,7 +4221,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERV</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4161,7 +4233,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER-INFO</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4185,7 +4257,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER-MODES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4197,7 +4269,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER-MODES-WITH-PARAMS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4209,7 +4281,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER-NAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4221,7 +4293,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER-TYPE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4233,7 +4305,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER1</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4245,7 +4317,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVER2</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4257,7 +4329,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVICE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4269,7 +4341,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVICE-NAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4281,7 +4353,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">SERVICE-TYPE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4341,7 +4413,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">STAFF-ONLINE-COUNT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4521,7 +4593,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TARGET</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4533,7 +4605,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TARGET-ADDRESS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4545,7 +4617,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TARGET-FQDN</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4569,7 +4641,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TARGET-TRACE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4593,7 +4665,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TARGETS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4641,7 +4713,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">THROUGH-NAME</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4665,7 +4737,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TIME-LEFT</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4689,7 +4761,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TIME-OPEN</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4701,7 +4773,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TIME-STRING</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4713,7 +4785,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TIMEZONE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -4785,7 +4857,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">TOPIC</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5145,7 +5217,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">UPSTREAM-SENDQ</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5157,7 +5229,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">USEC-PING</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5169,7 +5241,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">USER</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5181,7 +5253,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">USER-MODE-PARAMS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5193,7 +5265,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">USER-MODES</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5205,7 +5277,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">USER-MODES-WITH-PARAMS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5253,7 +5325,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">USERS</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5325,7 +5397,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">VERSION</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5349,7 +5421,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">VISIBLE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5361,7 +5433,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">VPROTOCOL-VERSION</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
@@ -5433,7 +5505,7 @@ MODULEVAR is the symbol that the module variable is bound to in the body. Defaul
                 <span class="functype">EXTERNAL GENERIC</span>
                 <code>
                   <h3 class="funcname">WHO-TYPE</h3>
-                  <span class="funcargs">(SB-PCL::OBJECT)</span>
+                  <span class="funcargs">(OBJECT)</span>
                 </code>
               </header>
               <pre class="funcdesc"></pre>
