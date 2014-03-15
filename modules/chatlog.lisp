@@ -24,7 +24,7 @@
   (connect-db chatlog
               :db (copy-seq (config-tree :chatlog :db))
               :host (copy-seq (config-tree :chatlog :host))
-              :port (copy-seq (config-tree :chatlog :port))
+              :port (config-tree :chatlog :port)
               :user (copy-seq (config-tree :chatlog :user))
               :pass (copy-seq (config-tree :chatlog :pass)))
   (disconnect-db chatlog))
