@@ -59,7 +59,9 @@
   (push (list (with-module-thread (get-module :twitter)
                 (chirp:stream/user #'(lambda (o)
                                        (when (and o (typep o 'chirp:status))
-                                         (respond event "[Twitter] ~a: ~a" (chirp:screen-name (chirp:user o)) (text o)))
+                                         (respond event "[Twitter] ~a: ~a"
+                                                  (chirp:screen-name (chirp:user o))
+                                                  (chirp:xml-decode (chirp:text-with-expanded-urls o))))
                                        T)))
               (colleen:name (server event))
               (channel event))
@@ -69,6 +71,20 @@
   (respond event "~a" (streams module)))
 
 (define-command (twitter stop-stream) (id) (:authorization T :documentation "Stop the given stream.")
-  (bordeaux-threads:destroy-thread (gethash id (threads module)))
-  (setf (threads module) (delete id (threads module) :key #'first :test #'string-equal))
-  (respond event "Stream stopped."))
+  (let ((thread (gethash id (threads module))))
+    (bordeaux-threads:interrupt-thread thread #'(lambda () (error "STOP STREAM!")))
+    (when (bordeaux-threads:thread-alive-p thread)
+      (bordeaux-threads:destroy-thread thread))
+    (if (bordeaux-threads:thread-alive-p thread)
+        (respond event "FIXME: Destroying the stream thread failed. Thread still alive.")
+        (progn
+          (setf (streams module) (delete id (streams module) :key #'first :test #'string-equal))
+          (respond event "Stream stopped.")))))
+
+(define-command (twitter follow) (screen-name) (:authorization T :documentation "Follow the specified user.")
+  (chirp:friendships/create :screen-name screen-name)
+  (respond event "~a followed." screen-name))
+
+(define-command (twitter unfollow) (screen-name) (:authorization T :documentation "Unfollow the specified user.")
+  (chirp:friendships/destroy :screen-name screen-name)
+  (respond event "~a unfollowed." screen-name))
