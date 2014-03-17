@@ -131,3 +131,9 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (declare (ignore time))
   (sleep (+ 1 (/ (random 60) 10)))
   (respond event "Failed to convert to valve-time!"))
+
+(define-command (convert-to unicode) (codepoint) (:documentation "Convert from decimal or hex (U+) to the actual character.")
+  (let ((char (if (string= "U" codepoint :end2 1)
+                  (code-char (parse-integer (subseq codepoint 2) :radix 16 :junk-allowed T))
+                  (code-char (parse-integer codepoint :radix 10 :junk-allowed T)))))
+    (respond event "~a (U+~a ~a)" char (write-to-string (char-int char) :base 16) (char-name char))))
