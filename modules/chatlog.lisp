@@ -78,7 +78,7 @@
 
 (define-group chatlog :documentation "Change chatlog settings.")
 
-(define-command (chatlog acivate) (&optional channel server) (:authorization T :documentation "Activate logging for a channel." :modulevar chatlog)
+(define-command (chatlog activate) (&optional channel server) (:authorization T :documentation "Activate logging for a channel." :modulevar chatlog)
   (unless channel (setf channel (channel event)))
   (unless server (setf server (name (server event))))
   (pushnew (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal)
