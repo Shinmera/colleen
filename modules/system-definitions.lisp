@@ -8,7 +8,6 @@
 
 (define-module-system auth ("authenticate"))
 (define-module-system backup ("backup") (:trivial-timers :cl-fad))
-(define-module-system blants ("blants") (:cl-ppcre))
 (define-module-system chatlog ("chatlog") (:clsql :clsql-mysql))
 (define-module-system convert ("convert") (:drakma :ieee-floats :ironclad :parse-number :cl-json))
 (define-module-system core ("core"))

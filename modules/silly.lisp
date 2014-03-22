@@ -9,53 +9,94 @@
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.silly)
 
-(define-module silly () ()
+(define-module silly ()
+    ((%active-in :initform () :accessor active-in))
   (:documentation "Silly things."))
 
+(defparameter *save-file* (merge-pathnames "silly.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
+(defparameter *thanks-match* (cl-ppcre:create-scanner "[Tt]hanks[,]? ([a-zA-Z]+)$"))
+(defparameter *bless-match* (cl-ppcre:create-scanner "[Bb]less you[,]? ([a-zA-Z]+)$"))
+
+(defun cut-to-first-vocal (string)
+  (loop for i from 0 below (length string)
+        until (find (aref string i) '(#\a #\e #\i #\o #\u))
+        finally (return (subseq string i))))
+
+(defmethod start ((silly silly))
+  (with-open-file (stream *save-file* :if-does-not-exist NIL)
+    (when stream
+      (setf (active-in silly) (yason:parse stream)))))
+
+(defmethod stop ((silly silly))
+  (with-open-file (stream *save-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
+    (yason:encode (active-in silly) stream)))
+
+(define-group silly :documentation "Manage the silly module.")
+
+(define-command (silly activate) (&optional channel server) (:authorization T :documentation "Activate the silly responses for the channel.")
+  (unless channel (setf channel (channel event)))
+  (unless server (setf server (name (server event))))
+  (pushnew (format T "~a/~a" server channel) (active-in module) :test #'string-equal)
+  (respond event "Activated silliness."))
+
+(define-command (silly deactivate) (&optional channel server) (:authorization T :documentation "Deactivate the silly responses for the channel.")
+  (unless channel (setf channel (channel event)))
+  (unless server (setf server (name (server event))))
+  (setf (active-in module) (delete (format T "~a/~a" server channel) (active-in module) :test #'string-equal))
+  (respond event "Deactivated silliness."))
+
 (define-handler (privmsg-event event) ()
-  (let ((message (string-downcase (message event))))
-    (when (cl-ppcre:scan "^colleen: (and )?(oh )?i (love|luv|wub) (you|u|wu|wuu|wo|woo)( too)?( as well)?( (so|very|too)( much)?)?$" message)
-      (respond event (format NIL "~a: ~a ~a" 
-                             (nick event) 
-                             (alexandria:random-elt '("I love you too." "Aww!" "Oh you~~" "Haha, oh you." "I wub wuu twoo~~" "I love you too!" "Tee hee." "I love you too."))
-                             (alexandria:random-elt '("" "" "" "" ":)" "(ɔˆ ³(ˆ⌣ˆc)" "(ღ˘⌣˘ღ)" "(っ˘з(˘⌣˘ )" "(˘▼˘>ԅ( ˘⌣ƪ)")))))
+  (when (member (format T "~a/~a" (name (server event)) (channel event)) (active-in module) :test #'string-equal)
+    (let ((message (string-downcase (message event))))
+      (cl-ppcre:register-groups-bind (name) (*thanks-match* message)
+        (sleep 2)
+        (respond event "...Th~a" (cut-to-first-vocal name)))
+      (cl-ppcre:register-groups-bind (name) (*bless-match* message)
+        (sleep 2)
+        (respond event "...Bl~a" (cut-to-first-vocal name)))
+      
+      (when (cl-ppcre:scan "^colleen: (and )?(oh )?i (love|luv|wub) (you|u|wu|wuu|wo|woo)( too)?( as well)?( (so|very|too)( much)?)?$" message)
+        (respond event (format NIL "~a: ~a ~a" 
+                               (nick event) 
+                               (alexandria:random-elt '("I love you too." "Aww!" "Oh you~~" "Haha, oh you." "I wub wuu twoo~~" "I love you too!" "Tee hee." "I love you too."))
+                               (alexandria:random-elt '("" "" "" "" ":)" "(ɔˆ ³(ˆ⌣ˆc)" "(ღ˘⌣˘ღ)" "(っ˘з(˘⌣˘ )" "(˘▼˘>ԅ( ˘⌣ƪ)")))))
 
-    (when (or (cl-ppcre:scan "(i|you|he|she|it|we|they)( all)? know(s?) now" message)
-              (cl-ppcre:scan "now (i|you|he|she|it|we|they)( all)? know(s?)" message))
-      (sleep (/ (random 10) 5))
-      (respond event (alexandria:random-elt '("...now we know." "... oh yeah we know now." "NOW WE KNOW!" "NOW WE KNOOOW!!" "...yeah that's good. Now we know."))))
-    (when (cl-ppcre:scan "(what|who) did you expect" message)
-      (sleep (/ (random 10) 5))
-      (respond event "Who were you expecting.... the easter bunny>"))
+      (when (or (cl-ppcre:scan "(i|you|he|she|it|we|they)( all)? know(s?) now" message)
+                (cl-ppcre:scan "now (i|you|he|she|it|we|they)( all)? know(s?)" message))
+        (sleep (/ (random 10) 5))
+        (respond event (alexandria:random-elt '("...now we know." "... oh yeah we know now." "NOW WE KNOW!" "NOW WE KNOOOW!!" "...yeah that's good. Now we know."))))
+      (when (cl-ppcre:scan "(what|who) did you expect" message)
+        (sleep (/ (random 10) 5))
+        (respond event "Who were you expecting.... the easter bunny>"))
 
-    (when (cl-ppcre:scan "that (was|is) the plan" message)
-      (sleep (/ (random 20) 10))
-      (respond event "...to give you a boner.")
-      (sleep (/ (random 20) 7))
-      (respond event "And you got one!"))
+      (when (cl-ppcre:scan "that (was|is) the plan" message)
+        (sleep (/ (random 20) 10))
+        (respond event "...to give you a boner.")
+        (sleep (/ (random 20) 7))
+        (respond event "And you got one!"))
 
-    (when (cl-ppcre:scan "(/burn)|(sick burn)|(o+h+ burn)" message)
-      (sleep (/ (random 10) 20))
-      (respond event "OOOOOOHH SICK BURN!!"))
+      (when (cl-ppcre:scan "(/burn)|(sick burn)|(o+h+ burn)" message)
+        (sleep (/ (random 10) 20))
+        (respond event "OOOOOOHH SICK BURN!!"))
 
-    (when (cl-ppcre:scan "muffin" message)
-      (sleep (/ (random 10) 20))
-      (respond event "Aw yeeeee. Muffiiins."))
+      (when (cl-ppcre:scan "muffin" message)
+        (sleep (/ (random 10) 20))
+        (respond event "Aw yeeeee. Muffiiins."))
 
-    (when (cl-ppcre:scan "i'm batman" message)
-      (sleep (/ (random 10) 5))
-      (respond event "I'M BATMAN."))
+      (when (cl-ppcre:scan "i'm batman" message)
+        (sleep (/ (random 10) 5))
+        (respond event "I'M BATMAN."))
 
-    (when (cl-ppcre:scan "kill myself" message)
-      (sleep (/ (random 10) 10))
-      (respond event "DO IT FGT!"))
+      (when (cl-ppcre:scan "kill myself" message)
+        (sleep (/ (random 10) 10))
+        (respond event "DO IT FGT!"))
 
-    (when (cl-ppcre:scan "yukkuri|take it easy|ゆっくり" message)
-      (sleep (/ (random 20) 10))
-      (if (< 1 (random 20))
-          (respond event "ゆっくりしていってね！")
-          (let ((irc:*privmsg-line-limit* 14))
-            (respond event "　　 _,,....,,_　 ＿人人人人人人人人人人人人人人人＿
+      (when (cl-ppcre:scan "yukkuri|take it easy|ゆっくり" message)
+        (sleep (/ (random 20) 10))
+        (if (< 1 (random 20))
+            (respond event "ゆっくりしていってね！")
+            (let ((irc:*privmsg-line-limit* 14))
+              (respond event "　　 _,,....,,_　 ＿人人人人人人人人人人人人人人人＿
 -''\":::::::::::::｀''＞　　　ゆっくりしていってね！！！　　　＜
 ヽ:::::::::::::::::::::￣^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^￣
 　|::::::;ノ´￣＼:::::::::::＼_,. -‐ｧ　　　　　＿_　　 _____　　 ＿_____
@@ -69,19 +110,19 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 　（　　,ﾊ　　　　ヽ _ﾝ　 　人! 　　　　 | ||ヽ、　　　　　　 ,ｲ| ||ｲ| /
 ,.ﾍ,）､　　）＞,､ _____,　,.イ　 ハ　　　　レ ル｀ ー--─ ´ルﾚ　ﾚ´"))))
 
-    (when (cl-ppcre:scan "how ((is (this|that) (even )?possible)|the hell|in the world)" message)
-      (sleep (/ (random 20) 10))
-      (respond event "NANO MACHINES, SON"))
+      (when (cl-ppcre:scan "how ((is (this|that) (even )?possible)|the hell|in the world)" message)
+        (sleep (/ (random 20) 10))
+        (respond event "NANO MACHINES, SON"))
 
-    (when (cl-ppcre:scan "power glove" message)
-      (sleep (/ (random 20) 10))
-      (respond event "I love the powerglove... it's so bad."))
+      (when (cl-ppcre:scan "power glove" message)
+        (sleep (/ (random 20) 10))
+        (respond event "I love the powerglove... it's so bad."))
 
-    (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
-      (sleep (/ (random 10) 20))
-      (respond event "The ~a ruse was a.........." thing)
-      (sleep (/ (random 10) 10))
-      (respond event "DISTACTION"))))
+      (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
+        (sleep (/ (random 10) 20))
+        (respond event "The ~a ruse was a.........." thing)
+        (sleep (/ (random 10) 10))
+        (respond event "DISTACTION")))))
 
 (define-command sandwich () (:documentation "Make a sandwich.")
   (if (auth-p (nick event))
@@ -131,3 +172,8 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 (define-command kill (who) (:authorization T :documentation "Kill someone.")
   (respond event "~a: Bang!" who)
   (irc:kick (channel event) who :reason "You're dead."))
+
+(define-command thanks () (:documentation "Thanks you." :eventvar event)
+  (respond event "Thanks, ~a" (nick event))
+  (sleep 2)
+  (respond event "...Th~a" (cut-to-first-vocal (nick event))))
