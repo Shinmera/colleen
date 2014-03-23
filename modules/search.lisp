@@ -21,18 +21,16 @@
 (define-module search () ()
   (:documentation "Perform searches on various sites."))
 
-(define-handler (privmsg-event event) ()
-  (when (and (>= (length (message event)) 4)
-             (string-equal (message event) "clhs" :end1 4))
-    (if (string-equal (message event) "clhs")
-        (respond event "The Common Lisp Hyperspec http://www.lispworks.com/documentation/HyperSpec/Front/index.htm")
-        (colleen:dispatch
-         T (make-instance 'command-event
-                          :server (server event)
-                          :arguments (arguments event)
-                          :prefix (prefix event)
-                          :command "search"
-                          :cmd-args (split-sequence #\Space (string-trim " " (message event))))))))
+(define-command clhs (&rest query) (:documentation "Look up on the Common Lisp Hyperspec.")
+  (if (= (length query) 0)
+      (respond event "The Common Lisp Hyperspec http://www.lispworks.com/documentation/HyperSpec/Front/index.htm")
+      (colleen:dispatch
+       T (make-instance 'command-event
+                        :server (server event)
+                        :arguments (arguments event)
+                        :prefix (prefix event)
+                        :command "search"
+                        :cmd-args query))))
 
 (define-group search :documentation "Perform a search on a variety of sites.")
 
