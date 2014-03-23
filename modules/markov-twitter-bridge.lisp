@@ -16,7 +16,7 @@
   (with-module-thread mod
     (loop do (progn
                (markov-tweet)
-               (sleep (+ (* 60 5) (random (* 60 30))))))))
+               (sleep (+ (* 60 15) (random (* 8 (* 60 60)))))))))
 
 (define-command markov-tweet () (:documentation "Tweets a markov message.")
   (markov-tweet))
