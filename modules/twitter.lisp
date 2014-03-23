@@ -72,14 +72,17 @@
 
 (define-command (twitter stop-stream) (id) (:authorization T :documentation "Stop the given stream.")
   (let ((thread (gethash id (threads module))))
-    (bordeaux-threads:interrupt-thread thread #'(lambda () (error "STOP STREAM!")))
-    (when (bordeaux-threads:thread-alive-p thread)
-      (bordeaux-threads:destroy-thread thread))
-    (if (bordeaux-threads:thread-alive-p thread)
-        (respond event "FIXME: Destroying the stream thread failed. Thread still alive.")
+    (if thread
         (progn
-          (setf (streams module) (delete id (streams module) :key #'first :test #'string-equal))
-          (respond event "Stream stopped.")))))
+          (bordeaux-threads:interrupt-thread thread #'(lambda () (error "STOP STREAM!")))
+          (when (bordeaux-threads:thread-alive-p thread)
+            (bordeaux-threads:destroy-thread thread))
+          (if (bordeaux-threads:thread-alive-p thread)
+              (respond event "FIXME: Destroying the stream thread failed. Thread still alive.")
+              (progn
+                (setf (streams module) (delete id (streams module) :key #'first :test #'string-equal))
+                (respond event "Stream stopped."))))
+        (respond event "No such stream."))))
 
 (define-command (twitter follow) (screen-name) (:authorization T :documentation "Follow the specified user.")
   (chirp:friendships/create :screen-name screen-name)
