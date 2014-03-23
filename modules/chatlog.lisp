@@ -111,7 +111,7 @@
 
 (define-handler (nick-event event) (:modulevar chatlog)
   (dolist (channel (channels (server event)))
-    (insert-record chatlog (name (server event)) channel (old-nick event) "n" (format NIL " ** NICK ~a" (nick event)))))
+    (insert-record chatlog (name (server event)) channel (nick event) "n" (format NIL " ** NICK ~a" (new-nick event)))))
 
 (define-handler (quit-event event) (:modulevar chatlog)
   (dolist (channel (channels (server event)))
