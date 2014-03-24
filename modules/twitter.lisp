@@ -59,9 +59,14 @@
   (push (list (with-module-thread (get-module :twitter)
                 (chirp:stream/user #'(lambda (o)
                                        (when (and o (typep o 'chirp:status))
-                                         (respond event "[Twitter] ~a: ~a"
-                                                  (chirp:screen-name (chirp:user o))
-                                                  (chirp:xml-decode (chirp:text-with-expanded-urls o))))
+                                         (if (chirp:retweeted-status o)
+                                             (respond event "[Twitter] ~a RT: ~a: ~a"
+                                                      (chirp:screen-name (chirp:user o))
+                                                      (chirp:screen-name (chirp:user (chirp:retweeted-status o)))
+                                                      (chirp:xml-decode (chirp:text-with-expanded-urls (chirp:retweeted-status o))))
+                                             (respond event "[Twitter] ~a: ~a"
+                                                      (chirp:screen-name (chirp:user o))
+                                                      (chirp:xml-decode (chirp:text-with-expanded-urls o)))))
                                        T)))
               (colleen:name (server event))
               (channel event))
