@@ -161,8 +161,8 @@
     (v:debug (name server) "Sending privmsg to ~a: ~a" target message)
     (colleen:dispatch T (make-instance 'colleen:send-event :server server :nick (colleen:nick server) :channel target :message message))
     (loop for message in (split-sequence:split-sequence #\Newline message)
-       for i from 0 below line-limit
-       do (raw server "PRIVMSG ~a :~a" target message))))
+          for i from 0 below line-limit
+          do (raw server "PRIVMSG ~a :~a" target message))))
 
 (defun notice (target message &key (server *current-server*))
   "Send a NOTICE."
@@ -178,7 +178,7 @@
      #'(lambda (server)
          (dolist (channel (channels server))
            (privmsg channel message :server server)))
-     *servers*)))
+     colleen:*servers*)))
 
 ;; USER-BASED QUERIES
 (defun who (&key name opers-only (server *current-server*))
@@ -250,14 +250,14 @@
 
 (defun userhost (nicks &key (server *current-server*))
   "Request information about up to 5 nicks."
-  (unless (listp nicks) (setf nicks (list nicks)))
+  (unless (listp nicks) (setf nicks (cl:list nicks)))
   (assert (< (length nicks) 5) () "Maximum 5 nicks allowed by RFC. Attempted to request: ~a" nicks)
   (v:debug (name server) "Requesting USERHOST about ~a" nicks)
   (raw server "USERHOST ~{~a~^ ~}" nicks))
 
 (defun ison (nicks &key (server *current-server*))
   "Check if nicks are online, using the ISON command."
-  (unless (listp nicks) (setf nicks (list nicks)))
+  (unless (listp nicks) (setf nicks (cl:list nicks)))
   (v:debug (name server) "Requesting ISON about: ~a" nicks)
   (raw server "ISON ~{~a~^ ~}" nicks))
 
