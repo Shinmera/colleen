@@ -192,9 +192,3 @@
       (let ((item (first (get-items (gethash name (feeds module)) :limit 1))))
         (respond event "~a: ~a ~a~@[ ~a~]" (nick event) (title item) (link item) (publish-date item)))
       (respond event "No feed called \"~a\" could be found!" name)))
-
-(define-command (rss recheck) () (:authorization T :documentation "Forces a recheck of all feeds immediately.")
-  (bordeaux-threads:interrupt-thread 
-   (thread module)
-   #'(lambda () (error 'recheck)))
-  (respond event "Forcing recheck..."))
