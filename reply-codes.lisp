@@ -6,17 +6,6 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defgeneric reply->keyword (code)
-  (:documentation "Take a reply code and turn it into a corresponding keyword if possible."))
-
-(defmethod reply->keyword ((code integer))
-  (or (gethash code *reply-code-map*)
-      (intern (format NIL "~a" code) "KEYWORD")))
-
-(defmethod reply->keyword ((code string))
-  (handler-case (reply->keyword (parse-integer code))
-    (error () (intern (string-upcase code) "KEYWORD"))))
-
 (defparameter *reply-code-map*
   (let ((hash-table (make-hash-table :size 207)))
     (prog1 hash-table
@@ -526,3 +515,12 @@
               (999 :ERR_NUMERIC_ERR) ; Bahamut
               ))))
   "Map containing all known IRC codes, mapping them to specific keywords.")
+
+(defgeneric reply->keyword (code)
+  (:documentation "Take a reply code and turn it into a corresponding keyword if possible.")
+  (:method ((code integer))
+    (or (gethash code *reply-code-map*)
+        (intern (format NIL "~a" code) "KEYWORD")))
+  (:method ((code string))
+    (handler-case (reply->keyword (parse-integer code))
+      (error () (intern (string-upcase code) "KEYWORD")))))
