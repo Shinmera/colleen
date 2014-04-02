@@ -39,7 +39,7 @@
                :uuid
                :cl-ppcre))
 
-(defsystem colleen-doc
-  :name "Colleen Doc"
-  :components ((:file "documentation"))
-  :depends-on (:colleen :lquery-doc))
+;; (defsystem colleen-doc
+;;   :name "Colleen Doc"
+;;   :components ((:file "documentation"))
+;;   :depends-on (:colleen :lquery-doc))
