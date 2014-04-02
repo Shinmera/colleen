@@ -136,7 +136,7 @@
     ($ (initialize (drakma-utf8 "http://store.steampowered.com/search/" :parameters `(("term" . ,query))) :type :HTML))
     (let ((results ($ ".search_result_row")))
       (if results
-          (let ((page ($ (first results) (attr :href) (node))))
+          (let ((page ($ (inline (first results)) (attr :href) (node))))
             ($ (initialize (drakma-utf8 page) :type :HTML))
             (respond event "~a : ~a ~a"
                      ($ ".apphub_AppName" (text) (node))
