@@ -93,7 +93,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
                          (format NIL "~{~a~^ ~}" text))))))
 
 (define-command (convert-to pbkdf2) (salt &rest text) (:documentation "Create a salted PBKDF2 hash with SHA512 digest and 1000 iterations.")
-  (setf text (format NIL "~{~a~^ ~}"))
+  (setf text (format NIL "~{~a~^ ~}" text))
   (respond event "~a" (ironclad:byte-array-to-hex-string
                        (ironclad:pbkdf2-hash-password (ironclad:ascii-string-to-byte-array text)
                                                       :salt salt :digest 'ironclad:sha512 :iterations 1000))))
