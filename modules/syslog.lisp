@@ -17,20 +17,18 @@
   ((%channel :initarg :channel :accessor channel)
    (%server :initarg :server :accessor server)))
 
-(defmethod piping:print-self ((faucet syslog-faucet) stream)
-  (format stream ">>~@[~a~]|~a/~a" (piping:name faucet) (server faucet) (channel faucet)))
-
 (defmethod piping:pass ((faucet syslog-faucet) message)
   (let ((server (get-server (server faucet))))
     (when server
-      (irc:privmsg (channel faucet) (format NIL "~a" message) :server server))))
+      (irc:privmsg (channel faucet) (format NIL "~a" message) :server server)))
+  message)
 
 (defmethod start ((syslog syslog))
   )
 
 (defmethod stop ((syslog syslog))
-  (loop for faucet being the hash-values of (faucets syslog)
-        do (piping:disconnect-prev faucet))
+  (loop for name being the hash-keys of (faucets syslog)
+        do (piping:remove-segment v:*global-controller* name))
   (setf (faucets syslog) (make-hash-table :test 'equalp)))
 
 (define-group syslog :documentation "Change syslog faucet settings.")
@@ -46,23 +44,26 @@
   (let ((level (find-symbol (string-upcase level) :KEYWORD))
         (category (if category (intern (string-upcase category) :KEYWORD)))
         (channel (or channel (channel event)))
-        (server (or (when server (find-symbol (string-upcase server) :KEYWORD)) (name (server event)))))
+        (server (or (when server (find-symbol (string-upcase server) :KEYWORD)) (name (server event))))
+        (name (intern (string-upcase name))))
     (if level
         (progn
           (when (gethash name (faucets module))
             (respond event "Warning: Overwriting already existing faucet!")
-            (piping:disconnect-prev (gethash name (faucets module))))
+            (piping:remove-segment v:*global-controller* name))
           (let ((faucet (make-instance 'syslog-faucet :name name :channel channel :server server)))
-            (setf (gethash name (faucets module))
-                  (v:attach-to level faucet :category category))
+            (setf (gethash name (faucets module)) faucet)
+            (let ((position (piping:add-segment v:*global-controller* faucet)))
+              (piping:set-name v:*global-controller* (list position) name))
             (respond event "Faucet ~s added." name)))
         (respond event "WTF?"))))
 
 (define-command (syslog stop) (name) (:authorization T :documentation "Stop and remove an existing pipe.")
-  (let ((faucet (gethash name (faucets module))))
+  (let* ((name (find-symbol (string-upcase name)))
+         (faucet (gethash name (faucets module))))
     (if faucet
         (progn
           (remhash name (faucets module))
-          (piping:disconnect (piping:prev faucet) faucet)
+          (piping:remove-segment v:*global-controller* name)
           (respond event "Faucet ~s stopped." name))
         (respond event "No faucet named ~s found." name))))
