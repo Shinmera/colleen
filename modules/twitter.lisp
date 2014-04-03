@@ -57,20 +57,24 @@
 
 (define-command (twitter stream-home) () (:authorization T :documentation "Stream the home timeline to the current channel.")
   (push (list (with-module-thread (get-module :twitter)
-                (chirp:stream/user #'(lambda (o)
-                                       (when (and o (typep o 'chirp:status))
-                                         (if (chirp:retweeted-status o)
-                                             (respond event "[Twitter] ~a RT: ~a: ~a"
-                                                      (chirp:screen-name (chirp:user o))
-                                                      (chirp:screen-name (chirp:user (chirp:retweeted-status o)))
-                                                      (chirp:xml-decode (chirp:text-with-expanded-urls (chirp:retweeted-status o))))
-                                             (respond event "[Twitter] ~a: ~a"
-                                                      (chirp:screen-name (chirp:user o))
-                                                      (chirp:xml-decode (chirp:text-with-expanded-urls o)))))
-                                       T)))
+                (chirp:stream/user #'stream-handler))
               (colleen:name (server event))
               (channel event))
         (streams module)))
+
+(defun stream-handler (o)
+  (when (and o (typep o 'chirp:status))
+    (if (chirp:retweeted-status o)
+        (let ((rt (chirp:statuses/show (chirp:id (chirp:retweeted-status o)))))
+          (respond event "[Twitter] ~a RT: ~a: ~a"
+                   (chirp:screen-name (chirp:user o))
+                   (chirp:screen-name (chirp:user rt))
+                   (chirp:xml-decode (chirp:text-with-expanded-urls rt))))
+        (respond event "[Twitter] ~a: ~a"
+                 (chirp:screen-name (chirp:user o))
+                 (chirp:xml-decode (chirp:text-with-expanded-urls o)))))
+  (bordeaux-threads:thread-yield)
+  (not (typep o 'chirp:stream-disconnect)))
 
 (define-command (twitter list-streams) () (:authorization T :documentation "List all working streams.")
   (respond event "~a" (streams module)))
