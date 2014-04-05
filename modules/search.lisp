@@ -30,7 +30,7 @@
                         :arguments (arguments event)
                         :prefix (prefix event)
                         :command "search"
-                        :cmd-args query))))
+                        :cmd-args (cons "clhs" query)))))
 
 (define-group search :documentation "Perform a search on a variety of sites.")
 
