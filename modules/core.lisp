@@ -36,14 +36,14 @@
     (setf (nick (server event)) (events:new-nick event))))
 
 (define-handler (events:nickname-in-use-event event) ()
-  (let ((true-nick (server-config (name (server event)) :nick))
+  (let ((true-nick (nick (server event)))
         (nick-pass (server-config (name (server event)) :nickservpw)))
     (when (string-equal (nick event) true-nick)
       (irc:nick (format NIL "~a_" true-nick))
       (setf (nick (server event)) (format NIL "~a_" true-nick))
       (when nick-pass
         (sleep 1)
-        (irc:privmsg "NickServ" (format NIL "GHOST ~a ~a" true-nick nick-pass))))))
+        (irc:privmsg "NickServ" (format NIL "GHOST ~a ~a" (server-config (name (server event)) :nick) nick-pass))))))
 
 (define-handler (events:quit-event event) ()
   (let ((true-nick (server-config (name (server event)) :nick)))
