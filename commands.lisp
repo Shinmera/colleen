@@ -9,7 +9,7 @@
 (defun raw (server message &rest formatargs)
   "Send a raw message over the server socket."
   (let ((message (apply #'format NIL message formatargs)))
-    (when (< *irc-message-limit* (length (flexi-streams:string-to-octets message :external-format :utf-8)))
+    (when (< *irc-message-limit* (length (flexi-streams:string-to-octets message :external-format *server-encoding*)))
       (warn 'message-too-long :message message))
     (with-accessors ((stream colleen::socket-stream)) server
       (write-string message stream)

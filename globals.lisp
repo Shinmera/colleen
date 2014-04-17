@@ -19,3 +19,4 @@
 
 (defvar *user-regex* (cl-ppcre:create-scanner "(.+)!(.+)@(.+)"))
 (defvar *irc-message-limit* 512)
+(defvar *server-encoding* :UTF-8)

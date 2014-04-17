@@ -92,7 +92,7 @@
 (defmethod connect ((server server) &key (start-thread T))
   "Connects with the given credentials and returns the connection object."
   (let ((*current-server* server)
-        #+sbcl (sb-impl::*default-external-format* :UTF-8)) ; Fix for non-UTF-8 defaults.
+        #+sbcl (sb-impl::*default-external-format* *server-encoding*)) ; Fix for non-UTF-8 defaults.
     (with-accessors ((nick nick) (realname realname)
                      (username username) (password password) 
                      (host host) (port port) (socket socket) (socket-stream socket-stream)) server

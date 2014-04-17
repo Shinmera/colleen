@@ -17,6 +17,7 @@
    :*current-server*
    :*debugger*
    :*irc-message-limit*
+   :*server-encoding*
    ;; ASDF-EXTRA
    :module-system
    :define-module-system
@@ -116,7 +117,7 @@
 
 (defpackage org.tymoonnext.colleen.commands
   (:use :cl)
-  (:import-from :colleen :*current-server* :name :channels :*irc-message-limit* :message-too-long)
+  (:import-from :colleen :*current-server* :*irc-message-limit* :*server-encoding* :name :channels :message-too-long)
   (:nicknames :irc)
   (:export
    :*privmsg-line-limit*
