@@ -40,3 +40,7 @@
 (define-condition module-system-not-found (error)
   ((%name :initarg :name :reader name))
   (:documentation "Condition signalled when LOAD-MODULE is called on an unknown module system."))
+
+(define-condition message-too-long (warning)
+  ((%message :initarg :message :reader message))
+  (:documentation "Condition signalled when an IRC message exceeds the byte limit set by *IRC-MESSAGE-LIMIT*"))

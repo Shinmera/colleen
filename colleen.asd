@@ -36,6 +36,7 @@
                :split-sequence
                :alexandria
                :usocket
+               :flexi-streams
                :uuid
                :cl-ppcre))
 

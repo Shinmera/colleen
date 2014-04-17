@@ -16,6 +16,7 @@
    :*default-conf-file*
    :*current-server*
    :*debugger*
+   :*irc-message-limit*
    ;; ASDF-EXTRA
    :module-system
    :define-module-system
@@ -30,6 +31,7 @@
    :not-authorized
    :module-stop
    :module-system-not-found
+   :message-too-long
    ;; REPLY-CODES
    :reply->keyword
    ;; CONFIG
@@ -114,7 +116,7 @@
 
 (defpackage org.tymoonnext.colleen.commands
   (:use :cl)
-  (:import-from :colleen :*current-server* :name :channels)
+  (:import-from :colleen :*current-server* :name :channels :*irc-message-limit* :message-too-long)
   (:nicknames :irc)
   (:export
    :*privmsg-line-limit*

@@ -18,3 +18,4 @@
 (defvar *current-server* "Special variable containing the server in the current thread context.")
 
 (defvar *user-regex* (cl-ppcre:create-scanner "(.+)!(.+)@(.+)"))
+(defvar *irc-message-limit* 512)
