@@ -8,119 +8,165 @@
 (defpackage org.tymoonnext.colleen
   (:use :cl :split-sequence :bordeaux-threads :alexandria)
   (:nicknames :colleen)
-  (:export 
-   ;; GLOBALS
-   :*servers*
-   :*bot-modules*
-   :*conf-file*
-   :*default-conf-file*
-   :*current-server*
-   :*debugger*
-   :*irc-message-limit*
-   :*server-encoding*
-   ;; ASDF-EXTRA
-   :module-system
-   :define-module-system
-   :load-module
-   ;; CONDITIONS
-   :invalid-arguments
-   :network-error
-   :disconnect
-   :ping-timeout
-   :connection-failed
-   :nickname-in-use
-   :not-authorized
-   :module-stop
-   :module-system-not-found
-   :message-too-long
-   ;; REPLY-CODES
-   :reply->keyword
-   ;; CONFIG
-   :load-config
-   :config
-   :config-tree
-   :server-config
-   :format-message
-   :standard-message
-   :fstd-message
-   ;; EVENTS
-   :event
-   :server
-   :prefix
-   :arguments
-   :define-event
-   :user-event
-   :username
-   :hostmask
-   :nick
-   :channel-event
-   :channel
-   :command-event
-   :command
-   :cmd-args
-   :send-event
-   :message
-   :respond
-   ;; LAUNCHER
-   :startup
-   :shutdown
-   ;; MODULE
-   :module
-   :active
-   :commands
-   :handlers
-   :threads
-   :start
-   :stop
-   :command
-   :docu
-   :cmd-args
-   :cmd-fun
-   :add-group
-   :add-group-command
-   :add-command
-   :add-handler
-   :with-module-thread
-   :dispatch
-   :get-module
-   :display-help
-   :define-module
-   :define-group
-   :define-command
-   :define-handler
-   :skip
-   :force
-   :retry
-   ;; SERVER
-   :name
-   :auth-users
-   :channels
-   :nick
-   :host
-   :port
-   :username
-   :password
-   :realname
-   :get-server
-   :connect
-   :disconnect
-   :reconnect
-   ;; COLLEEN
-   :start-module
-   :stop-module
-   :auth-p
-   :remove-from-auth
-   :add-to-auth
-   :process-event
-   )
+  ;; asdf-extra.lisp
+  (:export
+   #:module-system
+   #:define-module-system
+   #:load-module)
+  ;; conditions.lisp
+  (:export
+   #:module-error
+   #:invalid-arguments
+   #:command
+   #:argslist
+   
+   #:not-authorized
+   #:events
+   
+   #:network-error
+   #:failed-server
+   
+   #:disconnect
+   
+   #:connection-failed
+   #:initial-error
+   
+   #:ping-timeout
+   
+   #:module-stop
+   
+   #:module-system-not-found
+   #:name
+   
+   #:message-too-long
+   #:message)
+  ;; config.lisp
+  (:export
+   #:parse-json
+   #:load-config
+   #:save-config
+   #:config
+   #:config-tree
+   #:server-config
+   #:format-message
+   #:standard-message
+   #:fstd-message)
+  ;; event.lisp
+  (:export
+   #:event
+   #:server
+   #:prefix
+   #:arguments
+   
+   #:define-event
+   #:user-event
+   #:username
+   #:hostmask
+   #:nick
+   
+   #:channel-event
+   #:channel
+   
+   #:command-event
+   #:command
+   #:cmd-args
+   
+   #:send-event
+   #:nick
+   #:channel
+   #:message
+   
+   #:respond
+   #:make-event)
+  ;; globals.lisp
+  (:export
+   #:*servers*
+   #:*bot-modules*
+   #:*event-map*
+   #:*conf-file*
+   #:*default-conf-file*
+   #:*conf*
+   #:*debugger*
+   #:*current-server*
+   #:*irc-message-limit*
+   #:*privmsg-line-limit*
+   #:*server-encoding*)
+  ;; launcher.lisp
+  (:export
+   #:startup
+   #:shutdown)
+  ;; module.lisp
+  (:export
+   #:module
+   #:active
+   #:handlers
+   #:commands
+   #:groups
+   #:threads
+   
+   #:command
+   #:name
+   #:cmd-args
+   #:cmd-fun
+   #:docu
+   
+   #:start
+   #:stop
+   #:add-group
+   #:add-group-command
+   #:add-command
+   #:add-handler
+   #:dispatch
+   #:get-command
+   #:get-group
+   #:get-group-command
+   #:get-module
+
+   #:with-module-thread
+   #:get-current-module
+   #:display-help
+   #:define-module
+   #:define-group
+   #:define-command
+   #:define-handler
+   #:start-module
+   #:stop-module
+
+   #:skip
+   #:force
+   #:retry)
+  ;; reply-codes.lisp
+  (:export
+   #:*reply-code-map*
+   #:reply->keyword)
+  ;; server.lisp
+  (:export
+   #:server
+   #:name
+   #:auth-users
+   #:channels
+   #:nick
+   #:host
+   #:port
+   #:username
+   #:password
+   #:realname
+   
+   #:get-server
+   #:connect
+   #:disconnect
+   #:reconnect
+   #:auth-p
+   #:remove-from-auth
+   #:add-to-auth
+   #:process-event)
   (:shadow time trace))
 
 (defpackage org.tymoonnext.colleen.commands
   (:use :cl)
-  (:import-from :colleen :*current-server* :*irc-message-limit* :*server-encoding* :name :channels :message-too-long)
+  (:import-from :colleen :*privmsg-line-limit* :*current-server* :*irc-message-limit* :*server-encoding* :name :channels :message-too-long)
   (:nicknames :irc)
   (:export
-   :*privmsg-line-limit*
    :send-raw
    :pass
    :nick
