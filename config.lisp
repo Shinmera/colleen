@@ -57,28 +57,3 @@
   (assert (not (eq var :DEFAULT)) () "Cannot use :DEFAULT server.")
   (or (config-tree :servers server var)
       (config-tree :servers :default var)))
-
-(defun format-message (event message &rest other-replaces)
-  "Format the given message, replacing $NICK$, $CHANNEL$, $SERVER$ and $MYSELF$ with the according values."
-  (let ((replaces (append other-replaces
-                          `(("\\$NICK\\$" ,(nick event))
-                            ("\\$CHANNEL\\$" ,(channel event))
-                            ("\\$SERVER\\$" ,(string (name (server event))))
-                            ("\\$MYSELF\\$" ,(nick (server event)))))))
-    (flet ((rep (search replace message)
-             (cl-ppcre:regex-replace-all search message replace)))
-      (loop for replace in replaces
-         do (setf message (rep (car replace) (cdr replace) message))
-         finally (return message)))))
-
-(defun standard-message (msgsymbol &rest otherwise-format)
-  "Returns the default message designated by the symbol or if provided the otherwise-formatted string."
-  (or (config-tree :messages msgsymbol)
-      (when otherwise-format (apply #'format NIL otherwise-format))))
-
-(defun fstd-message (event msgsymbol &rest otherwise-format)
-  "Shorthand for (format-message (standard-message ..))."
-  (let ((msg (or (config-tree :messages msgsymbol)
-                 (when otherwise-format (apply #'format NIL otherwise-format)))))
-    (when msg (format-message event msg))))
-

@@ -47,10 +47,7 @@
    #:save-config
    #:config
    #:config-tree
-   #:server-config
-   #:format-message
-   #:standard-message
-   #:fstd-message)
+   #:server-config)
   ;; event.lisp
   (:export
    #:event
@@ -160,6 +157,15 @@
    #:remove-from-auth
    #:add-to-auth
    #:process-event)
+  ;; toolkit.lisp
+  (:export
+   #:format-message
+   #:standard-message
+   #:fstd-message
+
+   #:mirc-color->name
+   #:strip-colors
+   #:color-entities)
   (:shadow time trace))
 
 (defpackage org.tymoonnext.colleen.commands
