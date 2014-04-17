@@ -189,7 +189,6 @@
        (when *debugger*
          (invoke-debugger e)))))
 
-(defvar *irc-message-regex* (cl-ppcre:create-scanner "^(:([^ ]+) +)?([^ ]+)( +(.+))?"))
 (defun read-loop (&optional (server *current-server*))
   "Continuously receives and handles a message."
   (with-reconnect-handler server

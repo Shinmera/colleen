@@ -157,7 +157,6 @@
   (raw server "INFO~@[ ~a~]" remote-server))
 
 ;; SENDING MESSAGES
-(defvar *privmsg-line-limit* 5)
 (defun privmsg (target message &key (server *current-server*) (line-limit *privmsg-line-limit*))
   "Send a PRIVMSG."
   (when message
