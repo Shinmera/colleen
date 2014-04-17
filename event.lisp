@@ -6,19 +6,10 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defun make-event (event-name server prefix arguments)
-  "Makes an event instance from the given parameters."
-  (let ((class (gethash event-name *event-map*)))
-    (if class
-        (progn
-          (v:debug (intern (format NIL "~a.EVENT.~a" (name server) event-name) :KEYWORD) "~a ~{~a~^ ~}" prefix arguments)
-          (make-instance class :server server :prefix prefix :arguments arguments))
-        (v:warn (name server) "Inexistent event: ~a ~a ~a" event-name prefix arguments))))
-
 (defclass event ()
   ((%server :initarg :server :reader server)
    (%prefix :initarg :prefix :reader prefix)
-   (%args :initarg :arguments :reader arguments))
+   (%arguments :initarg :arguments :reader arguments))
   (:documentation "Base event class."))
 
 (defmacro arguments-bind ((&rest vars) expression &body body)
@@ -107,19 +98,6 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
     (unless (char= (aref channel 0) #\#)
       (setf channel (nick event)))))
 
-(defgeneric respond (event message &rest format-args)
-  (:documentation "Respond to an event origin with the given message."))
-
-(defmethod respond ((event user-event) message &rest format-args)
-  (let ((message (apply #'format NIL message format-args)))
-    (v:debug (name (server event)) "Replying to ~a: ~a" event message)
-    (irc:privmsg (nick event) message :server (server event))))
-
-(defmethod respond ((event channel-event) message &rest format-args)
-  (let ((message (apply #'format NIL message format-args)))
-    (v:debug (name (server event)) "Replying to ~a: ~a" event message)
-    (irc:privmsg (channel event) message :server (server event))))
-
 (defclass command-event (channel-event)
   ((%command :initarg :command :accessor command)
    (%cmd-args :initarg :cmd-args :accessor cmd-args))
@@ -130,3 +108,24 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
    (%channel :initarg :channel :accessor channel)
    (%message :initarg :message :accessor message))
   (:documentation "Event for when the bot sends a message."))
+
+(defgeneric respond (event message &rest format-args)
+  (:documentation "Respond to an event origin with the given message.")
+  (:method ((event user-event) message &rest format-args)
+    (let ((message (apply #'format NIL message format-args)))
+      (v:debug (name (server event)) "Replying to ~a: ~a" event message)
+      (irc:privmsg (nick event) message :server (server event))))
+  
+  (:method ((event channel-event) message &rest format-args)
+    (let ((message (apply #'format NIL message format-args)))
+      (v:debug (name (server event)) "Replying to ~a: ~a" event message)
+      (irc:privmsg (channel event) message :server (server event)))))
+
+(defun make-event (event-name server prefix arguments)
+  "Makes an event instance from the given parameters."
+  (let ((class (gethash event-name *event-map*)))
+    (if class
+        (progn
+          (v:debug (intern (format NIL "~a.EVENT.~a" (name server) event-name) :KEYWORD) "~a ~{~a~^ ~}" prefix arguments)
+          (make-instance class :server server :prefix prefix :arguments arguments))
+        (v:warn (name server) "Inexistent event: ~a ~a ~a" event-name prefix arguments))))
