@@ -34,13 +34,6 @@
   "Retrieve a server by its keyword name, if it is connected."
   (gethash keyword *servers*))
 
-(defgeneric connect (server-or-name &key &allow-other-keys)
-  (:documentation "Connect to a server instance."))
-(defgeneric disconnect (server-or-name &key quit-message &allow-other-keys)
-  (:documentation "Disconnect a server instance and terminate their read-threads."))
-(defgeneric reconnect (server-or-name &key try-again-indefinitely)
-  (:documentation "Attempt to reconnect a server instance."))
-
 (defun auth-p (nick)
   "Return T if the requested nick is on the server's authenticated users list."
   (find nick (auth-users *current-server*) :test #'equal))
@@ -66,102 +59,108 @@
         (make-thread function :initial-bindings `((*current-server* . ,server)
                                                   (*servers* . ,*servers*)))))
 
-(defmethod connect ((server string) &key (host NIL host-s-p) (port NIL port-s-p) (nick NIL nick-s-p) (user NIL user-s-p) (pass NIL pass-s-p) (real NIL real-s-p))
-  (setf server (find-symbol (string-upcase server) "KEYWORD"))
-  (unless host-s-p (setf host (server-config server :host)))
-  (unless port-s-p (setf port (server-config server :port)))
-  (unless nick-s-p (setf nick (server-config server :nick)))
-  (unless user-s-p (setf user (server-config server :user)))
-  (unless pass-s-p (setf pass (server-config server :pass)))
-  (unless real-s-p (setf real (server-config server :real)))
-  (connect server :host host :port port :nick nick :user user :pass pass :real real))
+(defgeneric connect (server-or-name &key &allow-other-keys)
+  (:documentation "Connect to a server instance.")
+  (:method ((server string) &key (host NIL host-s-p) (port NIL port-s-p) (nick NIL nick-s-p) (user NIL user-s-p) (pass NIL pass-s-p) (real NIL real-s-p))
+    (setf server (find-symbol (string-upcase server) "KEYWORD"))
+    (unless host-s-p (setf host (server-config server :host)))
+    (unless port-s-p (setf port (server-config server :port)))
+    (unless nick-s-p (setf nick (server-config server :nick)))
+    (unless user-s-p (setf user (server-config server :user)))
+    (unless pass-s-p (setf pass (server-config server :pass)))
+    (unless real-s-p (setf real (server-config server :real)))
+    (connect server :host host :port port :nick nick :user user :pass pass :real real))
 
-(defmethod connect ((server symbol) &key (host (server-config server :host))
-                                      (port (server-config server :port))
-                                      (nick (server-config server :nick))
-                                      (user (server-config server :user))
-                                      (pass (server-config server :pass))
-                                      (real (server-config server :real)))
-  (if (null (config-tree :servers server))
-      (v:warn server "No configuration found!"))
-  (assert (not (gethash server *servers*)) () "Server already connected!")
-  (connect (make-instance 'server :name server 
-                          :host host :port port :nick nick 
-                          :username user :password pass :realname real)))
+  (:method ((server symbol) &key (host (server-config server :host))
+                                        (port (server-config server :port))
+                                        (nick (server-config server :nick))
+                                        (user (server-config server :user))
+                                        (pass (server-config server :pass))
+                                        (real (server-config server :real)))
+    (if (null (config-tree :servers server))
+        (v:warn server "No configuration found!"))
+    (assert (not (gethash server *servers*)) () "Server already connected!")
+    (connect (make-instance 'server :name server 
+                                    :host host :port port :nick nick 
+                                    :username user :password pass :realname real)))
 
-(defmethod connect ((server server) &key (start-thread T))
-  "Connects with the given credentials and returns the connection object."
-  (let ((*current-server* server)
-        #+sbcl (sb-impl::*default-external-format* *server-encoding*)) ; Fix for non-UTF-8 defaults.
-    (with-accessors ((nick nick) (realname realname)
-                     (username username) (password password) 
-                     (host host) (port port) (socket socket) (socket-stream socket-stream)) server
-      (v:info (name server) "Connecting ~a/~a@~a:~a/~a (~a)..." username password host port nick realname)
+  (:method ((server server) &key (start-thread T))
+    "Connects with the given credentials and returns the connection object."
+    (let ((*current-server* server)
+          #+sbcl (sb-impl::*default-external-format* *server-encoding*)) ; Fix for non-UTF-8 defaults.
+      (with-accessors ((nick nick) (realname realname)
+                       (username username) (password password) 
+                       (host host) (port port) (socket socket) (socket-stream socket-stream)) server
+        (v:info (name server) "Connecting ~a/~a@~a:~a/~a (~a)..." username password host port nick realname)
+        
+        (handler-case
+            (progn 
+              (setf socket (usocket:socket-connect (copy-seq host) port))
+              (setf socket-stream (usocket:socket-stream socket))
+              (unless username (setf username nick))
+              ;; Initiate
+              (when password (irc:pass password))
+              (irc:nick nick)
+              (irc:user username 0 "*" realname))
+          (error (err) 
+            (error 'connection-failed :server server :error err))))
       
-      (handler-case
-          (progn 
-            (setf socket (usocket:socket-connect (copy-seq host) port))
-            (setf socket-stream (usocket:socket-stream socket))
-            (unless username (setf username nick))
-            ;; Initiate
-            (when password (irc:pass password))
-            (irc:nick nick)
-            (irc:user username 0 "*" realname))
-        (error (err) 
-          (error 'connection-failed :server server :error err))))
-    
-    ;; Register connection and start read-loop.
-    (setf (gethash (name server) *servers*) server)
-    (when start-thread
-      (make-server-thread server '%read-thread #'read-loop)
-      (make-server-thread server '%ping-thread #'ping-loop)
-      (setf (restart-thread server) NIL))
-    server))
+      ;; Register connection and start read-loop.
+      (setf (gethash (name server) *servers*) server)
+      (when start-thread
+        (make-server-thread server '%read-thread #'read-loop)
+        (make-server-thread server '%ping-thread #'ping-loop)
+        (setf (restart-thread server) NIL))
+      server)))
 
-(defmethod disconnect ((server string) &key (quit-message (config-tree :messages :quit)))
-  (disconnect (intern (string-upcase server) "KEYWORD") :quit-message quit-message))
+(defgeneric disconnect (server-or-name &key quit-message &allow-other-keys)
+  (:documentation "Disconnect a server instance and terminate their read-threads.")
+  (:method ((server string) &key (quit-message (config-tree :messages :quit)))
+    (disconnect (intern (string-upcase server) "KEYWORD") :quit-message quit-message))
 
-(defmethod disconnect ((server symbol) &key (quit-message (config-tree :messages :quit)))
-  (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
-  (disconnect (gethash server *servers*) :quit-message quit-message))
+  (:method ((server symbol) &key (quit-message (config-tree :messages :quit)))
+    (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
+    (disconnect (gethash server *servers*) :quit-message quit-message))
 
-(defmethod disconnect ((server server) &key (quit-message (config-tree :messages :quit)) (kill-reconnect T) (quit T))
-  (flet ((terminate-server-thread (slot)
-           (when (and (slot-value server slot) (thread-alive-p (slot-value server slot)))
-             (v:debug (name server) "Interrupting ~a" slot)
-             (interrupt-thread (slot-value server slot) #'(lambda () (error 'disconnect))))))
-    (when kill-reconnect
-      (terminate-server-thread '%restart-thread))
-    (terminate-server-thread '%read-thread)
-    (terminate-server-thread '%ping-thread))
+  (:method ((server server) &key (quit-message (config-tree :messages :quit)) (kill-reconnect T) (quit T))
+    (flet ((terminate-server-thread (slot)
+             (when (and (slot-value server slot) (thread-alive-p (slot-value server slot)))
+               (v:debug (name server) "Interrupting ~a" slot)
+               (interrupt-thread (slot-value server slot) #'(lambda () (error 'disconnect))))))
+      (when kill-reconnect
+        (terminate-server-thread '%restart-thread))
+      (terminate-server-thread '%read-thread)
+      (terminate-server-thread '%ping-thread))
 
-  (when (socket server)
-    (v:info (name server) "Disconnecting...")
-    (when quit
-      (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server)
-      (finish-output (socket-stream server)))
-    (close (socket-stream server))
-    (usocket:socket-close (socket server)))
-  (setf (socket server) NIL)
-  (remhash (name server) *servers*))
+    (when (socket server)
+      (v:info (name server) "Disconnecting...")
+      (when quit
+        (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server)
+        (finish-output (socket-stream server)))
+      (close (socket-stream server))
+      (usocket:socket-close (socket server)))
+    (setf (socket server) NIL)
+    (remhash (name server) *servers*)))
 
-(defmethod reconnect ((server symbol) &key try-again-indefinitely)
-  (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
-  (reconnect (gethash server *servers*)) :try-again-indefinitely try-again-indefinitely)
+(defgeneric reconnect (server-or-name &key try-again-indefinitely)
+  (:documentation "Attempt to reconnect a server instance.")
+  (:method ((server symbol) &key try-again-indefinitely)
+    (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
+    (reconnect (gethash server *servers*)) :try-again-indefinitely try-again-indefinitely)
 
-(defmethod reconnect ((server server) &key try-again-indefinitely)
-  (v:info (name server) "Reconnecting...")
-  (disconnect server :kill-reconnect NIL)
-  (handler-bind ((connection-failed
-                  #'(lambda (err)
-                      (if try-again-indefinitely
-                          (progn
-                            (v:warn (name server) "Reconnection failed, trying again in ~as..." (server-config server :reconnect-cooldown))
-                            (invoke-restart 'reconnect))
-                          (error err)))))
-    (loop do (sleep (server-config server :reconnect-cooldown))
-       until (with-simple-restart (reconnect "Retry connecting.") 
-               (connect server)))))
+  (:method ((server server) &key try-again-indefinitely)
+    (v:info (name server) "Reconnecting...")
+    (disconnect server :kill-reconnect NIL)
+    (handler-bind ((connection-failed
+                     #'(lambda (err)
+                         (if try-again-indefinitely
+                             (progn
+                               (v:warn (name server) "Reconnection failed, trying again in ~as..." (server-config server :reconnect-cooldown))
+                               (invoke-restart 'reconnect))
+                             (error err)))))
+      (loop do (sleep (server-config server :reconnect-cooldown))
+            until (with-simple-restart (reconnect "Retry connecting.") 
+                    (connect server))))))
 
 (defmacro with-reconnect-handler (servervar &body body)
   "Handles all possible connection errors and initiates a reconnect on failure."
