@@ -31,66 +31,55 @@
   (:documentation "Class for module commands."))
 
 (defgeneric start (module)
-  (:documentation "Start the module and activate it for use."))
+  (:documentation "Start the module and activate it for use.")
+  (:method :around ((module module))
+    (call-next-method)
+    (setf (active module) T)
+    module)
+
+  (:method ((module module))))
+
 (defgeneric stop (module)
-  (:documentation "Stop the module and clean everything up."))
+  (:documentation "Stop the module and clean everything up.")
+  (:method :around ((module module))
+    (setf (active module) NIL)
+    (loop for uid being the hash-keys of (threads module)
+          for thread being the hash-values of (threads module)
+          do (if (thread-alive-p thread)
+                 (interrupt-thread thread #'(lambda () (error 'module-stop)))
+                 (remhash uid (threads module))))
+    (call-next-method)
+    module)
+
+  (:method ((module module))))
+
 (defgeneric add-group (module group)
-  (:documentation "Register a new group in the module."))
+  (:documentation "Register a new group in the module.")
+  (:method ((module module) group)
+    (let ((group (string-downcase group)))
+      (unless (gethash group (groups module))
+        (setf (gethash group (groups module)) (make-hash-table :test 'equal))))))
+
 (defgeneric add-group-command (module group command args method &optional documentation)
-  (:documentation "Add a new command to a group in the module."))
+  (:documentation "Add a new command to a group in the module.")
+  (:method ((module module) group command args method &optional documentation)
+    (let ((command (string-downcase command))
+          (group (string-downcase group)))
+      (assert (not (null (gethash group (groups module)))))
+      (setf (gethash command (gethash group (groups module)))
+            (make-instance 'command :name command :arguments args :function method :documentation documentation)))))
+
 (defgeneric add-command (module command args method &optional documentation)
-  (:documentation "Add a new command to the module."))
+  (:documentation "Add a new command to the module.")
+  (:method ((module module) command args method &optional documentation)
+    (let ((command (string-downcase command)))
+      (setf (gethash command (commands module))
+            (make-instance 'command :name command :arguments args :function method :documentation documentation)))))
+
 (defgeneric add-handler (module eventtype method)
-  (:documentation "Add a new event handler to the module."))
-(defgeneric dispatch (module event &key &allow-other-keys)
-  (:documentation "Handle a new event and distribute it to the registered handler functions."))
-(defgeneric get-command (module commandname)
-  (:documentation "Get the command instance associated with the command name."))
-(defgeneric get-group (module group-symbol)
-  (:documentation "Return the hash-map defining the group."))
-(defgeneric get-group-command (module group-symbol commandname)
-  (:documentation "Return the function symbol to the group-command."))
-(defgeneric get-module (module-name)
-  (:documentation "Return a module by its name."))
-
-(defmethod start :around ((module module))
-  (call-next-method)
-  (setf (active module) T)
-  module)
-
-(defmethod start ((module module)))
-
-(defmethod stop :around ((module module))
-  (setf (active module) NIL)
-  (loop for uid being the hash-keys of (threads module)
-        for thread being the hash-values of (threads module)
-        do (if (thread-alive-p thread)
-               (interrupt-thread thread #'(lambda () (error 'module-stop)))
-               (remhash uid (threads module))))
-  (call-next-method)
-  module)
-
-(defmethod stop ((module module)))
-
-(defmethod add-group ((module module) group)
-  (let ((group (string-downcase group)))
-    (unless (gethash group (groups module))
-      (setf (gethash group (groups module)) (make-hash-table :test 'equal)))))
-
-(defmethod add-group-command ((module module) group command args method &optional documentation)
-  (let ((command (string-downcase command))
-        (group (string-downcase group)))
-    (assert (not (null (gethash group (groups module)))))
-    (setf (gethash command (gethash group (groups module)))
-          (make-instance 'command :name command :arguments args :function method :documentation documentation))))
-
-(defmethod add-command ((module module) command args method &optional documentation)
-  (let ((command (string-downcase command)))
-    (setf (gethash command (commands module))
-          (make-instance 'command :name command :arguments args :function method :documentation documentation))))
-
-(defmethod add-handler ((module module) eventtype method)
-  (setf (gethash (string-downcase eventtype) (handlers module)) method))
+  (:documentation "Add a new event handler to the module.")
+  (:method ((module module) eventtype method)
+    (setf (gethash (string-downcase eventtype) (handlers module)) method)))
 
 (defmacro with-module-thread (module &body thread-body)
   (let ((uidgens (gensym "UUID"))
@@ -116,62 +105,72 @@
                                               (*servers* . ,*servers*))))
        ,uidgens)))
 
-(defmethod dispatch ((module T) (event event) &key ignore-errors)
-  (loop for module being the hash-values of *bot-modules*
-        if (active module)
-          do (when (if ignore-errors 
-                       (ignore-errors (dispatch module event)) 
-                       (dispatch module event))
-               (return-from dispatch))))
+(defgeneric dispatch (module event &key &allow-other-keys)
+  (:documentation "Handle a new event and distribute it to the registered handler functions.")
+  (:method ((module T) (event event) &key ignore-errors)
+    (loop for module being the hash-values of *bot-modules*
+          if (active module)
+            do (when (if ignore-errors 
+                         (ignore-errors (dispatch module event)) 
+                         (dispatch module event))
+                 (return-from dispatch))))
 
-(defmethod dispatch ((module module) (event event) &key)
-  (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
-    (when handler
-      (v:trace (name module) "Dispatching: ~a" event)
-      (with-module-thread module
-        (funcall handler module event))
-      NIL)))
+  (:method ((module module) (event event) &key)
+    (let ((handler (gethash (string-downcase (class-name (class-of event))) (handlers module))))
+      (when handler
+        (v:trace (name module) "Dispatching: ~a" event)
+        (with-module-thread module
+          (funcall handler module event))
+        NIL)))
 
-(defmethod dispatch ((module module) (event command-event) &key)
-  (let ((handler (gethash (command event) (commands module))))
-    (when handler
-      (v:trace (name module) "Dispatching: ~a" event)
-      (with-module-thread module
-        (handler-bind
-            ((error #'(lambda (err)
-                        (v:warn (find-symbol (string-upcase (class-name (class-of module))) :KEYWORD) "Unhandled condition: ~a" err)
-                        (respond event "Unhandled condition: ~a" err)
-                        (when *debugger*
-                          (invoke-debugger err)))))
-          (handler-case
-              (funcall (cmd-fun handler) module event)
-            (not-authorized (err)
-              (v:warn (name *current-server*) "User ~a attempted to execute ~a, but is not authorized!" (nick (event err)) (command (event err)))
-              (respond (event err) (fstd-message (event err) :not-authorized)))
-            (invalid-arguments (err)
-              (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
-              (respond event "Invalid arguments. Expected: ~a" (argslist err))))))
-      T)))
+  (:method ((module module) (event command-event) &key)
+    (let ((handler (gethash (command event) (commands module))))
+      (when handler
+        (v:trace (name module) "Dispatching: ~a" event)
+        (with-module-thread module
+          (handler-bind
+              ((error #'(lambda (err)
+                          (v:warn (find-symbol (string-upcase (class-name (class-of module))) :KEYWORD) "Unhandled condition: ~a" err)
+                          (respond event "Unhandled condition: ~a" err)
+                          (when *debugger*
+                            (invoke-debugger err)))))
+            (handler-case
+                (funcall (cmd-fun handler) module event)
+              (not-authorized (err)
+                (v:warn (name *current-server*) "User ~a attempted to execute ~a, but is not authorized!" (nick (event err)) (command (event err)))
+                (respond (event err) (fstd-message (event err) :not-authorized)))
+              (invalid-arguments (err)
+                (v:warn (name *current-server*) "Invalid arguments to ~a, expected ~a" (command err) (argslist err))
+                (respond event "Invalid arguments. Expected: ~a" (argslist err))))))
+        T))))
 
-(defmethod get-command ((module module) commandname)
-  (gethash (string-downcase commandname) (commands module)))
+(defgeneric get-command (module commandname)
+  (:documentation "Get the command instance associated with the command name.")
+  (:method ((module module) commandname)
+    (gethash (string-downcase commandname) (commands module))))
 
-(defmethod get-group ((module module) group)
-  (gethash (string-downcase group) (groups module)))
+(defgeneric get-group (module group-symbol)
+  (:documentation "Return the hash-map defining the group.")
+  (:method ((module module) group)
+    (gethash (string-downcase group) (groups module))))
 
-(defmethod get-group-command ((module module) group commandname)
-  (let ((group (get-group module group)))
-    (when group (gethash commandname group))))
+(defgeneric get-group-command (module group-symbol commandname)
+  (:documentation "Return the function symbol to the group-command.")
+  (:method ((module module) group commandname)
+    (let ((group (get-group module group)))
+      (when group (gethash commandname group)))))
 
-(defmethod get-module ((module-name string))
-  (let ((symbol (find-symbol (string-upcase module-name) :KEYWORD)))
-    (when symbol
-      (get-module symbol))))
+(defgeneric get-module (module-name)
+  (:documentation "Return a module by its name.")
+  (:method ((module-name string))
+    (let ((symbol (find-symbol (string-upcase module-name) :KEYWORD)))
+      (when symbol
+        (get-module symbol))))
 
-(defmethod get-module ((module-name symbol))
-  (unless (keywordp module-name)
-    (get-module (symbol-name module-name)))
-  (gethash module-name *bot-modules*))
+  (:method ((module-name symbol))
+    (unless (keywordp module-name)
+      (get-module (symbol-name module-name)))
+    (gethash module-name *bot-modules*)))
 
 (defmethod name ((module module))
   (find-symbol (format NIL "~a" (class-name (class-of module))) :KEYWORD))
