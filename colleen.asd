@@ -21,6 +21,7 @@
                (:file "conditions")
                (:file "reply-codes")
                (:file "config")
+               (:file "toolkit")
                (:file "event")
                (:file "module")
                (:file "server")
