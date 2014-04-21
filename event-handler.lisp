@@ -8,6 +8,12 @@
 
 (defvar *handler-map* (make-hash-table))
 (defvar *priority-map* (make-hash-table))
+(defvar *priority-names* (let ((map (make-hash-table)))
+                           (loop for (name . val) in '((:MAIN 0) (:STANDARD 0)
+                                                       (:BEFORE 100) (:AFTER -100)
+                                                       (:PREPROCESS 200) (:POSTPROCESS -200))
+                                 do (setf (gethash name map) val))
+                           map))
 
 (defclass event-handler ()
   ((%event-type :initarg :event-type :initform 'event :accessor event-type)
@@ -32,13 +38,10 @@
     (setf *priority-map* priority-map)))
 
 (defun define-handler-function (event-class identifier function &optional (priority :MAIN))
-  (assert (symbolp identifier) () "Identifier has to be a symbol.")
-  (setf priority
-        (cond ((eql priority :MAIN) 0)
-              ((eql priority :BEFORE) 100)
-              ((eql priority :AFTER) -100)
-              ((realp priority) priority)
-              (T (error "Priority must be a REAL or one of :MAIN, :BEFORE, :AFTER."))))
+  (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
+  (setf priority (gethash priority *priority-names* priority))
+  (assert (realp priority) () "PRIORITY has to be a real or a symbol from *PRIORITY-NAMES*.")
+  
   (when (gethash identifier *handler-map*)
     (v:warn :event "Redefining handler ~a" identifier))
   (setf (gethash identifier *handler-map*)
