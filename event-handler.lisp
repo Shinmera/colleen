@@ -9,9 +9,9 @@
 (defvar *handler-map* (make-hash-table))
 (defvar *priority-map* (make-hash-table))
 (defvar *priority-names* (let ((map (make-hash-table)))
-                           (loop for (name . val) in '((:MAIN 0) (:STANDARD 0)
-                                                       (:BEFORE 100) (:AFTER -100)
-                                                       (:PREPROCESS 200) (:POSTPROCESS -200))
+                           (loop for (name val) in '((:MAIN 0) (:STANDARD 0)
+                                                     (:BEFORE 100) (:AFTER -100)
+                                                     (:PREPROCESS 200) (:POSTPROCESS -200))
                                  do (setf (gethash name map) val))
                            map))
 
