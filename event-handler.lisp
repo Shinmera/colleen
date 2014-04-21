@@ -37,7 +37,7 @@
     (v:trace :event "Rebuilding priority map.")
     (setf *priority-map* priority-map)))
 
-(defun define-handler-function (event-class identifier function &optional (priority :MAIN))
+(defun set-handler-function (identifier event-class function &optional (priority :MAIN))
   (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
   (setf priority (gethash priority *priority-names* priority))
   (assert (realp priority) () "PRIORITY has to be a real or a symbol from *PRIORITY-NAMES*.")
@@ -49,9 +49,23 @@
   (generate-handler-priority-cache)
   identifier)
 
+(defun remove-handler-function (identifier)
+  (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
+  (remhash identifier *handler-map*)
+  (generate-handler-priority-cache)
+  identifier)
+
 (defun dispatch (event)
   (loop for handler in (gethash (type-of event) *priority-map*)
         until (cancelled event)
         do (funcall (handler-function handler) event))
   event)
 
+(defmacro define-handler (event-type (&key (modulevar 'module) module-name (priority :MAIN) identifier) &body body)
+  (unless module-name (setf module-name (get-current-module-name)))
+  (destructuring-bind (event-type &optional (event-var event-type)) (ensure-list event-type)
+    (let ((auto-ident (format NIL "~a-~a" module-name event-type)))
+      `(set-handler-function ,(or identifier
+                                  (find-symbol auto-ident)
+                                  (intern auto-ident))
+                             ',event-type #'(lambda (event) ,@body) ,priority))))
