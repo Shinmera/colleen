@@ -9,8 +9,12 @@
 (defclass event ()
   ((%server :initarg :server :reader server)
    (%prefix :initarg :prefix :reader prefix)
-   (%arguments :initarg :arguments :reader arguments))
+   (%arguments :initarg :arguments :reader arguments)
+   (%cancelled :initarg :cancelled :initform NIL :reader cancelled))
   (:documentation "Base event class."))
+
+(defun cancel (event)
+  (setf (cancelled event) T))
 
 (defmacro arguments-bind ((&rest vars) expression &body body)
   "Destructuring-bind extension to make event parsing easier.

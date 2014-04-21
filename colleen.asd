@@ -23,6 +23,7 @@
                (:file "config")
                (:file "toolkit")
                (:file "event")
+               (:file "event-handler")
                (:file "module")
                (:file "client")
                (:file "irc-commands")
