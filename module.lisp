@@ -98,13 +98,16 @@
 
 (defun get-current-module (&optional (package *package*))
   "Returns the module of the current package context."
+  (get-module (get (package-symbol package) :module)))
+
+(defun get-current-module-name (&optional (package *package*))
+  "Returns the name of the module in the current package context."
   (get (package-symbol package) :module))
 
 (defmacro define-module (name direct-superclasses direct-slots &body options)
   "Define a new module class. See DEFCLASS.
 Note that all module slots are always allocated on the class."
-  (let ((instancesym (gensym "INSTANCE"))
-        (keyname (intern (string-upcase name) "KEYWORD")))
+  (let ((keyname (intern (string-upcase name) "KEYWORD")))
     `(eval-when (:compile-toplevel :load-toplevel :execute) 
        (defclass ,name (module ,@direct-superclasses)
          ((%active :initform NIL :reader active :allocation :class)
@@ -114,9 +117,8 @@ Note that all module slots are always allocated on the class."
        (when (and (gethash ,keyname *bot-modules*)
                   (active (gethash ,keyname *bot-modules*)))
          (v:warn :colleen "Redefining started module ~a. Let's hope everything goes well..." ,keyname))
-       (let ((,instancesym (make-instance ',name)))
-         (setf (get (package-symbol *package*) :module) ,instancesym
-               (gethash ,keyname *bot-modules*) ,instancesym)))))
+       (setf (get (package-symbol *package*) :module) ,keyname
+             (gethash ,keyname *bot-modules*) (make-instance ',name)))))
 
 (defun start-module (&rest module-names)
   "Start up one or more modules. Each module name should be a symbol or string."
