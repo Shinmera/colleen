@@ -10,7 +10,7 @@
   ((%server :initarg :server :reader server)
    (%prefix :initarg :prefix :reader prefix)
    (%arguments :initarg :arguments :reader arguments)
-   (%cancelled :initarg :cancelled :initform NIL :reader cancelled))
+   (%cancelled :initarg :cancelled :initform NIL :accessor cancelled))
   (:documentation "Base event class."))
 
 (defun cancel (event)
@@ -103,8 +103,7 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
       (setf channel (nick event)))))
 
 (defclass command-event (channel-event)
-  ((%command :initarg :command :accessor command)
-   (%cmd-args :initarg :cmd-args :accessor cmd-args))
+  ((%message :initarg :message :accessor message))
   (:documentation "Event for commands."))
 
 (defclass send-event (event) 

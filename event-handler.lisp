@@ -69,4 +69,6 @@
       `(set-handler-function ,(or identifier
                                   (find-symbol auto-ident)
                                   (intern auto-ident))
-                             ',event-type #'(lambda (event) ,@body) ,priority))))
+                             ',event-type #'(lambda (,event-var)
+                                              (let ((,modulevar (get-module ,module-name)))
+                                                ,@body)) ,priority))))

@@ -14,9 +14,9 @@
 (defmacro generalize-module-accessor (name)
   `(progn
      (defmethod ,name ((module-name string))
-       (,name (get-module ,module-name)))
+       (,name (get-module module-name)))
      (defmethod ,name ((module-name symbol))
-       (,name (get-module ,module-name)))))
+       (,name (get-module module-name)))))
 
 (generalize-module-accessor active)
 (generalize-module-accessor threads)
@@ -85,7 +85,7 @@
         (to-module-name (symbol-name module-name)))))
 
 (defun get-module (designator)
-  (gethash (to-module-name module-name) *bot-modules*))
+  (gethash (to-module-name designator) *bot-modules*))
 
 (defmethod name ((module module))
   (find-symbol (princ-to-string (class-name (class-of module))) :KEYWORD))

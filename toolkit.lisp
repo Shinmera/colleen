@@ -76,4 +76,4 @@ Each entity is a list with the following format: (TYPE START END)"
           (incf offset (- end start))))
       (finish unclosed-fg)
       (finish unclosed-bg))
-    (values (strip-formatting string) entities)))
+    (values (strip-colors string) entities)))
