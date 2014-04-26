@@ -16,7 +16,7 @@
    (%handler-function :initarg :handler-function :initform (error "Handler function required.") :accessor handler-function)
    (%priority :initarg :priority :initform 0 :accessor priority)
    (%docstring :initarg :docstring :initform NIL :accessor docstring))
-  (:documentation ""))
+  (:documentation "Container class representing a command handler."))
 
 (defmethod print-object ((handler command-handler) stream)
   (print-unreadable-object (handler stream :type T)
@@ -101,6 +101,7 @@ DOCSTRING        --- An optional documentation string"
                                :arguments (arguments event)
                                :prefix (prefix event)
                                :message (message (subseq (message event) (length prefix))))))))
+(set-handler-function :command-reader 'events:privmsg-event #'read-command)
 
 (defun lambda-keyword-p (symbol)
   (find symbol '(&allow-other-keys &aux &body &environment &key &optional &rest &whole)))
@@ -132,8 +133,6 @@ DOCSTRING        --- An optional documentation string"
                    (error 'invalid-arguments :argslist (cdr (arguments handler)) :command (identifier handler)))
                  (v:debug :command "Dispatching ~a to ~a." event handler)
                  (apply (handler-function handler) event args))))))
-
-(set-handler-function :command-reader 'events:privmsg-event #'read-command)
 (set-handler-function :command-dispatcher 'events:command-event #'dispatch-command)
 
 
