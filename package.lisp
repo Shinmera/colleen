@@ -55,7 +55,6 @@
    #:prefix
    #:arguments
    
-   #:define-event
    #:user-event
    #:username
    #:hostmask
@@ -74,6 +73,7 @@
    #:message
    
    #:respond
+   #:define-event
    #:make-event)
   ;; globals.lisp
   (:export
@@ -223,6 +223,11 @@
   (:nicknames :events)
   (:export
    ;; Event classes
+   :event
+   :user-event
+   :channel-event
+   :command-event
+   :send-event
    :ping-event
    :pong-event
    :nick-event
