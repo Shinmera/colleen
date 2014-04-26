@@ -18,6 +18,11 @@
    (%docstring :initarg :docstring :initform NIL :accessor docstring))
   (:documentation ""))
 
+(defmethod print-object ((handler command-handler) stream)
+  (print-unreadable-object (handler stream :type T)
+    (print (identifier handler) stream))
+  handler)
+
 (defun generate-command-priority-cache ()
   "Regenerates the command handler priority array.
 Necessary to ensure proper dispatch order."
@@ -48,18 +53,21 @@ Necessary to ensure proper dispatch order."
   (generate-handler-priority-cache)
   identifier)
 
-(defun set-command-function (identifier cmd-pattern arguments handler-function &key (priority (length cmd-pattern)) docstring)
+(defun set-command-function (identifier cmd-pattern handler-function &key arguments (priority (length cmd-pattern)) docstring)
   "Set a new handler function for a command pattern.
 
 IDENTIFIER       --- A symbol identifying your handler.
 CMD-PATTERN      --- A REGEX pattern to match the message with. Usually you'll
                      want to do something like \"^my-command (.*)\". Arguments are 
                      matched by the last regex group.
-ARGUMENTS        --- A list of function arguments that the command should accept.
-                     This lambda list can only contain &OPTIONAL and &REST.
 HANDLER-FUNCTION --- The function object to dispatch the command to. Has to
                      accept as many arguments as ARGUMENTS specifies as well
                      as a first argument that will be bound to the command event.
+ARGUMENTS        --- A list of function arguments that the command should accept.
+                     This lambda list can only contain &OPTIONAL and &REST.
+                     If not provided, it will attempt to retrieve it through
+                     SB-INTROSPECT:FUNCTION-LAMBDA-LIST or FUNCTION-LAMBDA-EXPRESSION.
+                     If this fails, an error is thrown.
 PRIORITY         --- Either a key from *PRIORITY-NAMES* or a real setting the
                      priority of the handler. Higher priorities are served first.
                      Defaults to the length of CMD-PATTERN, which should be sane.
@@ -70,9 +78,13 @@ DOCSTRING        --- An optional documentation string"
 
   (when (gethash identifier *cmd-map*)
     (v:info :command "Redefining handler ~a" identifier))
+  (unless arguments
+    (setf arguments #+sbcl (sb-introspect:function-lambda-list handler-function)
+                    #-sbcl (second (nth-value 2 (function-lambda-expression handler-function)))))
+  (assert (not (null arguments)) () "Failed to autodetect ARGUMENTS list. Please specify manually.")
   (setf (gethash identifier *cmd-map*)
         (make-instance 'command-handler
-                       :identifier identifier :pattern pattern :arguments arguments
+                       :identifier identifier :pattern cmd-pattern :arguments arguments
                        :handler-function handler-function :priority priority :docstring docstring))
   (generate-command-priority-cache)
   identifier)
@@ -89,8 +101,36 @@ DOCSTRING        --- An optional documentation string"
                                :prefix (prefix event)
                                :message (message (subseq (message event) (length prefix))))))))
 
+(defun lambda-keyword-p (symbol)
+  (find symbol '(&allow-other-keys &aux &body &environment &key &optional &rest &whole)))
+(defun flatten-lambda-list (lambda-list)
+  (mapcar #'(lambda (a) (if (listp a) (car a) a)) lambda-list))
+(defun extract-lambda-vars (lambda-list)
+  (remove-if #'lambda-keyword-p (flatten-lambda-list lambda-list)))
+(defun required-lambda-vars (lambda-list)
+  (loop for i in lambda-list
+        until (lambda-keyword-p i)
+        collect i))
+
+(defun arguments-match-p (lambda-list provided)
+  (let ((num (length provided))
+        (requireds (length (required-lambda-vars lambda-list))))
+    (or (= num requireds)                                 ; Only as long as required, good.
+        (and (> num requireds)                            ; But shorter is not allowed.
+             (or (find '&rest lambda-list)                ; If we have &rest, any amount is good.
+                 (and (find '&optional lambda-list)       ; Without &rest, &optional is possible.
+                      (< num (length lambda-list))))))))  ; But then it cannot be longer than the amount of optionals.
+
 (defun dispatch-command (event)
-  )
+  (loop for handler across *cmd-priority-array*
+        do (multiple-value-bind (match groups) (cl-ppcre:scan-to-strings (pattern handler) (message event))
+             (when match
+               (v:trace :command "Event ~a matched ~a." event handler)
+               (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))))))
+                 (unless (arguments-match-p (cdr (arguments handler)) args)
+                   (error 'invalid-arguments :argslist (cdr (arguments handler)) :command (identifier handler)))
+                 (v:debug :command "Dispatching ~a to ~a." event handler)
+                 (apply (handler-function handler) event args))))))
 
 (set-handler-function :command-reader 'events:privmsg-event #'read-command)
 (set-handler-function :command-dispatcher 'events:command-event #'dispatch-command)
