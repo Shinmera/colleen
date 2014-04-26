@@ -26,9 +26,9 @@ Defined by default are :PREPROCESS :BEFORE :MAIN :STANDARD
 
 (defclass event-handler ()
   ((%event-type :initarg :event-type :initform 'event :accessor event-type)
-   (%priority :initarg :priority :initform 0 :accessor priority)
    (%identifier :initarg :identifier :initform (error "Identifier required.") :accessor identifier)
    (%handler-function :initarg :handler-function :initform (error "Handler function required.") :accessor handler-function)
+   (%priority :initarg :priority :initform 0 :accessor priority)
    (%docstring :initarg :docstring :initform NIL :accessor docstring))
   (:documentation "Container class representing an event handler."))
 
@@ -56,12 +56,13 @@ Necessary to ensure proper event handling order."
 (defgeneric (setf event-handler) (event-handler identifier)
   (:documentation "Set a new EVENT-HANDLER instance for a given IDENTIFIER.")
   (:method ((event-handler event-handler) (identifier symbol))
-    (assert (eq identifier (identifier event-handler)) () "The identifier of the EVENT-HANDLER has to match.")
+    (assert (eq identifier (identifier event-handler)) ()
+            "The identifier of the EVENT-HANDLER does not match (~a != ~a)" identifier (identifier event-handler))
     (setf (gethash identifier *evt-map*) event-handler)
     (generate-handler-priority-cache)))
 
 (defun remove-event-handler (identifier)
-  "Remove an EVENT-HANDLER associated with the given IDENTIFIER."
+  "Remove the EVENT-HANDLER associated with the given IDENTIFIER."
   (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
   (remhash identifier *evt-map*)
   (generate-handler-priority-cache)
@@ -69,6 +70,7 @@ Necessary to ensure proper event handling order."
 
 (defun set-handler-function (identifier event-class function &key (priority :MAIN) docstring)
   "Set a new handler function for an event class.
+
 IDENTIFIER  --- A symbol identifying your handler.
 EVENT-CLASS --- The type of event class you want to handle.
 FUNCTION    --- The function object to dispatch to on event handling. Has to
