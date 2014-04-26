@@ -13,6 +13,10 @@
    (%cancelled :initarg :cancelled :initform NIL :accessor cancelled))
   (:documentation "Base event class."))
 
+(defmethod print-object ((event event) stream)
+  (print-unreadable-object (event stream :type T))
+  event)
+
 (defun cancel (event)
   (setf (cancelled event) T))
 
@@ -68,7 +72,8 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
                   (defmethod print-object ((,eventvar ,name) stream)
                     (print-unreadable-object (,eventvar stream :type T)
                       (format stream ,(format NIL "~{~a: ~~a~^ ~}" varlist)
-                              ,@(mapcar #'(lambda (var) `(,var ,eventvar)) varlist)))))))))
+                              ,@(mapcar #'(lambda (var) `(,var ,eventvar)) varlist)))
+                    ,eventvar))))))
 
 (defclass user-event (event)
     ((%username :initarg :username :reader username)

@@ -32,6 +32,11 @@ Defined by default are :PREPROCESS :BEFORE :MAIN :STANDARD
    (%docstring :initarg :docstring :initform NIL :accessor docstring))
   (:documentation "Container class representing an event handler."))
 
+(defmethod print-object ((handler event-handler) stream)
+  (print-unreadable-object (handler stream :type T)
+    (print (identifier handler) stream))
+  handler)
+
 (defun generate-handler-priority-cache (&optional (handler-map *evt-map*))
   "Regenerates the event handler priority map.
 Necessary to ensure proper event handling order."
