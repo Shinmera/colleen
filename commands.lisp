@@ -80,7 +80,8 @@ DOCSTRING        --- An optional documentation string"
     (v:info :command "Redefining handler ~a" identifier))
   (unless arguments
     (setf arguments #+sbcl (sb-introspect:function-lambda-list handler-function)
-                    #-sbcl (second (nth-value 2 (function-lambda-expression handler-function)))))
+                    #+(and swank (not sbcl)) (swank-backend:arglist handler-function)
+                    #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression handler-function)))))
   (assert (not (null arguments)) () "Failed to autodetect ARGUMENTS list. Please specify manually.")
   (setf (gethash identifier *cmd-map*)
         (make-instance 'command-handler
@@ -134,3 +135,10 @@ DOCSTRING        --- An optional documentation string"
 
 (set-handler-function :command-reader 'events:privmsg-event #'read-command)
 (set-handler-function :command-dispatcher 'events:command-event #'dispatch-command)
+
+
+(defmacro define-group (name &key module-name documentation)
+  )
+
+(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern priority) &body body)
+  )
