@@ -147,14 +147,14 @@
                 (since    (first (first (pstmt "SELECT \"time\" FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2 ORDER BY \"time\" ASC LIMIT 1" server channel))))
                 (topuser  (first (pstmt "SELECT COUNT(*) AS c,user FROM \"chatlog\" WHERE lower(\"server\")=$2 AND lower(\"channel\")=$1 AND \"type\"='m' GROUP BY \"user\" ORDER BY c DESC" server channel))))
             (respond event "Logging since ~a with a total of ~d events from ~a users, of which ~d were messages. User with most messages (~d) is ~a."
-                     (fmt since) events users messages (first topuser) (second topuser))))
+                     (fmt since) events users messages (first topuser) (string-trim " " (second topuser)))))
         (let ((channels (length (postmodern:query "SELECT \"channel\" FROM \"chatlog\" GROUP BY \"channel\"")))
               (events   (first (first (postmodern:query "SELECT COUNT(*) FROM \"chatlog\""))))
               (users    (length (postmodern:query "SELECT \"user\" FROM \"chatlog\" GROUP BY \"user\"")))
               (messages (first (first (postmodern:query "SELECT COUNT(*) FROM \"chatlog\" WHERE \"type\"='m'"))))
               (topuser  (first (postmodern:query "SELECT COUNT(*) AS c,\"user\" FROM \"chatlog\" WHERE \"type\"='m' GROUP BY \"user\" ORDER BY c DESC LIMIT 1"))))
           (respond event "Logging ~d channels with a total of ~d events from ~a users, of which ~d were messages. User with most messages (~d) is ~a."
-                   channels events users messages (first topuser) (second topuser))))))
+                   channels events users messages (first topuser) (string-trim " " (second topuser)))))))
 
 (define-command (chatlog-pg count) (nick) (:documentation "Counts the amount of recorded messages for a nick.")
   (bordeaux-threads:with-lock-held ((lock module))
