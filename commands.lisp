@@ -58,7 +58,7 @@ Necessary to ensure proper dispatch order."
   (generate-command-priority-cache)
   identifier)
 
-(defun set-command-function (identifier cmd-pattern handler-function &key (arguments () a-p) (priority (length cmd-pattern)) docstring)
+(defun set-command-function (identifier cmd-pattern handler-function &key (arguments () a-p) (priority (length cmd-pattern)) docstring (class 'command-handler))
   "Set a new handler function for a command pattern.
 
 IDENTIFIER       --- A symbol identifying your handler.
@@ -88,7 +88,7 @@ DOCSTRING        --- An optional documentation string"
                          #+(and swank (not sbcl)) (swank-backend:arglist handler-function)
                          #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression handler-function))))))
   (setf (command-handler identifier)
-        (make-instance 'command-handler
+        (make-instance class
                        :identifier identifier :pattern cmd-pattern :arguments arguments
                        :handler-function handler-function :priority priority :docstring docstring))
   identifier)
@@ -152,16 +152,17 @@ DOCSTRING        --- An optional documentation string"
                  (multiple-value-bind (match groups) (cl-ppcre:scan-to-strings (scanner handler) (message event))
                    (when match
                      (v:trace :command "Event ~a matched ~a." event handler)
-                     (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))))))
+                     (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))) :remove-empty-subseqs T)))
                        (with-repeating-restart (recheck-command "Try checking the arguments again.")
                          (unless (arguments-match-p (arguments handler) args)
-                           (error 'invalid-arguments :argslist (arguments handler) :command (identifier handler)))
+                           (error 'invalid-arguments :argslist args :expected (arguments handler) :command (identifier handler)))
                          (with-repeating-restart (retry-command "Retry dispatching to ~a" handler)
                            (v:debug :command "Dispatching ~a to ~a." event handler)
                            (setf (cancelled event) T) ; Cancel by default
                            (apply (handler-function handler) event args)
                            (setf (handled event) T)
-                           T))))))))))
+                           T))))
+                   T))))))
 (set-handler-function :command-dispatcher 'events:command-event #'dispatch-command)
 
 (defun no-command-matched (event &rest args)
@@ -187,18 +188,20 @@ DOCSTRING        --- An optional documentation string"
           (identifier handler) (pattern handler) (docstring handler) (subcommands handler)))
 
 (defmacro define-group (name &key documentation pattern subcommands)
+  (assert (symbolp name) () "NAME has to be a symbol.")
   (unless pattern
-    (setf pattern (format NIL "^~a(.*)" (escape-regex-symbols name))))
+    (setf pattern (format NIL "^~a(.*)" (escape-regex-symbols (string name)))))
   `(progn
      (set-command-function ',name ,pattern #'(lambda (event &rest args)
                                                (if args
                                                    (respond event (apropos-command-handler (message event)))
                                                    (respond event (apropos-command-handler (command-handler ',name)))))
-                           :docstring ,documentation :priority :AFTER)
+                           :docstring ,documentation :priority :AFTER :class 'group-handler)
      ,(when subcommands
         `(setf (subcommands (command-handler ',name)) ,subcommands))))
 
 (defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern (priority :DEFAULT)) &body body)
+  (assert (or (symbolp name) (listp name)) () "NAME has to be a symbol or a list of symbols.")
   (unless pattern
     (setf pattern (if (listp name)
                       (format NIL "^~{~a~^ ~}(.*)" (mapcar #'(lambda (a) (escape-regex-symbols (string a))) name))
@@ -207,7 +210,7 @@ DOCSTRING        --- An optional documentation string"
     (setf module-name (get-current-module-name)))
   (let ((funcsym (gensym "FUNCTION")))
     (flet ((mksymb (list)
-             (let ((name (format NIL "~{~a^ ~}" list)))
+             (let ((name (format NIL "~{~a~^ ~}" list)))
                (or (find-symbol name) (intern name)))))
       `(let ((,funcsym #'(lambda (,eventvar ,@args)
                             ,@(when authorization
@@ -220,11 +223,11 @@ DOCSTRING        --- An optional documentation string"
                                  `(progn ,@body)))))
          ,(if (listp name)
               (let ((group (car name))
-                    (name (mksymb (cdr name))))
+                    (name (mksymb name)))
                 `(progn
                    ,(if (command-handler group)
                         `(pushnew ',name (subcommands (command-handler ',group)))
                         `(progn (warn 'implicit-group-definition :group ',group)
-                                (define-group ',group :subcommands (list ',name))))
+                                (define-group ,group :subcommands (list ',name))))
                    (set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation)))
               `(set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation))))))
