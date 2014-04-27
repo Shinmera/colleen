@@ -111,8 +111,11 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
 (defclass command-event (channel-event)
   ((%message :initarg :message :accessor message)
    (%handled :initarg :handled :initform NIL :accessor handled))
-  
   (:documentation "Event for commands."))
+
+(defclass generated-command-event (command-event)
+  ((%output-stream :initarg :output-stream :accessor output-stream))
+  (:documentation "Event for commands generated and handled outside of IRC streams (f.e. REPL)."))
 
 (defclass send-event (event) 
   ((%nick :initarg :nick :accessor nick)
@@ -130,7 +133,13 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
   (:method ((event channel-event) message &rest format-args)
     (let ((message (apply #'format NIL message format-args)))
       (v:debug (name (server event)) "Replying to ~a: ~a" event message)
-      (irc:privmsg (channel event) message :server (server event)))))
+      (irc:privmsg (channel event) message :server (server event))))
+
+  (:method ((event generated-command-event) message &rest format-args)
+    (let ((message (apply #'format NIL message format-args)))
+      (v:debug (name (server event)) "Replying to ~a: ~a" event message)
+      (write-string message (output-stream event))
+      (finish-output (output-stream event)))))
 
 (defun make-event (event-name server prefix arguments)
   "Makes an event instance from the given parameters."
