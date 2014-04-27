@@ -85,3 +85,17 @@ Each entity is a list with the following format: (TYPE START END)"
 
 (defun escape-regex-symbols (string)
   (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
+
+(defun lambda-keyword-p (symbol)
+  (find symbol '(&allow-other-keys &aux &body &environment &key &optional &rest &whole)))
+
+(defun flatten-lambda-list (lambda-list)
+  (mapcar #'(lambda (a) (if (listp a) (car a) a)) lambda-list))
+
+(defun extract-lambda-vars (lambda-list)
+  (remove-if #'lambda-keyword-p (flatten-lambda-list lambda-list)))
+
+(defun required-lambda-vars (lambda-list)
+  (loop for i in lambda-list
+        until (lambda-keyword-p i)
+        collect i))

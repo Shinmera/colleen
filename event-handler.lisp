@@ -87,33 +87,42 @@ DOCSTRING   --- An optional documentation string."
   identifier)
 
 (defgeneric dispatch (event)
-  (:documentation "Dispatch an event instance through the event system.")
+  (:documentation "Dispatch an event instance through the event system.
+
+Unless specifically rebound, for standard events the following restarts are available:
+  STOP-EVENT    --- Stops dispatching completely and returns.
+  SKIP-HANDLER  --- Skips the current handler.
+  RETRY-HANDLER --- Attempts invoking the handler again.")
   (:method ((event event))
     (with-simple-restart (stop-event "Stop dispatching ~a" event)
       (loop for handler in (gethash (type-of event) *evt-priority-map*)
             until (cancelled event)
-            do (with-simple-restart (skip-event "Skip dispatching to ~a" handler)
-                 (with-repeating-restart (retry-event "Retry dispatching to ~a" handler)
+            do (with-simple-restart (skip-handler "Skip dispatching to ~a" handler)
+                 (with-repeating-restart (retry-handler "Retry dispatching to ~a" handler)
                    (funcall (handler-function handler) event)
                    (setf (dispatched event) T)
                    T))))
     event))
 
-(defmacro define-handler (event-type (&key module-name (modulevar 'module) identifier (priority :MAIN) (threaded T)) &body body)
+(defmacro define-handler (event-type (&key (module-name NIL m-p) (modulevar 'module) identifier (priority :MAIN) (threaded T)) &body body)
   "Define an event handler for a module.
 
 EVENT-TYPE  ::= TYPE | (TYPE NAME)
 TYPE        --- The type of event class you want to handle.
 NAME        --- A symbol for the variable name to bind the event to.
                 By default the same as TYPE.
-MODULEVAR   --- The symbol to bind the module instance to.
-MODULE-NAME --- Your module identifier. Defaults to whatever 
-                GET-CURRENT-MODULE-NAME returns.
-PRIORITY    --- See SET-HANDLER-FUNCTION.
+MODULE-NAME --- An optional name to activate module convenience bindings.
+                Defaults to GET-CURRENT-MODULE-NAME when unset.
+MODULEVAR   --- The symbol to bind the module instance to, if at all.
 IDENTIFIER  --- See SET-HANDLER-FUNCTION. Defaults to a symbol made up
                 of MODULE-NAME and TYPE.
+PRIORITY    --- See SET-HANDLER-FUNCTION.
+THREADED    --- If a MODULE is found and bound to this handler, setting
+                this to T will execute the body in a module thread with
+                the module lock held. 
+                See WITH-MODULE-THREAD, WITH-MODULE-LOCK.
 BODY        ::= FORM*"
-  (unless module-name
+  (when (and (not m-p) (not module-name))
     (setf module-name (get-current-module-name)))
   (destructuring-bind (event-type &optional (event-var event-type)) (ensure-list event-type)
     (let ((auto-ident (format NIL "~a-~a" module-name event-type))
