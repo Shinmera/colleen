@@ -137,9 +137,9 @@ BODY        ::= FORM*"
                                              ,@body))
                                         `(progn ,@body)))
                                 `(progn ,@body)))))
-         (set-handler-function ,(or identifier
-                                    (find-symbol auto-ident)
-                                    (intern auto-ident))
+         (set-handler-function ',(or identifier
+                                     (find-symbol auto-ident)
+                                     (intern auto-ident))
                                ',event-type ,funcsym
                                :priority ,priority)))))
 
