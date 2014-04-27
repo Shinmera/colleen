@@ -79,8 +79,9 @@ Each entity is a list with the following format: (TYPE START END)"
     (values (strip-colors string) entities)))
 
 (defmacro with-repeating-restart ((restart-name format-string &rest format-arguments) &body forms)
-  `(loop until (with-simple-restart (,restart-name ,format-string ,@format-arguments)
-                 ,@forms)))
+  `(loop for ret = (with-simple-restart (,restart-name ,format-string ,@format-arguments)
+                     ,@forms)
+         until ret finally (return ret)))
 
 (defun escape-regex-symbols (string)
   (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
