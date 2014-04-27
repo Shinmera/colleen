@@ -200,7 +200,7 @@ DOCSTRING        --- An optional documentation string"
      ,(when subcommands
         `(setf (subcommands (command-handler ',name)) ,subcommands))))
 
-(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern (priority :DEFAULT)) &body body)
+(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern (priority :DEFAULT) (threaded T)) &body body)
   (assert (or (symbolp name) (listp name)) () "NAME has to be a symbol or a list of symbols.")
   (unless pattern
     (setf pattern (if (listp name)
@@ -219,7 +219,11 @@ DOCSTRING        --- An optional documentation string"
                             ,(if module-name
                                  `(with-module (,modulevar ,module-name)
                                     (declare (ignorable ,modulevar))
-                                    ,@body)
+                                    ,(if threaded
+                                         `(with-module-thread (,modulevar)
+                                            (with-module-lock (,modulevar)
+                                              ,@body))
+                                         `(progn ,@body)))
                                  `(progn ,@body)))))
          ,(if (listp name)
               (let ((group (car name))
