@@ -8,7 +8,8 @@
 
 (defclass module ()
   ((%active :initform NIL :accessor active :allocation :class)
-   (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class))
+   (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
+   (%lock :initform (bordeaux-threads:make-lock) :accessor lock :allocation :class))
   (:documentation "Base module class."))
 
 (defmacro generalize-module-accessor (name)
@@ -47,7 +48,7 @@
 
   (:method ((module module))))
 
-(defmacro with-module-thread (module &body thread-body)
+(defmacro with-module-thread ((module) &body thread-body)
   (let ((uidgens (gensym "UUID"))
         (modgens (gensym "MODULE"))
         (modnamegens (gensym "MODULE-NAME")))
@@ -70,6 +71,11 @@
                           :initial-bindings `((*current-server* . ,*current-server*)
                                               (*servers* . ,*servers*))))
        ,uidgens)))
+
+(defmacro with-module-lock ((module &optional (lockvar (gensym "LOCK"))) &body forms)
+  `(let ((,lockvar (lock (get-module ,module))))
+     (bordeaux-threads:with-lock-held (,lockvar)
+       ,@forms)))
 
 (defgeneric to-module-name (name-object)
   (:documentation "Attempts to transform the given object into the keyword name for a module.")
@@ -112,6 +118,7 @@ Note that all module slots are always allocated on the class."
        (defclass ,name (module ,@direct-superclasses)
          ((%active :initform NIL :reader active :allocation :class)
           (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
+          (%lock :initform (bordeaux-threads:make-lock ,(string name)) :accesso lock :allocation :class)
           ,@(mapcar #'(lambda (slot) (append slot '(:allocation :class))) direct-slots))
          ,@options)
        (when (and (gethash ,keyname *bot-modules*)
