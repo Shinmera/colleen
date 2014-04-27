@@ -124,15 +124,22 @@ DOCSTRING        --- An optional documentation string"
                       (< num (length lambda-list))))))))  ; But then it cannot be longer than the amount of optionals.
 
 (defun dispatch-command (event)
-  (loop for handler across *cmd-priority-array*
-        do (multiple-value-bind (match groups) (cl-ppcre:scan-to-strings (pattern handler) (message event))
-             (when match
-               (v:trace :command "Event ~a matched ~a." event handler)
-               (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))))))
-                 (unless (arguments-match-p (cdr (arguments handler)) args)
-                   (error 'invalid-arguments :argslist (cdr (arguments handler)) :command (identifier handler)))
-                 (v:debug :command "Dispatching ~a to ~a." event handler)
-                 (apply (handler-function handler) event args))))))
+  (with-simple-restart (stop-command "Stop dispatching ~a" event)
+    (loop for handler across *cmd-priority-array*
+          until (cancelled event)
+          do (with-simple-restart (skip-command "Skip dispatching to ~a" handler)
+               (with-repeating-restart (rematch-command "Try matching the handler pattern again.")
+                 (multiple-value-bind (match groups) (cl-ppcre:scan-to-strings (pattern handler) (message event))
+                   (when match
+                     (v:trace :command "Event ~a matched ~a." event handler)
+                     (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))))))
+                       (with-repeating-restart (recheck-command "Try checking the arguments again.")
+                         (unless (arguments-match-p (cdr (arguments handler)) args)
+                           (error 'invalid-arguments :argslist (cdr (arguments handler)) :command (identifier handler)))
+                         (v:debug :command "Dispatching ~a to ~a." event handler)
+                         (setf (cancelled event) T) ; Cancel by default
+                         (with-repeating-restart (retry-command "Retry dispatching to ~a")
+                           (apply (handler-function handler) event args) T))))))))))
 (set-handler-function :command-dispatcher 'events:command-event #'dispatch-command)
 
 

@@ -77,3 +77,7 @@ Each entity is a list with the following format: (TYPE START END)"
       (finish unclosed-fg)
       (finish unclosed-bg))
     (values (strip-colors string) entities)))
+
+(defmacro with-repeating-restart ((restart-name format-string &rest format-arguments) &body forms)
+  `(loop until (with-simple-restart (,restart-name ,format-string ,@format-arguments)
+                 ,@forms)))
