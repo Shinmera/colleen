@@ -126,9 +126,13 @@ BODY        ::= FORM*"
     (setf module-name (get-current-module-name)))
   (destructuring-bind (event-type &optional (event-var event-type)) (ensure-list event-type)
     (let ((auto-ident (format NIL "~a-~a" module-name event-type))
-          (funcsym (gensym "FUNCTION")))
+          (funcsym (gensym "FUNCTION"))
+          (declarations (loop for form in body
+                              until (or (not (listp form)) (not (eq (first form) 'declare)))
+                              collect (pop body))))
       `(eval-when (:compile-toplevel :load-toplevel :execute)
          (let ((,funcsym #'(lambda (,event-var)
+                             ,@declarations
                              ,(if module-name
                                   `(with-module (,modulevar ,module-name)
                                      (declare (ignorable ,modulevar))
