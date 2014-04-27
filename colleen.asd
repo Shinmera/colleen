@@ -26,7 +26,7 @@
                (:file "event")
                (:file "event-priority")
                (:file "event-handler")
-               (:file "commands")
+               (:file "command-handler")
                (:file "client")
                (:file "irc-commands")
                (:file "irc-events")
