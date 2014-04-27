@@ -25,7 +25,7 @@
 
 (defmethod print-object ((handler command-handler) stream)
   (print-unreadable-object (handler stream :type T)
-    (print (identifier handler) stream))
+    (format stream "~s" (identifier handler)))
   handler)
 
 (defun generate-command-priority-cache ()
@@ -35,7 +35,7 @@ Necessary to ensure proper dispatch order."
     (loop for handler being the hash-values of *cmd-map*
           for i from 0
           do (setf (aref array i) handler))
-    (setf array (sort array #'>))
+    (setf array (sort array #'> :key #'priority))
     (v:trace :command "Rebuilding priority array.")
     (setf *cmd-priority-array* array)))
 
@@ -154,9 +154,9 @@ DOCSTRING        --- An optional documentation string"
                      (v:trace :command "Event ~a matched ~a." event handler)
                      (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))))))
                        (with-repeating-restart (recheck-command "Try checking the arguments again.")
-                         (unless (arguments-match-p (cdr (arguments handler)) args)
-                           (error 'invalid-arguments :argslist (cdr (arguments handler)) :command (identifier handler)))
-                         (with-repeating-restart (retry-command "Retry dispatching to ~a")
+                         (unless (arguments-match-p (arguments handler) args)
+                           (error 'invalid-arguments :argslist (arguments handler) :command (identifier handler)))
+                         (with-repeating-restart (retry-command "Retry dispatching to ~a" handler)
                            (v:debug :command "Dispatching ~a to ~a." event handler)
                            (setf (cancelled event) T) ; Cancel by default
                            (apply (handler-function handler) event args)
@@ -201,8 +201,8 @@ DOCSTRING        --- An optional documentation string"
 (defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern (priority :DEFAULT)) &body body)
   (unless pattern
     (setf pattern (if (listp name)
-                      (format NIL "^~{~a~^ ~}(.*)" name)
-                      (format NIL "^~a(.*)" name))))
+                      (format NIL "^~{~a~^ ~}(.*)" (mapcar #'escape-regex-symbols name))
+                      (format NIL "^~a(.*)" (escape-regex-symbols name)))))
   (unless module-name
     (setf module-name (get-current-module-name)))
   (let ((funcsym (gensym "FUNCTION")))
