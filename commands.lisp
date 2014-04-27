@@ -164,12 +164,17 @@ DOCSTRING        --- An optional documentation string"
                            T))))))))))
 (set-handler-function :command-dispatcher 'events:command-event #'dispatch-command)
 
-(defun no-command-matched (event)
+(defun no-command-matched (event &rest args)
+  (declare (ignore args))
   (respond event (fstd-message event :no-command "No such command.")))
-(set-command-function :no-command "" #'no-command-matched
-                      :arguments () :priority :LAST
+(set-command-function :no-command "(.*)" #'no-command-matched
+                      :arguments '(&rest args) :priority :LAST
                       :docstring "Catchall command handler for when no command matched.")
 
+(defun simulate-command (command-string &optional (output-stream *standard-output*))
+  (dispatch-command (make-instance 'generated-command-event
+                                   :message command-string :output-stream output-stream
+                                   :server (get-server :null) :prefix "CL-USER!CL-USER@COLLEEN" :arguments '("REPL"))))
 
 (defclass group-handler (command-handler)
   ((%subcommands :initarg :subcommands :initform () :accessor subcommands))
@@ -180,9 +185,6 @@ DOCSTRING        --- An optional documentation string"
                ~:[No docstring available.~;Docstring: ~:*~a~]~%~
                Commands in this group: ~{~a~^, ~}"
           (identifier handler) (pattern handler) (docstring handler) (subcommands handler)))
-
-(defun escape-regex-symbols (string)
-  (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
 
 (defmacro define-group (name &key documentation pattern subcommands)
   (unless pattern
@@ -196,7 +198,7 @@ DOCSTRING        --- An optional documentation string"
      ,(when subcommands
         `(setf (subcommands (command-handler ',name)) ,subcommands))))
 
-(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern priority) &body body)
+(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern (priority :DEFAULT)) &body body)
   (unless pattern
     (setf pattern (if (listp name)
                       (format NIL "^~{~a~^ ~}(.*)" name)
