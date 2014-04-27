@@ -8,7 +8,6 @@
 
 (defvar *cmd-map* (make-hash-table))
 (defvar *cmd-priority-array* (make-array 0))
-(defvar *cmd-groups-map* (make-hash-table))
 
 (defclass command-handler ()
   ((%identifier :initarg :identifier :initform (error "Identifier required.") :accessor identifier)
@@ -56,10 +55,10 @@ Necessary to ensure proper dispatch order."
   "Remove the COMMAND-HANDLER associated with the given IDENTIFIER."
   (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
   (remhash identifier *cmd-map*)
-  (generate-handler-priority-cache)
+  (generate-command-priority-cache)
   identifier)
 
-(defun set-command-function (identifier cmd-pattern handler-function &key arguments (priority (length cmd-pattern)) docstring)
+(defun set-command-function (identifier cmd-pattern handler-function &key (arguments () a-p) (priority (length cmd-pattern)) docstring)
   "Set a new handler function for a command pattern.
 
 IDENTIFIER       --- A symbol identifying your handler.
@@ -82,19 +81,34 @@ DOCSTRING        --- An optional documentation string"
   (setf priority (gethash priority *priority-names* priority))
   (assert (realp priority) () "PRIORITY has to be a real or a symbol from *PRIORITY-NAMES*.")
 
-  (when (gethash identifier *cmd-map*)
+  (when (command-handler identifier)
     (v:info :command "Redefining handler ~a" identifier))
-  (unless arguments
+  (unless a-p
     (setf arguments (cdr #+sbcl (sb-introspect:function-lambda-list handler-function)
                          #+(and swank (not sbcl)) (swank-backend:arglist handler-function)
                          #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression handler-function))))))
-  (assert (not (null arguments)) () "Failed to autodetect ARGUMENTS list. Please specify manually.")
-  (setf (gethash identifier *cmd-map*)
+  (setf (command-handler identifier)
         (make-instance 'command-handler
                        :identifier identifier :pattern cmd-pattern :arguments arguments
                        :handler-function handler-function :priority priority :docstring docstring))
-  (generate-command-priority-cache)
   identifier)
+
+(defgeneric apropos-command-handler (handler)
+  (:documentation "Returns a string describing the given command handler if it exists.")
+  (:method ((name symbol))
+    (when-let ((handler (command-handler name)))
+      (apropos-command-handler handler)))
+
+  (:method ((command string))
+    (loop for handler across *cmd-priority-array*
+          do (when (cl-ppcre:scan (scanner handler) command)
+               (return-from apropos-command-handler
+                 (apropos-command-handler handler)))))
+  
+  (:method ((handler command-handler))
+    (format NIL "[Command Handler] ~s matching ~s with priority ~a expecting ~s~%~
+                 ~:[No docstring available.~;Docstring: ~:*~a~]"
+            (identifier handler) (pattern handler) (priority-name (priority handler)) (arguments handler) (docstring handler))))
 
 (defun read-command (event)
   (dolist (prefix (config-tree :command :prefix))
@@ -156,13 +170,28 @@ DOCSTRING        --- An optional documentation string"
                       :arguments () :priority :LAST
                       :docstring "Catchall command handler for when no command matched.")
 
+
+(defclass group-handler (command-handler)
+  ((%subcommands :initarg :subcommands :initform () :accessor subcommands))
+  (:documentation ""))
+
+(defmethod apropos-command-handler ((handler group-handler))
+  (format NIL "[Command Group] ~s matching ~s~%~
+               ~:[No docstring available.~;Docstring: ~:*~a~]~%~
+               Commands in this group: ~{~a~^, ~}"
+          (identifier handler) (pattern handler) (docstring handler) (subcommands handler)))
+
 (defun escape-regex-symbols (string)
   (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
 
 (defmacro define-group (name &key documentation pattern)
   (unless pattern
     (setf pattern (format NIL "^~a(.*)" (escape-regex-symbols name))))
-  )
+  `(set-command-function ',name ,pattern #'(lambda (event &rest args)
+                                             (if args
+                                                 (respond event (apropos-command-handler (message event)))
+                                                 (respond event (apropos-command-handler (command-handler ',name)))))
+                         :docstring ,documentation :priority :AFTER))
 
 (defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern priority) &body body)
   )
