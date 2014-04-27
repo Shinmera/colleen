@@ -201,8 +201,8 @@ DOCSTRING        --- An optional documentation string"
 (defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern (priority :DEFAULT)) &body body)
   (unless pattern
     (setf pattern (if (listp name)
-                      (format NIL "^~{~a~^ ~}(.*)" (mapcar #'escape-regex-symbols name))
-                      (format NIL "^~a(.*)" (escape-regex-symbols name)))))
+                      (format NIL "^~{~a~^ ~}(.*)" (mapcar #'(lambda (a) (escape-regex-symbols (string a))) name))
+                      (format NIL "^~a(.*)" (escape-regex-symbols (string name))))))
   (unless module-name
     (setf module-name (get-current-module-name)))
   (let ((funcsym (gensym "FUNCTION")))
@@ -215,6 +215,7 @@ DOCSTRING        --- An optional documentation string"
                                      (error 'not-authorized :event ,eventvar))))
                             ,(if module-name
                                  `(with-module (,modulevar ,module-name)
+                                    (declare (ignorable ,modulevar))
                                     ,@body)
                                  `(progn ,@body)))))
          ,(if (listp name)
