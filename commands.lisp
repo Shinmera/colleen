@@ -63,7 +63,7 @@ Necessary to ensure proper dispatch order."
 
 IDENTIFIER       --- A symbol identifying your handler.
 CMD-PATTERN      --- A REGEX pattern to match the message with. Usually you'll
-                     want to do something like \"^my-command (.*)\". Arguments are 
+                     want to do something like \"^my-command(.*)\". Arguments are 
                      matched by the last regex group.
 HANDLER-FUNCTION --- The function object to dispatch the command to. Has to
                      accept as many arguments as ARGUMENTS specifies as well
@@ -184,14 +184,44 @@ DOCSTRING        --- An optional documentation string"
 (defun escape-regex-symbols (string)
   (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
 
-(defmacro define-group (name &key documentation pattern)
+(defmacro define-group (name &key documentation pattern subcommands)
   (unless pattern
     (setf pattern (format NIL "^~a(.*)" (escape-regex-symbols name))))
-  `(set-command-function ',name ,pattern #'(lambda (event &rest args)
-                                             (if args
-                                                 (respond event (apropos-command-handler (message event)))
-                                                 (respond event (apropos-command-handler (command-handler ',name)))))
-                         :docstring ,documentation :priority :AFTER))
+  `(progn
+     (set-command-function ',name ,pattern #'(lambda (event &rest args)
+                                               (if args
+                                                   (respond event (apropos-command-handler (message event)))
+                                                   (respond event (apropos-command-handler (command-handler ',name)))))
+                           :docstring ,documentation :priority :AFTER)
+     ,(when subcommands
+        `(setf (subcommands (command-handler ',name)) ,subcommands))))
 
 (defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern priority) &body body)
-  )
+  (unless pattern
+    (setf pattern (if (listp name)
+                      (format NIL "^~{~a~^ ~}(.*)" name)
+                      (format NIL "^~a(.*)" name))))
+  (unless module-name
+    (setf module-name (get-current-module-name)))
+  (let ((funcsym (gensym "FUNCTION")))
+    (flet ((mksymb (list)
+             (let ((name (format NIL "~{~a^ ~}" list)))
+               (or (find-symbol name) (intern name)))))
+      `(let ((,funcsym #'(lambda (,eventvar ,@args)
+                            ,@(when authorization
+                                `((unless (auth-p (nick ,eventvar))
+                                     (error 'not-authorized :event ,eventvar))))
+                            ,(if module-name
+                                 `(with-module (,modulevar ,module-name)
+                                    ,@body)
+                                 `(progn ,@body)))))
+         ,(if (listp name)
+              (let ((group (car name))
+                    (name (mksymb (cdr name))))
+                `(progn
+                   ,(if (command-handler group)
+                        `(pushnew ',name (subcommands (command-handler ',group)))
+                        `(progn (warn 'implicit-group-definition :group ',group)
+                                (define-group ',group :subcommands (list ',name))))
+                   (set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation)))
+              `(set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation))))))
