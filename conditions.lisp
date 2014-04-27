@@ -11,10 +11,11 @@
 
 (define-condition invalid-arguments (module-error)
   ((%command :initarg :command :reader command)
-   (%argslist :initarg :argslist :reader argslist))
+   (%argslist :initarg :argslist :reader argslist)
+   (%expected :initarg :expected :reader expected))
   (:documentation "Condition raised when a command is called with an invalid arguments structure.")
   (:report (lambda (c s)
-             (format s "Invalid arguments for command ~a. Expected form: ~a" (command c) (argslist c)))))
+             (format s "Invalid arguments for command ~s: ~s Expected form: ~s" (command c) (argslist c) (expected c)))))
 
 (define-condition not-authorized (module-error)
   ((%event :initarg :event :reader event))
