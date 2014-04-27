@@ -124,11 +124,11 @@ BODY        ::= FORM*"
                                                 ,@body))
                              :priority ,priority))))
 
-(defgeneric apropos-handler (handler)
-  (:documentation "Returns a string describing the given handler if it exists.")
+(defgeneric apropos-event-handler (handler)
+  (:documentation "Returns a string describing the given event handler if it exists.")
   (:method ((name symbol))
     (when-let ((handler (event-handler name)))
-      (apropos-handler handler)))
+      (apropos-event-handler handler)))
   
   (:method ((handler event-handler))
     (format NIL "[Event Handler] ~s for ~a with priority ~a~%~
