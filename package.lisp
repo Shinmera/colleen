@@ -13,12 +13,45 @@
    #:module-system
    #:define-module-system
    #:load-module)
+  ;; command-handler.lisp
+  (:export
+   #:*cmd-map*
+   #:*cmd-priority-array*
+   
+   #:command-handler
+   #:identifier
+   #:pattern
+   #:scanner
+   #:arguments
+   #:handler-function
+   #:priority
+   #:docstring
+   
+   #:generate-priority-cache
+   #:command-handler
+   #:remove-command-handler
+   #:set-command-function
+   #:apropos-command-handler
+   #:dispatch-command
+   #:stop-command
+   #:skip-handler
+   #:rematch-handler
+   #:recheck-arguments
+   #:retry-handler
+   #:simulate-command
+   
+   #:group-handler
+   #:subcommands
+   
+   #:define-group
+   #:define-command)
   ;; conditions.lisp
   (:export
    #:module-error
    #:invalid-arguments
    #:command
    #:argslist
+   #:expected
    
    #:not-authorized
    #:events
@@ -39,7 +72,10 @@
    #:name
    
    #:message-too-long
-   #:message)
+   #:message
+   
+   #:implicit-group-definition
+   #:group)
   ;; config.lisp
   (:export
    #:parse-json
@@ -48,6 +84,31 @@
    #:config
    #:config-tree
    #:server-config)
+  ;; event-handler.lisp
+  (:export
+   #:*evt-map*
+   #:*evt-priority-map*
+   
+   #:event-handler
+   #:event-type
+   #:identifier
+   #:handler-function
+   #:priority
+   #:docstring
+   
+   #:generate-handler-priority-cache
+   #:event-handler
+   #:remove-event-handler
+   #:apropos-event-handler
+   #:set-handler-function
+   #:dispatch
+   #:define-handler)
+  ;; event-priority.lisp
+  (:export
+   #:*priority-names*
+   #:*priority-nums*
+   #:priority-name
+   #:priority-num)
   ;; event.lisp
   (:export
    #:event
@@ -66,6 +127,9 @@
    #:command-event
    #:command
    #:cmd-args
+   
+   #:generated-command-event
+   #:output-stream
    
    #:send-event
    #:nick
@@ -96,43 +160,26 @@
   (:export
    #:module
    #:active
-   #:handlers
-   #:commands
-   #:groups
    #:threads
-   
-   #:command
-   #:name
-   #:cmd-args
-   #:cmd-fun
-   #:docu
+   #:lock
    
    #:start
    #:stop
-   #:add-group
-   #:add-group-command
-   #:add-command
-   #:add-handler
-   #:dispatch
-   #:get-command
-   #:get-group
-   #:get-group-command
-   #:get-module
-
+   #:with-module
    #:with-module-thread
+   #:with-module-lock
+   #:to-module-name
+   #:get-module
+   #:name
    #:get-current-module
-   #:display-help
+   #:get-current-module-name
    #:define-module
-   #:define-group
-   #:define-command
-   #:define-handler
    #:start-module
    #:stop-module
-
    #:skip
    #:force
    #:retry)
-  ;; reply-codes.lisp
+  ;; irc-codes.lisp
   (:export
    #:*reply-code-map*
    #:reply->keyword)
