@@ -90,7 +90,7 @@ DOCSTRING   --- An optional documentation string."
   (assert (functionp function) () "FUNCTION has to be a function object.")
   
   (when (gethash identifier *evt-map*)
-    (v:info :event "Redefining handler ~a" identifier))
+    (v:debug :event "Redefining handler ~a" identifier))
   (setf (event-handler identifier)
         (make-instance 'event-handler
                        :event-type event-class :priority priority :identifier identifier

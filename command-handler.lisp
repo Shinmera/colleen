@@ -89,7 +89,7 @@ CLASS            --- The class to make an instance of. Has to be subclass of
   (assert (realp priority) () "PRIORITY has to be a real or a symbol from *PRIORITY-NAMES*.")
 
   (when (command-handler identifier)
-    (v:info :command "Redefining handler ~a" identifier))
+    (v:debug :command "Redefining handler ~a" identifier))
   (unless a-p
     (setf arguments (cdr #+sbcl (sb-introspect:function-lambda-list handler-function)
                          #+(and swank (not sbcl)) (swank-backend:arglist handler-function)
