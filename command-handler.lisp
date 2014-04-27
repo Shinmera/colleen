@@ -137,7 +137,7 @@ If a match occurs, a fitting COMMAND-EVENT is generated and dispatched."
   (let ((signaturevar (gensym "COMMAND-SIGNATURE")))
     `(let ((,signaturevar ,command-signature))
        (loop for ,handlervar across *cmd-priority-array*
-             when (cl-ppcre:scan (scanner handler) ,signaturevar)
+             when (cl-ppcre:scan (scanner ,handlervar) ,signaturevar)
                do ,@body))))
 
 (defun arguments-match-p (lambda-list provided)
