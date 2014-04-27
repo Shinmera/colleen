@@ -95,7 +95,8 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
 
 (defmethod print-object ((event user-event) stream)
   (print-unreadable-object (event stream :type T)
-    (format stream "NICK: ~a USER: ~a HOST: ~a" (nick event) (username event) (hostmask event))))
+    (format stream "NICK: ~a USER: ~a HOST: ~a" (nick event) (username event) (hostmask event)))
+  event)
 
 (define-event channel-event NIL (user-event)
     (channel)
@@ -108,10 +109,20 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
     (unless (char= (aref channel 0) #\#)
       (setf channel (nick event)))))
 
+(defmethod print-object ((event channel-event) stream)
+  (print-unreadable-object (event stream :type T)
+    (format stream "~a" (channel event)))
+  event)
+
 (defclass command-event (channel-event)
   ((%message :initarg :message :accessor message)
    (%handled :initarg :handled :initform NIL :accessor handled))
   (:documentation "Event for commands."))
+
+(defmethod print-object ((event command-event) stream)
+  (print-unreadable-object (event stream :type T)
+    (format stream "~a" (message event)))
+  event)
 
 (defclass generated-command-event (command-event)
   ((%output-stream :initarg :output-stream :accessor output-stream))
