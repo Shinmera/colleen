@@ -152,9 +152,8 @@ DOCSTRING        --- An optional documentation string"
 
 (defun no-command-matched (event)
   (respond event (fstd-message event :no-command "No such command.")))
-
 (set-command-function :no-command "" #'no-command-matched
-                      :arguments () :priority (most-negative-fixnum)
+                      :arguments () :priority :LAST
                       :docstring "Catchall command handler for when no command matched.")
 
 (defun escape-regex-symbols (string)
