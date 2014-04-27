@@ -44,3 +44,8 @@
 (define-condition message-too-long (warning)
   ((%message :initarg :message :reader message))
   (:documentation "Condition signalled when an IRC message exceeds the byte limit set by *IRC-MESSAGE-LIMIT*"))
+
+(define-condition implicit-group-definition (style-warning)
+  ((%group :initarg :group :reader group))
+  (:documentation "Condition signalled when a group is implicitly defined for a grouped command.")
+  (:report (lambda (c s) (format s "Implicitly creating new group command ~a" (group c)))))
