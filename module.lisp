@@ -48,6 +48,10 @@
 
   (:method ((module module))))
 
+(defmacro with-module ((var &optional (name (get-current-module-name))) &body forms)
+  `(let ((,var (get-module ,name)))
+     ,@forms))
+
 (defmacro with-module-thread ((module) &body thread-body)
   (let ((uidgens (gensym "UUID"))
         (modgens (gensym "MODULE"))
@@ -118,7 +122,7 @@ Note that all module slots are always allocated on the class."
        (defclass ,name (module ,@direct-superclasses)
          ((%active :initform NIL :reader active :allocation :class)
           (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
-          (%lock :initform (bordeaux-threads:make-lock ,(string name)) :accesso lock :allocation :class)
+          (%lock :initform (bordeaux-threads:make-lock ,(string name)) :accessor lock :allocation :class)
           ,@(mapcar #'(lambda (slot) (append slot '(:allocation :class))) direct-slots))
          ,@options)
        (when (and (gethash ,keyname *bot-modules*)
@@ -126,10 +130,6 @@ Note that all module slots are always allocated on the class."
          (v:warn :colleen "Redefining started module ~a. Let's hope everything goes well..." ,keyname))
        (setf (get (package-symbol *package*) :module) ,keyname
              (gethash ,keyname *bot-modules*) (make-instance ',name)))))
-
-(defmacro with-module ((var &optional (name (get-current-module-name))) &body forms)
-  `(let ((,var (get-module ,name)))
-     ,@forms))
 
 (defun start-module (&rest module-names)
   "Start up one or more modules. Each module name should be a symbol or string."
