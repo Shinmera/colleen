@@ -52,7 +52,7 @@
 (defun start-log-loop (dramatica)
   (v:info :dramatica.recentchanges "Starting log-loop.")
   (setf (log-running dramatica) T)
-  (setf (log-loop dramatica) (with-module-thread dramatica
+  (setf (log-loop dramatica) (with-module-thread (dramatica)
                                (wiki-log-loop dramatica))))
 
 (defun stop-log-loop (dramatica)

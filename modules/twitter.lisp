@@ -9,7 +9,7 @@
   (:use :cl :colleen :events :chirp-objects)
   (:shadowing-import-from :events :version :parameters :users :reason :sender :mode :user :parameter :address :language :resource :query :code :target)
   (:shadowing-import-from :colleen :message)
-  (:shadowing-import-from :chirp-objects :start :name))
+  (:shadowing-import-from :chirp-objects :start :name :events))
 (in-package :org.tymoonnext.colleen.mod.twitter)
 
 (defvar *config-file* (merge-pathnames "twitter.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
@@ -56,13 +56,13 @@
   (chirp:tweet (format NIL "~{~a~^ ~}" text)))
 
 (define-command (twitter stream-home) () (:authorization T :documentation "Stream the home timeline to the current channel.")
-  (push (list (with-module-thread (get-module :twitter)
-                (chirp:stream/user #'stream-handler))
+  (push (list (with-module-thread (:twitter)
+                (chirp:stream/user #'(lambda (o) (stream-handler o event))))
               (colleen:name (server event))
               (channel event))
         (streams module)))
 
-(defun stream-handler (o)
+(defun stream-handler (o event)
   (when (and o (typep o 'chirp:status))
     (if (chirp:retweeted-status o)
         (let ((rt (chirp:statuses/show (chirp:id (chirp:retweeted-status o)))))

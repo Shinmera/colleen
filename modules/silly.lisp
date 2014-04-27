@@ -95,7 +95,7 @@
         (sleep (/ (random 20) 10))
         (if (< 1 (random 20))
             (respond event "ゆっくりしていってね！")
-            (let ((irc:*privmsg-line-limit* 14))
+            (let ((*privmsg-line-limit* 14))
               (respond event "　　 _,,....,,_　 ＿人人人人人人人人人人人人人人人＿
 -''\":::::::::::::｀''＞　　　ゆっくりしていってね！！！　　　＜
 ヽ:::::::::::::::::::::￣^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^Ｙ^￣

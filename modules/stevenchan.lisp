@@ -10,13 +10,13 @@
 (in-package :org.tymoonnext.colleen.mod.stevenchan)
 
 (define-module stevenchan ()
-  ((%rss-url :initarg :rss-url :initform "http://api.tymoon.eu/chan/rss" :accessor rss-url :allocation :class)
-   (%last-id :initarg :last-id :initform 0 :accessor last-id :allocation :class)
-   (%stream-api :initarg :stream-api :initform "http://xshinmerax.api.channel.livestream.com/2.0/livestatus.xml" :accessor stream-api :allocation :class)
-   (%stream-live :initform NIL :accessor stream-live :allocation :class)))
+  ((%rss-url :initarg :rss-url :initform "http://api.tymoon.eu/chan/rss" :accessor rss-url)
+   (%last-id :initarg :last-id :initform 0 :accessor last-id)
+   (%stream-api :initarg :stream-api :initform "http://xshinmerax.api.channel.livestream.com/2.0/livestatus.xml" :accessor stream-api)
+   (%stream-live :initform NIL :accessor stream-live)))
 
 (defmethod start ((stevenchan stevenchan))
-  (with-module-thread stevenchan
+  (with-module-thread (stevenchan)
     (check-loop stevenchan)))
 
 (defun check-loop (module)
@@ -60,7 +60,7 @@
 
 (define-group stevenchan :documentation "Interact with Stevenchan.")
 
-(define-command (stevenchan latest) (&optional board) (:documentation "Get the latest post." :modulevar stevenchan)
+(define-command (stevenchan latest) () (:documentation "Get the latest post." :modulevar stevenchan)
   (apply #'respond event "#~a by ~a: ~a" (most-recent stevenchan)))
 
 (define-command (stevenchan movie) (&optional user) (:documentation "Get information about the movie night.")

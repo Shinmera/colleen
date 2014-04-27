@@ -48,6 +48,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 (define-command (google translate-from) (source-language &rest text) (:documentation "Translate a given text from a specific language into english.")
   (with-key (translate-key)
     (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (translate-key module) :from source-language)
+      (declare (ignore language))
       (respond event "[~a → en] ~a" source-language translation))))
 
 (define-command (google translate-from-to) (source-language target-language &rest text) (:documentation "Translate a given text from a language into another.")

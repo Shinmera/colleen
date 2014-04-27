@@ -40,7 +40,7 @@
 
 (defmethod start ((rss rss))
   (load-feeds rss)
-  (with-module-thread rss
+  (with-module-thread (rss)
     (check-loop rss)))
 
 (defmethod stop ((rss rss))

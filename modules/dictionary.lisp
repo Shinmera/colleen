@@ -12,7 +12,7 @@
 (defvar *save-file* (merge-pathnames "dictionary.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
 (define-module dictionary ()
-    ((%dictionary :accessor dictionary :initform (make-hash-table :test 'equalp) :allocation :class))
+    ((%dictionary :accessor dictionary :initform (make-hash-table :test 'equalp)))
   (:documentation "A general purpose dictionary provider."))
 
 (defmethod start ((dictionary dictionary)) (%load dictionary))
