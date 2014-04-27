@@ -32,6 +32,7 @@
    #:remove-command-handler
    #:set-command-function
    #:apropos-command-handler
+   #:do-matching-command-handlers
    #:dispatch-command
    #:stop-command
    #:skip-handler

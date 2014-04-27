@@ -132,6 +132,14 @@ If a match occurs, a fitting COMMAND-EVENT is generated and dispatched."
                                :message (message (subseq (message event) (length prefix))))))))
 (set-handler-function :command-reader 'events:privmsg-event #'read-command)
 
+(defmacro do-matching-command-handlers ((command-signature handlervar) &body body)
+  "Applies BODY for each matching COMMAND-HANDLER, binding it to HANDLERVAR."
+  (let ((signaturevar (gensym "COMMAND-SIGNATURE")))
+    `(let ((,signaturevar ,command-signature))
+       (loop for ,handlervar across *cmd-priority-array*
+             when (cl-ppcre:scan (scanner handler) ,signaturevar)
+               do ,@body))))
+
 (defun arguments-match-p (lambda-list provided)
   "Returns T if it is possibly to pass the PROVIDED list of arguments to the LAMBDA-LIST.
 Only cares about required, optional and rest args."
