@@ -24,6 +24,7 @@
                (:file "toolkit")
                (:file "module")
                (:file "event")
+               (:file "event-priority")
                (:file "event-handler")
                (:file "commands")
                (:file "client")

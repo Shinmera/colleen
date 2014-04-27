@@ -13,18 +13,6 @@
 
 You should not modify this yourself unless you know what you're doing as this
 map is overwritten completely whenever GENERATE-HANDLER-PRIORITY-CACHE is invoked.")
-(defvar *priority-names*
-  (loop with map = (make-hash-table)
-        for (name val) in `((:FIRST ,most-positive-fixnum)
-                            (:PREPROCESS 200) (:BEFORE 100)
-                            (:MAIN 0) (:STANDARD 0) (:DEFAULT 0)
-                            (:AFTER -100) (:POSTPROCESS -200)
-                            (:LAST ,most-negative-fixnum))
-        do (setf (gethash name map) val)
-        finally (return map))
-  "Hash table mapping arbitrary names to event priorities.
-Defined by default are :FIRST :PREPROCESS :BEFORE :MAIN :STANDARD
-:DEFAULT :AFTER :POSTPROCESS :LAST.")
 
 (defclass event-handler ()
   ((%event-type :initarg :event-type :initform 'event :accessor event-type)
@@ -36,7 +24,7 @@ Defined by default are :FIRST :PREPROCESS :BEFORE :MAIN :STANDARD
 
 (defmethod print-object ((handler event-handler) stream)
   (print-unreadable-object (handler stream :type T)
-    (print (identifier handler) stream))
+    (format stream "~s" (identifier handler)))
   handler)
 
 (defun generate-handler-priority-cache (&optional (handler-map *evt-map*))
@@ -86,7 +74,7 @@ PRIORITY    --- Either a key from *PRIORITY-NAMES* or a real setting the
                 priority of the handler. Higher priorities are served first.
 DOCSTRING   --- An optional documentation string."
   (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
-  (setf priority (gethash priority *priority-names* priority))
+  (setf priority (priority-num priority))
   (assert (realp priority) () "PRIORITY has to be a real or a symbol from *PRIORITY-NAMES*.")
   (assert (functionp function) () "FUNCTION has to be a function object.")
   
@@ -135,3 +123,14 @@ BODY        ::= FORM*"
                                               (let ((,modulevar (get-module ,module-name)))
                                                 ,@body))
                              :priority ,priority))))
+
+(defgeneric apropos-handler (handler)
+  (:documentation "Returns a string describing the given handler if it exists.")
+  (:method ((name symbol))
+    (when-let ((handler (event-handler name)))
+      (apropos-handler handler)))
+  
+  (:method ((handler event-handler))
+    (format NIL "[Event Handler] ~s for ~a with priority ~a~%~
+                 ~:[No docstring available.~;Docstring: ~:*~a~]"
+            (identifier handler) (event-type handler) (priority-name (priority handler)) (docstring handler))))
