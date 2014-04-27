@@ -257,12 +257,17 @@ BODY          ::= FORM*"
                       (format NIL "^~a(.*)" (escape-regex-symbols (string name))))))
   (unless module-name
     (setf module-name (get-current-module-name)))
-  (let ((funcsym (gensym "FUNCTION")))
+  (let ((funcsym (gensym "FUNCTION"))
+        (declarations (loop for form in body
+                            until (or (not (listp form)) (not (eq (first form) 'declare)))
+                            collect (pop body))))
     (flet ((mksymb (list)
              (let ((name (format NIL "~{~a~^ ~}" list)))
                (or (find-symbol name) (intern name)))))
       `(eval-when (:compile-toplevel :load-toplevel :execute)
          (let ((,funcsym #'(lambda (,eventvar ,@args)
+                             (declare (ignorable ,eventvar))
+                             ,@declarations
                              ,@(when authorization
                                  `((unless (auth-p (nick ,eventvar))
                                      (error 'not-authorized :event ,eventvar))))
