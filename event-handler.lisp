@@ -145,7 +145,7 @@ BODY        ::= FORM*"
          (let ((,funcsym #'(lambda (,event-var)
                              ,@declarations
                              ,(if module-name
-                                  `(with-module (,module-name ,modulevar)
+                                  `(with-module (,modulevar ,module-name)
                                      (declare (ignorable ,modulevar))
                                      ,(if threaded
                                           `(with-module-thread (,modulevar)

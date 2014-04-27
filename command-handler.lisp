@@ -272,7 +272,7 @@ BODY          ::= FORM*"
                                  `((unless (auth-p (nick ,eventvar))
                                      (error 'not-authorized :event ,eventvar))))
                              ,(if module-name
-                                  `(with-module (,module-name ,modulevar)
+                                  `(with-module (,modulevar ,module-name)
                                      (declare (ignorable ,modulevar))
                                      ,(if threaded
                                           `(with-module-thread (,modulevar)
