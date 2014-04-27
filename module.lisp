@@ -120,6 +120,10 @@ Note that all module slots are always allocated on the class."
        (setf (get (package-symbol *package*) :module) ,keyname
              (gethash ,keyname *bot-modules*) (make-instance ',name)))))
 
+(defmacro with-module ((var &optional (name (get-current-module-name))) &body forms)
+  `(let ((,var (get-module ,name)))
+     ,@forms))
+
 (defun start-module (&rest module-names)
   "Start up one or more modules. Each module name should be a symbol or string."
   (dolist (module-name module-names)
