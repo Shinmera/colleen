@@ -252,3 +252,7 @@
                 (irc:ping (host server))
                 (sleep (server-config (name server) :ping-step)))))
       (v:debug name "Leaving ping loop."))))
+
+;; define standard NULL client
+(setf (gethash :null *servers*)
+      (make-instance 'server :host "NULL" :nick "NULL" :name :null :port -1 :realname "NULL"))
