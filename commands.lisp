@@ -8,15 +8,21 @@
 
 (defvar *cmd-map* (make-hash-table))
 (defvar *cmd-priority-array* (make-array 0))
+(defvar *cmd-groups-map* (make-hash-table))
 
 (defclass command-handler ()
   ((%identifier :initarg :identifier :initform (error "Identifier required.") :accessor identifier)
    (%pattern :initarg :pattern :initform (error "Command pattern required.") :accessor pattern)
+   (%scanner :accessor scanner)
    (%arguments :initarg :arguments :initform () :accessor arguments)
    (%handler-function :initarg :handler-function :initform (error "Handler function required.") :accessor handler-function)
    (%priority :initarg :priority :initform 0 :accessor priority)
    (%docstring :initarg :docstring :initform NIL :accessor docstring))
   (:documentation "Container class representing a command handler."))
+
+(defmethod initialize-instance :after ((handler command-handler) &rest args)
+  (declare (ignore args))
+  (setf (scanner handler) (cl-ppcre:create-scanner (pattern handler) :case-insensitive-mode T)))
 
 (defmethod print-object ((handler command-handler) stream)
   (print-unreadable-object (handler stream :type T)
@@ -79,9 +85,9 @@ DOCSTRING        --- An optional documentation string"
   (when (gethash identifier *cmd-map*)
     (v:info :command "Redefining handler ~a" identifier))
   (unless arguments
-    (setf arguments #+sbcl (sb-introspect:function-lambda-list handler-function)
-                    #+(and swank (not sbcl)) (swank-backend:arglist handler-function)
-                    #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression handler-function)))))
+    (setf arguments (cdr #+sbcl (sb-introspect:function-lambda-list handler-function)
+                         #+(and swank (not sbcl)) (swank-backend:arglist handler-function)
+                         #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression handler-function))))))
   (assert (not (null arguments)) () "Failed to autodetect ARGUMENTS list. Please specify manually.")
   (setf (gethash identifier *cmd-map*)
         (make-instance 'command-handler
@@ -129,21 +135,34 @@ DOCSTRING        --- An optional documentation string"
           until (cancelled event)
           do (with-simple-restart (skip-command "Skip dispatching to ~a" handler)
                (with-repeating-restart (rematch-command "Try matching the handler pattern again.")
-                 (multiple-value-bind (match groups) (cl-ppcre:scan-to-strings (pattern handler) (message event))
+                 (multiple-value-bind (match groups) (cl-ppcre:scan-to-strings (scanner handler) (message event))
                    (when match
                      (v:trace :command "Event ~a matched ~a." event handler)
                      (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))))))
                        (with-repeating-restart (recheck-command "Try checking the arguments again.")
                          (unless (arguments-match-p (cdr (arguments handler)) args)
                            (error 'invalid-arguments :argslist (cdr (arguments handler)) :command (identifier handler)))
-                         (v:debug :command "Dispatching ~a to ~a." event handler)
-                         (setf (cancelled event) T) ; Cancel by default
                          (with-repeating-restart (retry-command "Retry dispatching to ~a")
-                           (apply (handler-function handler) event args) T))))))))))
+                           (v:debug :command "Dispatching ~a to ~a." event handler)
+                           (setf (cancelled event) T) ; Cancel by default
+                           (apply (handler-function handler) event args)
+                           (setf (handled event) T)
+                           T))))))))))
 (set-handler-function :command-dispatcher 'events:command-event #'dispatch-command)
 
+(defun no-command-matched (event)
+  (respond event (fstd-message event :no-command "No such command.")))
 
-(defmacro define-group (name &key module-name documentation)
+(set-command-function :no-command "" #'no-command-matched
+                      :arguments () :priority (most-negative-fixnum)
+                      :docstring "Catchall command handler for when no command matched.")
+
+(defun escape-regex-symbols (string)
+  (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
+
+(defmacro define-group (name &key documentation pattern)
+  (unless pattern
+    (setf pattern (format NIL "^~a(.*)" (escape-regex-symbols name))))
   )
 
 (defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern priority) &body body)

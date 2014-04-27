@@ -104,7 +104,9 @@ DOCSTRING   --- An optional documentation string."
             until (cancelled event)
             do (with-simple-restart (skip-event "Skip dispatching to ~a" handler)
                  (with-repeating-restart (retry-event "Retry dispatching to ~a" handler)
-                   (funcall (handler-function handler) event) T))))
+                   (funcall (handler-function handler) event)
+                   (setf (dispatched event) T)
+                   T))))
     event))
 
 (defmacro define-handler (event-type (&key (modulevar 'module) module-name (priority :MAIN) identifier) &body body)
