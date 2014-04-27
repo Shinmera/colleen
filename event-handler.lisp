@@ -99,7 +99,7 @@ DOCSTRING   --- An optional documentation string."
                    T))))
     event))
 
-(defmacro define-handler (event-type (&key (modulevar 'module) module-name (priority :MAIN) identifier) &body body)
+(defmacro define-handler (event-type (&key module-name (modulevar 'module) identifier (priority :MAIN) (threaded T)) &body body)
   "Define an event handler for a module.
 
 EVENT-TYPE  ::= TYPE | (TYPE NAME)
@@ -113,16 +113,26 @@ PRIORITY    --- See SET-HANDLER-FUNCTION.
 IDENTIFIER  --- See SET-HANDLER-FUNCTION. Defaults to a symbol made up
                 of MODULE-NAME and TYPE.
 BODY        ::= FORM*"
-  (unless module-name (setf module-name (get-current-module-name)))
+  (unless module-name
+    (setf module-name (get-current-module-name)))
   (destructuring-bind (event-type &optional (event-var event-type)) (ensure-list event-type)
-    (let ((auto-ident (format NIL "~a-~a" module-name event-type)))
-      `(set-handler-function ,(or identifier
-                                  (find-symbol auto-ident)
-                                  (intern auto-ident))
-                             ',event-type #'(lambda (,event-var)
-                                              (let ((,modulevar (get-module ,module-name)))
-                                                ,@body))
-                             :priority ,priority))))
+    (let ((auto-ident (format NIL "~a-~a" module-name event-type))
+          (funcsym (gensym "FUNCTION")))
+      `(let ((,funcsym #'(lambda (,event-var)
+                           ,(if module-name
+                                `(with-module (,modulevar ,module-name)
+                                   (declare (ignorable ,modulevar))
+                                   ,(if threaded
+                                        `(with-module-thread (,modulevar)
+                                           (with-module-lock (,modulevar)
+                                             ,@body))
+                                        `(progn ,@body)))
+                                `(progn ,@body)))))
+         (set-handler-function ,(or identifier
+                                    (find-symbol auto-ident)
+                                    (intern auto-ident))
+                               ',event-type ,funcsym
+                               :priority ,priority)))))
 
 (defgeneric apropos-event-handler (handler)
   (:documentation "Returns a string describing the given event handler if it exists.")
