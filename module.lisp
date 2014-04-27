@@ -132,7 +132,12 @@ Note that all module slots are always allocated on the class."
              (gethash ,keyname *bot-modules*) (make-instance ',name)))))
 
 (defun start-module (&rest module-names)
-  "Start up one or more modules. Each module name should be a symbol or string."
+  "Start up one or more modules. Each module name should be a symbol or string.
+
+The following restarts are available:
+  SKIP  --- Skip starting the module.
+  FORCE --- Force starting even though it's already active.
+  RETRY --- Simply retry starting."
   (dolist (module-name module-names)
     (setf module-name (to-module-name module-name))
     (with-simple-restart (skip "Skip starting the module.")
@@ -146,7 +151,12 @@ Note that all module slots are always allocated on the class."
         module))))
 
 (defun stop-module (&rest module-names)
-  "Stop one or more modules. Each module name should be a symbol or string."
+  "Stop one or more modules. Each module name should be a symbol or string.
+
+The following restarts are available:
+  SKIP  --- Skip stopping the module.
+  FORCE --- Force stopping even though it isn't active.
+  RETRY --- Simply retry stopping."
   (dolist (module-name module-names)
     (setf module-name (to-module-name module-name))
     (with-simple-restart (skip "Skip stopping the module.")

@@ -63,6 +63,17 @@ Necessary to ensure proper event handling order."
   (generate-handler-priority-cache)
   identifier)
 
+(defgeneric apropos-event-handler (handler)
+  (:documentation "Returns a string describing the given event handler if it exists.")
+  (:method ((name symbol))
+    (when-let ((handler (event-handler name)))
+      (apropos-event-handler handler)))
+  
+  (:method ((handler event-handler))
+    (format NIL "[Event Handler] ~s for ~a with priority ~a~%~
+                 ~:[No docstring available.~;Docstring: ~:*~a~]"
+            (identifier handler) (event-type handler) (priority-name (priority handler)) (docstring handler))))
+
 (defun set-handler-function (identifier event-class function &key (priority :MAIN) docstring)
   "Set a new handler function for an event class.
 
@@ -147,14 +158,3 @@ BODY        ::= FORM*"
                                        (intern auto-ident))
                                  ',event-type ,funcsym
                                  :priority ,priority))))))
-
-(defgeneric apropos-event-handler (handler)
-  (:documentation "Returns a string describing the given event handler if it exists.")
-  (:method ((name symbol))
-    (when-let ((handler (event-handler name)))
-      (apropos-event-handler handler)))
-  
-  (:method ((handler event-handler))
-    (format NIL "[Event Handler] ~s for ~a with priority ~a~%~
-                 ~:[No docstring available.~;Docstring: ~:*~a~]"
-            (identifier handler) (event-type handler) (priority-name (priority handler)) (docstring handler))))

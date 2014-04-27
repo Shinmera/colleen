@@ -147,11 +147,11 @@ Only cares about required, optional and rest args."
   (:documentation "Dispatches an event to command handlers.
 
 Unless specifically rebound, for command events the following restarts are available:
-  STOP-COMMAND    --- Stops dispatching completely and returns.
-  SKIP-HANDLER    --- Skips the current handler.
-  REMATCH-HANDLER --- Attempts to rematch the command with the handler's pattern.
-  RECHECK-HANDLER --- Rechecks the command arguments with the handler's arguments list.
-  RETRY-HANDLER   --- Attempts invoking the handler again.")
+  STOP-COMMAND      --- Stops dispatching completely and returns.
+  SKIP-HANDLER      --- Skips the current handler.
+  REMATCH-HANDLER   --- Attempts to rematch the command with the handler's pattern.
+  RECHECK-ARGUMENTS --- Rechecks the command arguments with the handler's arguments list.
+  RETRY-HANDLER     --- Attempts invoking the handler again.")
   (:method ((event command-event))
     (with-simple-restart (stop-command "Stop dispatching ~a" event)
       (loop for handler across *cmd-priority-array*
@@ -162,7 +162,7 @@ Unless specifically rebound, for command events the following restarts are avail
                      (when match
                        (v:trace :command "Event ~a matched ~a." event handler)
                        (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))) :remove-empty-subseqs T)))
-                         (with-repeating-restart (recheck-handler "Try checking the arguments again.")
+                         (with-repeating-restart (recheck-arguments "Try checking the arguments again.")
                            (unless (arguments-match-p (arguments handler) args)
                              (error 'invalid-arguments :argslist args :expected (arguments handler) :command (identifier handler)))
                            (with-repeating-restart (retry-handler "Retry dispatching to ~a" handler)
