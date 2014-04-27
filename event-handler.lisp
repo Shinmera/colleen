@@ -15,14 +15,16 @@ You should not modify this yourself unless you know what you're doing as this
 map is overwritten completely whenever GENERATE-HANDLER-PRIORITY-CACHE is invoked.")
 (defvar *priority-names*
   (loop with map = (make-hash-table)
-        for (name val) in '((:PREPROCESS 200) (:BEFORE 100)
+        for (name val) in `((:FIRST ,most-positive-fixnum)
+                            (:PREPROCESS 200) (:BEFORE 100)
                             (:MAIN 0) (:STANDARD 0) (:DEFAULT 0)
-                            (:AFTER -100) (:POSTPROCESS -200))
+                            (:AFTER -100) (:POSTPROCESS -200)
+                            (:LAST ,most-negative-fixnum))
         do (setf (gethash name map) val)
         finally (return map))
   "Hash table mapping arbitrary names to event priorities.
-Defined by default are :PREPROCESS :BEFORE :MAIN :STANDARD
-:DEFAULT :AFTER :POSTPROCESS.")
+Defined by default are :FIRST :PREPROCESS :BEFORE :MAIN :STANDARD
+:DEFAULT :AFTER :POSTPROCESS :LAST.")
 
 (defclass event-handler ()
   ((%event-type :initarg :event-type :initform 'event :accessor event-type)
