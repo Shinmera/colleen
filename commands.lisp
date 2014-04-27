@@ -215,7 +215,7 @@ See SET-COMMAND-FUNCTION"
   (assert (symbolp name) () "NAME has to be a symbol.")
   (unless pattern
     (setf pattern (format NIL "^~a(.*)" (escape-regex-symbols (string name)))))
-  `(progn
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
      (set-command-function ',name ,pattern #'(lambda (event &rest args)
                                                (if args
                                                    (respond event (apropos-command-handler (message event)))
@@ -261,26 +261,27 @@ BODY          ::= FORM*"
     (flet ((mksymb (list)
              (let ((name (format NIL "~{~a~^ ~}" list)))
                (or (find-symbol name) (intern name)))))
-      `(let ((,funcsym #'(lambda (,eventvar ,@args)
-                            ,@(when authorization
-                                `((unless (auth-p (nick ,eventvar))
+      `(eval-when (:compile-toplevel :load-toplevel :execute)
+         (let ((,funcsym #'(lambda (,eventvar ,@args)
+                             ,@(when authorization
+                                 `((unless (auth-p (nick ,eventvar))
                                      (error 'not-authorized :event ,eventvar))))
-                            ,(if module-name
-                                 `(with-module (,modulevar ,module-name)
-                                    (declare (ignorable ,modulevar))
-                                    ,(if threaded
-                                         `(with-module-thread (,modulevar)
-                                            (with-module-lock (,modulevar)
-                                              ,@body))
-                                         `(progn ,@body)))
-                                 `(progn ,@body)))))
-         ,(if (listp name)
-              (let ((group (car name))
-                    (name (mksymb name)))
-                `(progn
-                   ,(if (command-handler group)
-                        `(pushnew ',name (subcommands (command-handler ',group)))
-                        `(progn (warn 'implicit-group-definition :group ',group)
-                                (define-group ,group :subcommands (list ',name))))
-                   (set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation)))
-              `(set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation))))))
+                             ,(if module-name
+                                  `(with-module (,modulevar ,module-name)
+                                     (declare (ignorable ,modulevar))
+                                     ,(if threaded
+                                          `(with-module-thread (,modulevar)
+                                             (with-module-lock (,modulevar)
+                                               ,@body))
+                                          `(progn ,@body)))
+                                  `(progn ,@body)))))
+           ,(if (listp name)
+                (let ((group (car name))
+                      (name (mksymb name)))
+                  `(progn
+                     ,(if (command-handler group)
+                          `(pushnew ',name (subcommands (command-handler ',group)))
+                          `(progn (warn 'implicit-group-definition :group ',group)
+                                  (define-group ,group :subcommands (list ',name))))
+                     (set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation)))
+                `(set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation)))))))
