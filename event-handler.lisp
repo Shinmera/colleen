@@ -34,8 +34,8 @@ Necessary to ensure proper event handling order."
     ;; Rebuild
     (loop for handler being the hash-values of handler-map
           do (if (gethash (event-type handler) priority-map)
-                 (setf (gethash (event-type handler) priority-map) (list handler))
-                 (push handler (gethash (event-type handler) priority-map))))
+                 (push handler (gethash (event-type handler) priority-map))
+                 (setf (gethash (event-type handler) priority-map) (list handler))))
     ;; Sort
     (loop for event-type being the hash-keys of priority-map
           for handlers being the hash-values of priority-map
