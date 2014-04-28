@@ -129,7 +129,7 @@ If a match occurs, a fitting COMMAND-EVENT is generated and dispatched."
                                :server (server event)
                                :arguments (arguments event)
                                :prefix (prefix event)
-                               :message (message (subseq (message event) (length prefix))))))))
+                               :message (subseq (message event) (length prefix)))))))
 (set-handler-function :command-reader 'events:privmsg-event #'read-command)
 
 (defmacro do-matching-command-handlers ((command-signature handlervar) &body body)
