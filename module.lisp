@@ -9,7 +9,8 @@
 (defclass module ()
   ((%active :initform NIL :accessor active :allocation :class)
    (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
-   (%lock :initform (bordeaux-threads:make-lock) :accessor lock :allocation :class))
+   (%lock :initform (bordeaux-threads:make-lock) :accessor lock :allocation :class)
+   (%storage :initform (make-hash-table :test 'equal) :accessor storage :allocation :class))
   (:documentation "Base module class."))
 
 (defmacro generalize-module-accessor (name)
@@ -110,9 +111,15 @@
   "Returns the module of the current package context."
   (get-module (get (package-symbol package) :module)))
 
+(define-compiler-macro get-current-module (&whole whole &optional package)
+  (if package whole (get-module (get (package-symbol *package*) :module))))
+
 (defun get-current-module-name (&optional (package *package*))
   "Returns the name of the module in the current package context."
   (get (package-symbol package) :module))
+
+(define-compiler-macro get-current-module-name (&whole whole &optional package)
+  (if package whole (get (package-symbol *package*) :module)))
 
 (defmacro define-module (name direct-superclasses direct-slots &body options)
   "Define a new module class. See DEFCLASS.
@@ -123,6 +130,7 @@ Note that all module slots are always allocated on the class."
          ((%active :initform NIL :reader active :allocation :class)
           (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
           (%lock :initform (bordeaux-threads:make-lock ,(string name)) :accessor lock :allocation :class)
+          (%storage :initform (make-hash-table :test 'equal) :accessor storage :allocation :class)
           ,@(mapcar #'(lambda (slot) (append slot '(:allocation :class))) direct-slots))
          ,@options)
        (when (and (gethash ,keyname *bot-modules*)
