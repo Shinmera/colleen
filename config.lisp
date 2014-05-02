@@ -12,7 +12,8 @@
                          (loop for char across name
                                do (format stream "~:[~a~;-~a~]" (upper-case-p char) (char-upcase char))))))
              (intern name "KEYWORD"))))
-    (yason:parse stream :object-key-fn #'object-key-fn :object-as :alist)))
+    ;;(yason:parse stream :object-key-fn #'object-key-fn :object-as :alist)
+    ))
 
 (defun load-config (&optional (config-file *conf-file*))
   "(Re)load the static configuration."
@@ -30,7 +31,7 @@
     (setf config-file *default-conf-file*))
   
   (with-open-file (stream config-file :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (yason:encode-alist *conf* stream)
+    ;;(yason:encode-alist *conf* stream)
     (v:info :colleen.main "Saved config to ~a" config-file)))
 
 (defun config (setting &optional new-value (config-file *conf-file*))

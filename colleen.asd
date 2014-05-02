@@ -23,6 +23,7 @@
                (:file "config")
                (:file "toolkit")
                (:file "module")
+               (:file "module-storage")
                (:file "event")
                (:file "event-priority")
                (:file "event-handler")
@@ -35,7 +36,7 @@
                (:module "modules"
                 :components ((:file "system-definitions"))))
   :depends-on (:bordeaux-threads 
-               :yason
+               :universal-config
                :verbose
                :split-sequence
                :alexandria
