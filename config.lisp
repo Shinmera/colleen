@@ -6,26 +6,23 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defun parse-json (stream)
-  (flet ((object-key-fn (name)
-           (let ((name (with-output-to-string (stream)
-                         (loop for char across name
-                               do (format stream "~:[~a~;-~a~]" (upper-case-p char) (char-upcase char))))))
-             (intern name "KEYWORD"))))
-    ;;(yason:parse stream :object-key-fn #'object-key-fn :object-as :alist)
-    ))
+(defvar *config-file* NIL "Pathname pointing to the config file being used.")
+(defvar *config-directory* (merge-pathnames "config/" (asdf:system-source-directory :colleen)))
+(defvar *default-config-file* (merge-pathnames "colleen.uc.lisp" *config-directory*))
+(defvar *config* (make-hash-table :test 'equal) "")
 
-(defun load-config (&optional (config-file *conf-file*))
+(defun load-config (&optional (config-file *config-file*))
   "(Re)load the static configuration."
   (when (not config-file)
-    (setf config-file *default-conf-file*))
+    (setf config-file *default-config-file*))
 
-  (with-open-file (stream config-file :if-does-not-exist :ERROR)
-    (setf *conf* (parse-json stream))
-    (setf *conf-file* config-file)
-    (v:info :colleen.main "Loaded config from ~a" config-file)))
+  (let ((uc:*config*))
+    (uc:load-configuration config-file)
+    (setf *config* uc:*config*))
+  (setf *config-file* config-file)
+  (v:info :colleen.main "Loaded config from ~a" config-file))
 
-(defun save-config (&optional (config-file *conf-file*))
+(defun save-config (&optional (config-file *config-file*))
   "Save the static configuration to file."
   (when (not config-file)
     (setf config-file *default-conf-file*))
@@ -33,23 +30,6 @@
   (with-open-file (stream config-file :direction :output :if-exists :supersede :if-does-not-exist :create)
     ;;(yason:encode-alist *conf* stream)
     (v:info :colleen.main "Saved config to ~a" config-file)))
-
-(defun config (setting &optional new-value (config-file *conf-file*))
-  "Get or set configuration values."
-  (when new-value
-    (setf (cdr (assoc setting *conf*)) new-value)
-    (save-config config-file))
-  (cdr (assoc setting *conf*)))
-
-(defmacro config-tree (&rest branches)
-  "Retrieve a configuration value based on a branch."
-  (labels ((ct (branches)
-             (if branches
-                 `(cdr (assoc ,(car branches) ,(ct (cdr branches))))
-                 `*conf*)))
-    (ct (reverse branches))))
-
-(defsetf config config)
 
 (defun server-config (server var)
   "Shorthand accessor for server configuration values, defaulting to the DEFAULT server if not available."

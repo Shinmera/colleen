@@ -6,6 +6,8 @@
 
 (in-package :org.tymoonnext.colleen)
 
+(defvar *event-map* (make-hash-table :test 'equal #+sbcl :synchronized #+sbcl T) "Global event map for event codes to event classes.")
+
 (defclass event ()
   ((%server :initarg :server :reader server)
    (%prefix :initarg :prefix :reader prefix)
@@ -82,6 +84,7 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
      (%nickname :initarg :nick :reader nick))
     (:documentation "Events related to users."))
 
+(defvar *user-regex* (cl-ppcre:create-scanner "(.+)!(.+)@(.+)"))
 (defmethod initialize-instance :after ((event user-event) &rest rest)
   (declare (ignore rest))
   (cl-ppcre:register-groups-bind (nick username hostmask) (*user-regex* (prefix event))

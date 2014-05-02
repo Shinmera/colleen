@@ -6,6 +6,10 @@
 
 (in-package :org.tymoonnext.colleen)
 
+(defvar *servers* (make-hash-table #+sbcl :synchronized #+sbcl T) "Table containing the IRC server instances.")
+(defvar *current-server*)
+(setf (documentation '*current-server* 'variable) "Special variable containing the server in the current thread context.")
+
 (defclass server ()
   ((%name :initarg :name :initform (error "Name required.") :accessor name)
    (%auth-users :initarg :auth-users :initform () :accessor auth-users)
@@ -188,6 +192,7 @@
        (when *debugger*
          (invoke-debugger e)))))
 
+(defvar *irc-message-regex* (cl-ppcre:create-scanner "^(:([^ ]+) +)?([^ ]+)( +(.+))?"))
 (defun read-loop (&optional (server *current-server*))
   "Continuously receives and handles a message."
   (with-reconnect-handler server

@@ -6,6 +6,10 @@
 
 (in-package :org.tymoonnext.colleen)
 
+(defvar *bot-modules* (make-hash-table #+sbcl :synchronized #+sbcl T) "Global module table consisting of name->instance pairs.")
+(defvar *current-module*)
+(setf (documentation '*current-module* 'variable) "Special variable containing the module in the current module context.")
+
 (defclass module ()
   ((%active :initform NIL :accessor active :allocation :class)
    (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
@@ -29,6 +33,7 @@
 (defgeneric start (module)
   (:documentation "Start the module and activate it for use.")
   (:method :around ((module module))
+    (load-storage module)
     (call-next-method)
     (setf (active module) T)
     module)
@@ -45,12 +50,14 @@
                  (interrupt-thread thread #'(lambda () (error 'module-stop)))
                  (remhash uid (threads module))))
     (call-next-method)
+    (save-storage module)
     module)
 
   (:method ((module module))))
 
 (defmacro with-module ((var &optional (name (get-current-module-name))) &body forms)
-  `(let ((,var (get-module ,name)))
+  `(let* ((,var (get-module ,name))
+          (*current-module* ,var))
      ,@forms))
 
 (defmacro with-module-thread ((module) &body thread-body)
