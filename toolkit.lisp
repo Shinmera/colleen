@@ -21,12 +21,12 @@
 
 (defun standard-message (msgsymbol &rest otherwise-format)
   "Returns the default message designated by the symbol or if provided the otherwise-formatted string."
-  (or (config-tree :messages msgsymbol)
+  (or (uc:config-tree :messages msgsymbol)
       (when otherwise-format (apply #'format NIL otherwise-format))))
 
 (defun fstd-message (event msgsymbol &rest otherwise-format)
   "Shorthand for (format-message (standard-message ..))."
-  (let ((msg (or (config-tree :messages msgsymbol)
+  (let ((msg (or (uc:config-tree :messages msgsymbol)
                  (when otherwise-format (apply #'format NIL otherwise-format)))))
     (when msg (format-message event msg))))
 

@@ -81,7 +81,7 @@
                                         (user (server-config server :user))
                                         (pass (server-config server :pass))
                                         (real (server-config server :real)))
-    (if (null (config-tree :servers server))
+    (if (null (uc:config-tree :servers server))
         (v:warn server "No configuration found!"))
     (assert (not (gethash server *servers*)) () "Server already connected!")
     (connect (make-instance 'server :name server 
@@ -119,14 +119,14 @@
 
 (defgeneric disconnect (server-or-name &key quit-message &allow-other-keys)
   (:documentation "Disconnect a server instance and terminate their read-threads.")
-  (:method ((server string) &key (quit-message (config-tree :messages :quit)))
+  (:method ((server string) &key (quit-message (uc:config-tree :messages :quit)))
     (disconnect (intern (string-upcase server) "KEYWORD") :quit-message quit-message))
 
-  (:method ((server symbol) &key (quit-message (config-tree :messages :quit)))
+  (:method ((server symbol) &key (quit-message (uc:config-tree :messages :quit)))
     (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
     (disconnect (gethash server *servers*) :quit-message quit-message))
 
-  (:method ((server server) &key (quit-message (config-tree :messages :quit)) (kill-reconnect T) (quit T))
+  (:method ((server server) &key (quit-message (uc:config-tree :messages :quit)) (kill-reconnect T) (quit T))
     (flet ((terminate-server-thread (slot)
              (when (and (slot-value server slot) (thread-alive-p (slot-value server slot)))
                (v:debug (name server) "Interrupting ~a" slot)
