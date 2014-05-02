@@ -99,3 +99,20 @@ Each entity is a list with the following format: (TYPE START END)"
   (loop for i in lambda-list
         until (lambda-keyword-p i)
         collect i))
+
+(defun build-lambda-call (lambda-list)
+  (loop with return = ()
+        with keys = NIL
+        for arg in (flatten-lambda-list lambda-list)
+        do (if keys
+               (setf return (cons arg (cons (find-symbol (symbol-name arg) "KEYWORD") return)))
+               (unless (lambda-keyword-p arg)
+                 (push arg return)))
+           (when (eq arg '&key)
+             (setf keys T))
+        finally (return (nreverse return))))
+
+(defun function-arguments (function)
+  #+sbcl (sb-introspect:function-lambda-list function)
+  #+(and swank (not sbcl)) (swank-backend:arglist function)
+  #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression function))))

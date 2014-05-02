@@ -91,9 +91,7 @@ CLASS            --- The class to make an instance of. Has to be subclass of
   (when (command-handler identifier)
     (v:debug :command "Redefining handler ~a" identifier))
   (unless a-p
-    (setf arguments (cdr #+sbcl (sb-introspect:function-lambda-list handler-function)
-                         #+(and swank (not sbcl)) (swank-backend:arglist handler-function)
-                         #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression handler-function))))))
+    (setf arguments (cdr (function-arguments handler-function))))
   (setf (command-handler identifier)
         (make-instance class
                        :identifier identifier :pattern cmd-pattern :arguments arguments
