@@ -6,14 +6,29 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defmacro wrap-function (function-symbol)
-  (let ((args (function-arguments (symbol-function function-symbol))))
-    `(defun ,(intern (string function-symbol) :colleen) ,args
-       (let ((uc:*config* (storage (get-module (get-current-module-name)))))
-         (,function-symbol ,@(build-lambda-call args))))))
+(defmacro with-module-storage ((&optional (module *current-module*)) &body forms)
+  `(let ((uc:*config* (storage (get-module ,module))))
+     ,@forms))
 
-(wrap-function uc:access)
-(wrap-function uc:config-tree)
-(wrap-function uc:save-configuration)
-(wrap-function uc:load-configuration)
+(defun module-config-path (module)
+  (merge-pathnames (string-downcase
+                    (format NIL "~a.uc.~a"
+                            (to-module-name module)
+                            uc:*output-format*))
+                   *config-directory*))
 
+(defgeneric save-storage (module)
+  (:documentation "")
+  (:method ((module module))
+    (let ((path (module-config-path module)))
+      (v:info (to-module-name module) "Saving storage to ~a" path)
+      (uc:save-configuration path :object (storage module)))))
+
+(defgeneric load-storage (module)
+  (:documentation "")
+  (:method ((module module))
+    (let ((uc:*config*)
+          (path (module-config-path module)))
+      (v:info (to-module-name module) "Loading storage from ~a" path)
+      (uc:load-configuration path)
+      (setf (storage module) uc:*config*))))
