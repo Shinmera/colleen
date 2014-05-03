@@ -30,5 +30,6 @@
     (let ((uc:*config*)
           (path (module-config-path module)))
       (v:info (to-module-name module) "Loading storage from ~a" path)
-      (uc:load-configuration path)
+      (unless (uc:load-configuration path :if-does-not-exist NIL)
+        (v:info (to-module-name module) "Storage file not found."))
       (setf (storage module) uc:*config*))))
