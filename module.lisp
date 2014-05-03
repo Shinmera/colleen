@@ -81,6 +81,8 @@
                               (v:trace ,modnamegens "Ending thread ~a." ,uidgens)
                               (remhash ,uidgens (threads ,modgens)))
                           :initial-bindings `((*current-server* . ,*current-server*)
+                                              (*current-module* . ,*current-module*)
+                                              (uc:*config* . ,uc:*config*)
                                               (*servers* . ,*servers*))))
        ,uidgens)))
 
