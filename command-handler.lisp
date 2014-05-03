@@ -123,11 +123,15 @@ If a match occurs, a fitting COMMAND-EVENT is generated and dispatched."
              (setf prefix (format NIL "~a:" (nick *current-server*))))
            (when (and (> (length (message event)) (length prefix))
                       (string= (message event) prefix :end1 (length prefix)))
-             (dispatch (make-instance 'command-event
-                                      :server (server event)
-                                      :arguments (arguments event)
-                                      :prefix (prefix event)
-                                      :message (subseq (message event) (length prefix)))))))
+             (handler-bind ((not-authorized #'(lambda (err)
+                                                (v:warn (name (server event)) "~a" err)
+                                                (respond event (fstd-message event :not-authorized))
+                                                (invoke-restart 'skip-handler))))
+               (dispatch (make-instance 'command-event
+                                        :server (server event)
+                                        :arguments (arguments event)
+                                        :prefix (prefix event)
+                                        :message (subseq (message event) (length prefix))))))))
 (set-handler-function :command-reader 'events:privmsg-event #'read-command)
 
 (defmacro do-matching-command-handlers ((command-signature handlervar) &body body)
