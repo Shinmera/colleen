@@ -6,6 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.auth
+  (:nicknames :co-auth)
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.auth)
 
@@ -45,7 +46,7 @@
   (handler-case 
       (if (auth-p (nick event))
           (respond event (fstd-message event :auth-already))
-          (let ((logininfo (config-tree :auth :logins (find-symbol (string-upcase (nick event)) "KEYWORD"))))
+          (let ((logininfo (uc:config-tree :logins (intern (string-upcase (nick event)) "KEYWORD"))))
             (if pw
                 (if (string= (format nil "~{~a~^ ~}" pw) logininfo)
                     (progn (add-to-auth (nick event) "Password auth.")
@@ -64,6 +65,20 @@
     (error (err)
       (v:warn :auth "Error during login attempt: ~a" err)
       (respond event (fstd-message event :auth-fail)))))
+
+(define-group auth :documentation "Regulate authentication.")
+
+(define-command (auth add) (username password) (:authorization T :documentation "Add a user to the auth login system.")
+  (setf (uc:config-tree :logins (intern (string-upcase username) "KEYWORD")) password)
+  (respond event "User ~a added to logins." username))
+
+(define-command (auth remove) (username) (:authorization T :documentation "Remove a user from the auth login system.")
+  (remhash (intern (string-upcase username) "KEYWORD") (uc:config-tree :logins))
+  (respond event "User ~a removed from logins." username))
+
+(define-command (auth change-password) (new-password) (:authorization T :documentation "Change the password.")
+  (setf (uc:config-tree :logins (intern (string-upcase (nick event)) "KEYWORD")) new-password)
+  (respond event "Password changed."))
 
 (define-handler notice-event ()
   (when (string-equal "NickServ" (nick notice-event))
