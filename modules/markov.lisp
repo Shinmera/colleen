@@ -17,8 +17,9 @@
 
 (defmethod start ((markov markov))
   (let ((uc:*config*))
-    (uc:load-configuration *registry-file*)
-    (setf (registry markov) uc:*config*))
+    (if (uc:load-configuration *registry-file* :if-does-not-exist NIL)
+        (setf (registry markov) uc:*config*)
+        (setf (registry markov) (make-hash-table :test 'equalp))))
   markov)
 
 (defmethod stop ((markov markov))

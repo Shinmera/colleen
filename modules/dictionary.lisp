@@ -6,12 +6,16 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.dictionary
+  (:nicknames :co-dictionary)
   (:use :cl :colleen :events :alexandria))
 (in-package :org.tymoonnext.colleen.mod.dictionary)
 
-
 (define-module dictionary ()
-  (:documentation "A general purpose dictionary provider."))
+    (:documentation "A general purpose dictionary provider."))
+
+(defmethod stop ((dictionary dictionary))
+  (unless (eq (hash-table-test (storage dictionary)) 'equalp)
+    (setf (storage dictionary) (make-hash-table :test 'equalp))))
 
 (defun link-p (definition)
   (and definition (< 2 (length definition))
