@@ -12,17 +12,8 @@
 (in-package :org.tymoonnext.colleen.mod.essentials)
 
 (define-module essentials ()
-    ((%last-seen :initform (make-hash-table :test 'equalp) :accessor last-seen)
-     (%startup :initform (get-universal-time) :accessor startup-time))
+    ((%startup :initform (get-universal-time) :accessor startup-time))
   (:documentation "A few essential bot and irc commands."))
-
-(defmethod start ((essentials essentials))
-  (with-module-storage (essentials)
-    (setf (last-seen essentials) (uc:config-tree :last-seen))))
-
-(defmethod stop ((essentials essentials))
-  (with-module-storage (essentials)
-    (setf (uc:config-tree :last-seen) (last-seen essentials))))
 
 (define-command reload () (:authorization T :documentation "Reload the configuration.")
   (when (auth-p (nick event))
@@ -213,10 +204,10 @@
 
 ;; LAST SEEN
 (define-handler (join-event event) ()
-  (setf (gethash (nick event) (last-seen module)) (get-universal-time)))
+  (setf (uc:config-tree :last-seen (nick event)) (get-universal-time)))
 
 (define-handler (privmsg-event event) ()
-  (setf (gethash (nick event) (last-seen module)) (get-universal-time)))
+  (setf (uc:config-tree :last-seen (nick event)) (get-universal-time)))
 
 (defun format-time-since (secs)
   (multiple-value-bind (s m h dd yy) (decode-universal-time secs)
@@ -225,8 +216,8 @@
     (format NIL "~:[~D years, ~;~*~]~:[~D days, ~;~*~]~:[~D hours, ~;~*~]~D minutes" (= yy 0) yy (= dd 0) dd (= h 0) h m)))
 
 (define-command last-seen (nick) (:documentation "Tell how long it has been since the bot last saw the requested nick.")
-  (if (gethash nick (last-seen module))
-      (respond event "I have last seen ~a ~a ago." nick (format-time-since (- (get-universal-time) (gethash nick (last-seen module)))))
+  (if (uc:config-tree :last-seen nick)
+      (respond event "I have last seen ~a ~a ago." nick (format-time-since (- (get-universal-time) (uc:config-tree :last-seen nick))))
       (respond event "I don't know anyone called ~a." nick)))
 
 (define-command uptime () (:documentation "Report how long Colleen has been started up for (or more specifically, the Essentials module).")
