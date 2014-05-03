@@ -118,15 +118,9 @@
   "Returns the module of the current package context."
   (get-module (get (package-symbol package) :module)))
 
-(define-compiler-macro get-current-module (&whole whole &optional package)
-  (if package whole (get-module (get (package-symbol *package*) :module))))
-
 (defun get-current-module-name (&optional (package *package*))
   "Returns the name of the module in the current package context."
   (get (package-symbol package) :module))
-
-(define-compiler-macro get-current-module-name (&whole whole &optional package)
-  (if package whole (get (package-symbol *package*) :module)))
 
 (defmacro define-module (name direct-superclasses direct-slots &body options)
   "Define a new module class. See DEFCLASS.
