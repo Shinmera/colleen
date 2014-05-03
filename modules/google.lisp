@@ -1,7 +1,7 @@
 #|
-This file is a part of Colleen
-(c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
-Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 TymoonNET/NexT http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
 (in-package :org.tymoonnext.colleen)
