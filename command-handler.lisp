@@ -279,12 +279,12 @@ BODY          ::= FORM*"
                                      (error 'not-authorized :event ,eventvar))))
                              ,(if module-name
                                   `(with-module (,modulevar ,module-name)
-                                     (declare (ignorable ,modulevar))
-                                     ,(if threaded
-                                          `(with-module-thread (,modulevar)
-                                             (with-module-lock (,modulevar)
-                                               ,@body))
-                                          `(progn ,@body)))
+                                     (when (active ,modulevar)
+                                       ,(if threaded
+                                            `(with-module-thread (,modulevar)
+                                               (with-module-lock (,modulevar)
+                                                 ,@body))
+                                            `(progn ,@body))))
                                   `(progn ,@body)))))
            ,(if (listp name)
                 (let ((group (car name))
