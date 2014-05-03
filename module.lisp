@@ -80,10 +80,9 @@
                                     (invoke-debugger err))))
                               (v:trace ,modnamegens "Ending thread ~a." ,uidgens)
                               (remhash ,uidgens (threads ,modgens)))
-                          :initial-bindings `((*current-server* . ,*current-server*)
-                                              (*current-module* . ,*current-module*)
-                                              (uc:*config* . ,uc:*config*)
-                                              (*servers* . ,*servers*))))
+                          :initial-bindings (loop for symbol in '(*current-server* *current-module* uc:*config*)
+                                                  when (boundp symbol)
+                                                    collect (cons symbol (symbol-value symbol)))))
        ,uidgens)))
 
 (defmacro with-module-lock ((&optional (module '*current-module*) (lockvar (gensym "LOCK"))) &body forms)
