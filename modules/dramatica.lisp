@@ -15,18 +15,20 @@
   (:documentation "Module related to Encyclopedia Dramatica activities."))
 
 (defmethod start ((dramatica dramatica))
-  (setf wiki:*wiki-api* (config-tree :dramatica :wiki :api))
-  (when (> (length (config-tree :dramatica :wiki :pass)) 0)
-    (wiki:login (config-tree :dramatica :wiki :user)
-                (config-tree :dramatica :wiki :pass)))
-  (when (> (length (config-tree :dramatica :forum :pass)) 0)
-    (xencl:initiate (config-tree :dramatica :forum :url)
-                    (config-tree :dramatica :forum :user)
-                    (config-tree :dramatica :forum :pass))))
+  (with-module-storage (dramatica)
+    (setf wiki:*wiki-api* (uc:config-tree :wiki :api))
+    (when (> (length (uc:config-tree :wiki :pass)) 0)
+      (wiki:login (uc:config-tree :wiki :user)
+                  (uc:config-tree :wiki :pass)))
+    (when (> (length (uc:config-tree :forum :pass)) 0)
+      (xencl:initiate (uc:config-tree :forum :url)
+                      (uc:config-tree :forum :user)
+                      (uc:config-tree :forum :pass)))))
 
 (defmethod stop ((dramatica dramatica))
-  (setf (config-tree :dramatica :wiki :api) wiki:*wiki-api*)
-  (setf (config-tree :dramatica :forum :url) xencl:*index*))
+  (with-module-storage (dramatica)
+    (setf (uc:config-tree :wiki :api) wiki:*wiki-api*)
+    (setf (uc:config-tree :forum :url) xencl:*index*)))
 
 ;;;;;;;;;;;; RECENT CHANGES
 (define-group ed :documentation "Interact or change ED settings.")
@@ -68,33 +70,34 @@
   (v:info :dramatica.recentchanges "Log-loop stopped."))
 
 (defun wiki-log-loop (dramatica)
-  (let ((wiki:*wiki-api* (config-tree :dramatica :wiki :api))
-        (latest-timestamp
-          (multiple-value-bind (query timestamp) (wiki:recent-changes :limit 1 :type :log)
-            (declare (ignore query)) timestamp))
-        (last-id 0))
-    (v:info :dramatica.recentchanges "Log-loop started with latest-timestamp ~a" latest-timestamp)
-    (loop while (log-running dramatica)
-          do (sleep 10)
-             (v:debug :dramatica.recentchanges "Querying log.")
-             (ignore-errors
-              (handler-case
-                  (let ((query (wiki:recent-changes :end latest-timestamp :limit 1000 :type :log :properties '(user comment loginfo timestamp title))))
-                    (setf latest-timestamp (cdr (assoc :timestamp (first query))))
-                    (v:trace :dramatica.recentchanges "Log return: ~a" query)
-                    (dolist (log query)
-                      (when (< last-id (cdr (assoc :logid log)))
-                        (setf last-id (cdr (assoc :logid log)))
-                        (v:info :dramatica.recentchanges "New log entry: ~a" log)
-                        
-                        (handle-log (cdr (assoc :logtype log))
-                                    (cdr (assoc :title log))
-                                    (cdr (assoc :comment log))))))
-                (error (err)
-                  (v:warn :dramatica.recentchanges "ERROR: ~a" err)
-                  (wiki:login (config-tree :dramatica :wiki :user)
-                              (config-tree :dramatica :wiki :pass))))))
-    (v:info :dramatica.recentchanges "Leaving log-loop with last-id ~a" last-id))
+  (with-module-storage (dramatica)
+    (let ((wiki:*wiki-api* (uc:config-tree :wiki :api))
+          (latest-timestamp
+            (multiple-value-bind (query timestamp) (wiki:recent-changes :limit 1 :type :log)
+              (declare (ignore query)) timestamp))
+          (last-id 0))
+      (v:info :dramatica.recentchanges "Log-loop started with latest-timestamp ~a" latest-timestamp)
+      (loop while (log-running dramatica)
+            do (sleep 10)
+               (v:debug :dramatica.recentchanges "Querying log.")
+               (ignore-errors
+                (handler-case
+                    (let ((query (wiki:recent-changes :end latest-timestamp :limit 1000 :type :log :properties '(user comment loginfo timestamp title))))
+                      (setf latest-timestamp (cdr (assoc :timestamp (first query))))
+                      (v:trace :dramatica.recentchanges "Log return: ~a" query)
+                      (dolist (log query)
+                        (when (< last-id (cdr (assoc :logid log)))
+                          (setf last-id (cdr (assoc :logid log)))
+                          (v:info :dramatica.recentchanges "New log entry: ~a" log)
+                          
+                          (handle-log (cdr (assoc :logtype log))
+                                      (cdr (assoc :title log))
+                                      (cdr (assoc :comment log))))))
+                  (error (err)
+                    (v:warn :dramatica.recentchanges "ERROR: ~a" err)
+                    (wiki:login (uc:config-tree :wiki :user)
+                                (uc:config-tree :wiki :pass))))))
+      (v:info :dramatica.recentchanges "Leaving log-loop with last-id ~a" last-id)))
   (setf (log-loop dramatica) NIL))
 
 (defvar *ip-match* (cl-ppcre:create-scanner "(\\d{1,4}\\.){3}\\d{1,4}"))
@@ -135,8 +138,8 @@
 (define-command (wiki login) (&optional username password) (:authorization T :documentation "Log in to the wiki.")
   (handler-case
       (progn
-        (wiki:login (or username (config-tree :dramatica :wiki :user)) 
-                    (or password (config-tree :dramatica :wiki :pass)))
+        (wiki:login (or username (uc:config-tree :wiki :user)) 
+                    (or password (uc:config-tree :wiki :pass)))
         (respond event "Login successful."))
     (error (err)
       (respond event "Error: ~a" err))))
@@ -207,8 +210,8 @@
 
 (define-edf-command login (&optional username password) (:authorization T :documentation "Log in to the forum.")
   (xencl:login (make-instance 'xencl:user
-                              :title (or username (config-tree :dramatica :forum :user))
-                              :pass (or password (config-tree :dramatica :forum :pass))))
+                              :title (or username (uc:config-tree :forum :user))
+                              :pass (or password (uc:config-tree :forum :pass))))
   (respond event "Login successful."))
 
 (define-edf-command shoutbox-post (&rest message) (:authorization T :documentation "Posted a message to the shoutbox.")
