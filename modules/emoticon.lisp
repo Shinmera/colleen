@@ -9,7 +9,7 @@
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.emoticons)
 
-(define-module emoticon ()
+(define-module emoticon () ()
   (:documentation "Simple database for :emoticon:s."))
 
 (define-handler (privmsg-event event) ()

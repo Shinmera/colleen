@@ -9,7 +9,7 @@
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.counter)
 
-(define-module counter ()
+(define-module counter () ()
   (:documentation "Count objects."))
 
 (define-handler (privmsg-event event) ()

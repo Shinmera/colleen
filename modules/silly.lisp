@@ -9,8 +9,7 @@
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.silly)
 
-(define-module silly ()
-    ((%active-in :initform () :accessor active-in))
+(define-module silly () ()
   (:documentation "Silly things."))
 
 (defparameter *save-file* (merge-pathnames "silly.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
@@ -22,31 +21,23 @@
         until (find (aref string i) '(#\a #\e #\i #\o #\u))
         finally (return (subseq string i))))
 
-(defmethod start ((silly silly))
-  (with-open-file (stream *save-file* :if-does-not-exist NIL)
-    (when stream
-      (setf (active-in silly) (yason:parse stream)))))
-
-(defmethod stop ((silly silly))
-  (with-open-file (stream *save-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
-    (yason:encode (active-in silly) stream)))
-
 (define-group silly :documentation "Manage the silly module.")
 
 (define-command (silly activate) (&optional channel server) (:authorization T :documentation "Activate the silly responses for the channel.")
   (unless channel (setf channel (channel event)))
   (unless server (setf server (name (server event))))
-  (pushnew (format NIL "~a/~a" server channel) (active-in module) :test #'string-equal)
+  (pushnew (format NIL "~a/~a" server channel) (uc:config-tree :active-in) :test #'string-equal)
   (respond event "Activated silliness."))
 
 (define-command (silly deactivate) (&optional channel server) (:authorization T :documentation "Deactivate the silly responses for the channel.")
   (unless channel (setf channel (channel event)))
   (unless server (setf server (name (server event))))
-  (setf (active-in module) (delete (format NIL "~a/~a" server channel) (active-in module) :test #'string-equal))
+  (setf (uc:config-tree :active-in)
+        (delete (format NIL "~a/~a" server channel) (uc:config-tree :active-in) :test #'string-equal))
   (respond event "Deactivated silliness."))
 
 (define-handler (privmsg-event event) ()
-  (when (member (format NIL "~a/~a" (name (server event)) (channel event)) (active-in module) :test #'string-equal)
+  (when (member (format NIL "~a/~a" (name (server event)) (channel event)) (uc:config-tree :active-in) :test #'string-equal)
     (let ((message (string-downcase (message event))))
       (cl-ppcre:register-groups-bind (name) (*thanks-match* message)
         (sleep 2)

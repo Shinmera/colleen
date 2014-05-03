@@ -11,7 +11,7 @@
 
 (defparameter *save-file* (merge-pathnames "rss-feed-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
-(define-module rss () 
+(define-module rss () ()
   (:documentation "Update about new RSS feed items."))
 
 (defclass feed ()

@@ -10,8 +10,8 @@
   (:use :cl :colleen :events :alexandria))
 (in-package :org.tymoonnext.colleen.mod.dictionary)
 
-(define-module dictionary ()
-    (:documentation "A general purpose dictionary provider."))
+(define-module dictionary () ()
+  (:documentation "A general purpose dictionary provider."))
 
 (defmethod stop ((dictionary dictionary))
   (unless (eq (hash-table-test (storage dictionary)) 'equalp)
@@ -74,7 +74,7 @@
     (if (< (length term) 1)
         (respond event "Search term too short.")
         (respond event "Matching terms: ~{~a~^, ~}"
-                 (loop for item being the hash-table keys of (storage module)
+                 (loop for item being the hash-keys of (storage module)
                        if (search term item :test #'equalp)
                          collect item)))))
 

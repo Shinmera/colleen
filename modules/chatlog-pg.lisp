@@ -32,7 +32,7 @@
   (with-module-storage (chatlog)
     (let ((db (or db (uc:config-tree :db)))
           (host (or host (uc:config-tree :host)))
-          (port (or post (uc:config-tree :port)))
+          (port (or port (uc:config-tree :port)))
           (user (or user (uc:config-tree :user)))
           (pass (or pass (uc:config-tree :pass))))
       (v:info :chatlog-pg "Connecting ~a@~a:~a/~a" user host port db)

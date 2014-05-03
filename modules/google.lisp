@@ -12,7 +12,7 @@
 
 (defvar *language-code-map*)
 
-(define-module google ()
+(define-module google () ()
   (:documentation "Interact with various Google APIs."))
 
 (define-group google :documentation "Interact with various google services.")

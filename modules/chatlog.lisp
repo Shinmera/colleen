@@ -35,22 +35,23 @@
 
 (defconstant +UNIX-EPOCH-DIFFERENCE+ (encode-universal-time 0 0 0 1 1 1970 0))
 (defmethod insert-record ((chatlog chatlog) server channel user type message)
-  (when (find (format NIL "~a/~a" server channel) (active-in chatlog) :test #'string-equal)
-    (bordeaux-threads:with-lock-held ((lock chatlog))
-      (unless (clsql:connected-databases) (connect-db chatlog))
-      (handler-bind ((clsql-sys:sql-database-error
-                      #'(lambda (err)
-                          (v:severe :chatlog "SQL ERROR: ~a" err)
-                          (v:info :chatlog "Reconnecting and trying again.")
-                          (disconnect-db chatlog)
-                          (connect-db chatlog)
-                          (invoke-restart 'try-again))))
-        (loop until
-             (with-simple-restart (try-again "Retry inserting the record.")
-               (clsql:insert-records :into 'chatlog
-                                     :attributes '(server channel user time type message)
-                                     :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message))
-               T))))))
+  (with-module-storage (chatlog)
+    (when (find (format NIL "~a/~a" server channel) (uc:config-tree :active-in) :test #'string-equal)
+      (bordeaux-threads:with-lock-held ((lock chatlog))
+        (unless (clsql:connected-databases) (connect-db chatlog))
+        (handler-bind ((clsql-sys:sql-database-error
+                         #'(lambda (err)
+                             (v:severe :chatlog "SQL ERROR: ~a" err)
+                             (v:info :chatlog "Reconnecting and trying again.")
+                             (disconnect-db chatlog)
+                             (connect-db chatlog)
+                             (invoke-restart 'try-again))))
+          (loop until
+                (with-simple-restart (try-again "Retry inserting the record.")
+                  (clsql:insert-records :into 'chatlog
+                                        :attributes '(server channel user time type message)
+                                        :values (list (format NIL "~a" server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message))
+                  T)))))))
 
 (define-group chatlog :documentation "Change chatlog settings.")
 

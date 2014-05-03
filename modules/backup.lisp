@@ -19,7 +19,9 @@
 (defmethod start ((backup backup))
   (with-module-storage (backup)
     (setf (interval backup) (uc:config-tree :interval)
-          (backup-directory backup) (parse-namestring (uc:config-tree :directory))
+          (backup-directory backup) (parse-namestring (or (uc:config-tree :directory)
+                                                          (namestring (merge-pathnames "backup"
+                                                                                       (asdf:system-source-directory :colleen)))))
           (timer backup) (trivial-timers:make-timer #'backup :name "Backup-Thread")))
   (start-timer))
 
