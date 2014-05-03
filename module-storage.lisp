@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defmacro with-module-storage ((&optional (module *current-module*)) &body forms)
+(defmacro with-module-storage ((&optional (module '*current-module*)) &body forms)
   `(let ((uc:*config* (storage (get-module ,module))))
      ,@forms))
 

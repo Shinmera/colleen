@@ -60,7 +60,7 @@
           (*current-module* ,var))
      ,@forms))
 
-(defmacro with-module-thread ((module) &body thread-body)
+(defmacro with-module-thread ((&optional (module '*current-module*)) &body thread-body)
   (let ((uidgens (gensym "UUID"))
         (modgens (gensym "MODULE"))
         (modnamegens (gensym "MODULE-NAME")))
@@ -84,7 +84,7 @@
                                               (*servers* . ,*servers*))))
        ,uidgens)))
 
-(defmacro with-module-lock ((module &optional (lockvar (gensym "LOCK"))) &body forms)
+(defmacro with-module-lock ((&optional (module '*current-module*) (lockvar (gensym "LOCK"))) &body forms)
   `(let ((,lockvar (lock (get-module ,module))))
      (bordeaux-threads:with-lock-held (,lockvar)
        ,@forms)))
