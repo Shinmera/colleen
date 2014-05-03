@@ -12,31 +12,23 @@
   (:shadowing-import-from :chirp-objects :start :name :events))
 (in-package :org.tymoonnext.colleen.mod.twitter)
 
-(defvar *config-file* (merge-pathnames "twitter.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
-
 (define-module twitter ()
     ((streams :initform () :accessor streams))
   (:documentation "Provides access to the twitter API."))
 
 (defmethod start ((twitter twitter))
-  (with-open-file (stream *config-file* :if-does-not-exist NIL)
-    (when stream
-      (let ((config (yason:parse stream)))
-        (setf chirp:*oauth-api-key* (gethash "api-key" config)
-              chirp:*oauth-api-secret* (gethash "api-secret" config) 
-              chirp:*oauth-access-token* (gethash "access-token" config)
-              chirp:*oauth-access-secret* (gethash "access-secret" config)))
-      (v:info :twitter "Loaded keys from config."))))
+  (with-module-storage (twitter)
+    (setf chirp:*oauth-api-key* (uc:config-tree :api-key)
+          chirp:*oauth-api-secret* (uc:config-tree :api-secret) 
+          chirp:*oauth-access-token* (uc:config-tree :access-token)
+          chirp:*oauth-access-secret* (uc:config-tree :access-secret))))
 
 (defmethod stop ((twitter twitter))
-  (with-open-file (stream *config-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
-    (let ((config (make-hash-table :test 'equal)))
-      (setf (gethash "api-key" config) chirp:*oauth-api-key*)
-      (setf (gethash "api-secret" config) chirp:*oauth-api-secret*)
-      (setf (gethash "access-token" config) chirp:*oauth-access-token*)
-      (setf (gethash "access-secret" config) chirp:*oauth-access-secret*)
-      (yason:encode config stream))
-    (v:info :twitter "Saved keys to config.")))
+  (with-module-storage (twitter)
+    (setf (uc:config-tree :api-key) chirp:*oauth-api-key*
+          (uc:config-tree :api-secret) chirp:*oauth-api-secret*
+          (uc:config-tree :access-token) chirp:*oauth-access-token*
+          (uc:config-tree :access-secret) chirp:*oauth-access-secret*)))
 
 (define-group twitter :documentation "Interact with the linked twitter account.")
 
