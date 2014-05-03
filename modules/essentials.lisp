@@ -6,6 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.essentials
+  (:nicknames :co-essentials)
   (:use :cl :colleen :events :local-time :alexandria)
   (:shadow :shutdown))
 (in-package :org.tymoonnext.colleen.mod.essentials)
@@ -14,6 +15,14 @@
     ((%last-seen :initform (make-hash-table :test 'equalp) :accessor last-seen)
      (%startup :initform (get-universal-time) :accessor startup-time))
   (:documentation "A few essential bot and irc commands."))
+
+(defmethod start ((essentials essentials))
+  (with-module-storage (essentials)
+    (setf (last-seen essentials) (uc:config-tree :last-seen))))
+
+(defmethod stop ((essentials essentials))
+  (with-module-storage (essentials)
+    (setf (uc:config-tree :last-seen) (last-seen essentials))))
 
 (define-command reload () (:authorization T :documentation "Reload the configuration.")
   (when (auth-p (nick event))
