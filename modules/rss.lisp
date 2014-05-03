@@ -12,7 +12,6 @@
 (defparameter *save-file* (merge-pathnames "rss-feed-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
 (define-module rss () 
-  ((%feeds :initform (make-hash-table :test 'equalp) :accessor feeds))
   (:documentation "Update about new RSS feed items."))
 
 (defclass feed ()
@@ -21,6 +20,12 @@
    (%report-to :initarg :report-to :initform () :accessor report-to)
    (%last-item :initarg :last-item :initform NIL :accessor last-item))
   (:documentation "Class representation of an RSS feed."))
+
+(uc:define-serializer (feed feed T)
+  (make-array 3 :initial-contents (list (name feed) (url feed) (report-to feed))))
+
+(uc:define-deserializer (fed array T)
+  (make-instance 'feed :name (aref array 0) :url (aref array 1) :report-to (aref array 2)))
 
 (defmethod print-object ((feed feed) stream)
   (print-unreadable-object (feed stream :type T)
@@ -39,63 +44,38 @@
     (format stream "~a ~a~@[ ~a~]" (guid item) (title item) (publish-date item))))
 
 (defmethod start ((rss rss))
-  (load-feeds rss)
+  (with-module-storage (rss)
+    (unless (uc:config-tree :feeds)
+      (setf (uc:config-tree :feeds)
+            (make-hash-table :test 'equalp))))
   (with-module-thread (rss)
     (check-loop rss)))
-
-(defmethod stop ((rss rss))
-  (save-feeds rss))
-
-(defmethod save-feeds ((rss rss))
-  (v:info :rss "Saving feeds...")
-  (with-open-file (stream *save-file* :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (let ((data (loop for feed being the hash-values of (feeds rss)
-                   collect (cons (if (keywordp (name feed)) 
-                                     (name feed) 
-                                     (intern (name feed) :KEYWORD))
-                                 (list (cons :URL (url feed))
-                                       (cons :REPORT (list (report-to feed))))))))
-      (json:encode-json data stream)
-      (v:info :rss "~a feeds saved." (hash-table-count (feeds rss))))))
-
-(defmethod load-feeds ((rss rss))
-  (v:info :rss "Loading feeds...")
-  (with-open-file (stream *save-file* :if-does-not-exist NIL)
-    (when stream
-      (let ((feeds (loop with feeds = (make-hash-table :test 'equalp) 
-                      for feed in (json:decode-json stream)
-                      for name = (string-downcase (car feed))
-                      for url = (cdr (assoc :URL (cdr feed)))
-                      for report = (first (cdr (assoc :REPORT (cdr feed))))
-                      do (setf (gethash name feeds) (make-instance 'feed :name name :url url :report-to report))
-                      finally (return feeds))))
-        (setf (feeds rss) feeds)
-        (v:info :rss "~a feeds loaded." (hash-table-count feeds))))))
 
 (define-condition recheck (error) ())
 (defmethod check-loop ((rss rss))
   (v:debug :rss "Starting check-loop.")
   (loop with startup = T
-     while (active rss)
-     do (handler-case
-            (progn
-              (sleep (* 60 5))
-              (v:debug :rss "[Check-Loop] Checking all...")
-              (loop for feed being the hash-values of (feeds rss)
-                 do (handler-case 
-                        (let ((update (update feed)))
-                          (when (and update (not startup))
-                            (v:info :rss "~a New item: ~a" feed update)
-                            (dolist (channel (report-to feed))
-                              (irc:privmsg (cdr channel) 
-                                           (format NIL "[RSS UPDATE] ~a: ~a ~a" 
-                                                   (name feed) (title update) (link update)) 
-                                           :server (get-server (car channel))))))
-                      (error (err)
-                        (v:warn :rss "<~a> Error in check-loop: ~a" feed err)))))
-          (recheck (err) 
-            (declare (ignore err))
-            (v:debug :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately.")))
+        while (active rss)
+        do (with-module-storage (rss)
+             (handler-case
+                 (progn
+                   (sleep (* 60 5))
+                   (v:debug :rss "[Check-Loop] Checking all...")
+                   (loop for feed being the hash-values of (uc:config-tree :feeds)
+                         do (handler-case 
+                                (let ((update (update feed)))
+                                  (when (and update (not startup))
+                                    (v:info :rss "~a New item: ~a" feed update)
+                                    (dolist (channel (report-to feed))
+                                      (irc:privmsg (cdr channel) 
+                                                   (format NIL "[RSS UPDATE] ~a: ~a ~a" 
+                                                           (name feed) (title update) (link update)) 
+                                                   :server (get-server (car channel))))))
+                              (error (err)
+                                (v:warn :rss "<~a> Error in check-loop: ~a" feed err)))))
+               (recheck (err) 
+                 (declare (ignore err))
+                 (v:debug :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately."))))
        (setf startup NIL))
   (v:debug :rss "Leaving check-loop."))
 
@@ -143,12 +123,12 @@
 
 (define-command (rss add) (name url &optional (report-here T)) (:authorization T :documentation "Add a new RSS feed to check for updates.")
   (when (string-equal report-here "nil") (setf report-here NIL))
-  (if (gethash name (feeds module))
+  (if (uc:config-tree :feeds name)
       (respond event "A feed with name \"~a\" already exists!" name)
       (handler-case
           (let ((feed (make-instance 'feed :name name :url url :report-to (when report-here (list (cons (name (server event)) (channel event)))))))
             (update feed)
-            (setf (gethash name (feeds module)) feed)
+            (setf (uc:config-tree :feeds name) feed)
             (v:info :rss "Added feed: ~a" feed)
             (respond event "Feed ~a added!" name))
         (error (err)
@@ -156,39 +136,40 @@
           (respond event "Failed to add feed ~a: ~a" name err)))))
 
 (define-command (rss remove) (name) (:authorization T :documentation "Remove an RSS feed.")
-  (if (gethash name (feeds module))
+  (if (uc:config-tree :feeds name)
       (progn 
-        (remhash name (feeds module))
+        (remhash name (uc:config-tree :feeds))
         (respond event "Feed ~a removed!" name))
       (respond event "No feed called \"~a\" could be found!" name)))
 
 (define-command (rss about) (name) (:documentation "Show information about a feed.")
-  (if (gethash name (feeds module))
-      (respond event "~a: ~a" name (url (gethash name (feeds module))))
+  (if (uc:config-tree :feeds name)
+      (respond event "~a: ~a" name (url (uc:config-tree :feeds name)))
       (respond event "No feed called \"~a\" could be found!" name)))
 
 (define-command (rss list) () (:documentation "List the currently available feeds.")
-  (respond event "Known feeds: ~{~a~^, ~}" (alexandria:hash-table-keys (feeds module))))
+  (respond event "Known feeds: ~{~a~^, ~}" (alexandria:hash-table-keys (uc:config-tree :feeds))))
 
 (define-command (rss watch) (name) (:authorization T :documentation "Start watching a feed on this channel.")
-  (if (gethash name (feeds module))
+  (if (uc:config-tree :feeds name)
       (progn
-        (pushnew (cons (name (server event)) (channel event)) (report-to (gethash name (feeds module))))
+        (pushnew (cons (name (server event)) (channel event))
+                 (report-to (uc:config-tree :feeds name)))
         (respond event "Now watching ~a on this channel." name))
       (respond event "No feed called \"~a\" could be found!" name)))
 
 (define-command (rss unwatch) (name) (:authorization T :documentation "Stop watching a feed on this channel.")
-  (if (gethash name (feeds module))
+  (if (uc:config-tree :feeds name)
       (progn
-        (setf (report-to (gethash name (feeds module))) 
+        (setf (report-to (uc:config-tree :feeds name)) 
               (delete-if #'(lambda (el) (and (eql (name (server event)) (car el))
                                              (string-equal (channel event) (cdr el))))
-                         (report-to (gethash name (feeds module)))))
+                         (report-to (uc:config-tree :feeds name))))
         (respond event "No longer watching ~a on this channel." name))
       (respond event "No feed called \"~a\" could be found!" name)))
 
 (define-command (rss latest) (name) (:documentation "Get the latest feed item.")
-  (if (gethash name (feeds module))
-      (let ((item (first (get-items (gethash name (feeds module)) :limit 1))))
+  (if (uc:config-tree :feeds name)
+      (let ((item (first (get-items (uc:config-tree :feeds name) :limit 1))))
         (respond event "~a: ~a ~a~@[ ~a~]" (nick event) (title item) (link item) (publish-date item)))
       (respond event "No feed called \"~a\" could be found!" name)))
