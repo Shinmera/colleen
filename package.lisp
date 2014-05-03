@@ -157,12 +157,19 @@
   (:export
    #:startup
    #:shutdown)
+  ;; module-storage.lisp
+  (:export
+   #:with-module-storage
+   #:module-config-path
+   #:save-storage
+   #:load-storage)
   ;; module.lisp
   (:export
    #:module
    #:active
    #:threads
    #:lock
+   #:storage
    
    #:start
    #:stop
