@@ -118,7 +118,7 @@ CLASS            --- The class to make an instance of. Has to be subclass of
 (defun read-command (event)
   "Tries to read a command from a PRIVMSG-EVENT by matching the prefixes as defined in the config.
 If a match occurs, a fitting COMMAND-EVENT is generated and dispatched."
-  (loop for prefix across (uc:config-tree :command :prefix)
+  (loop for prefix across (bot-config :command :prefix)
         do (when (string= prefix "$NICK$") 
              (setf prefix (format NIL "~a:" (nick *current-server*))))
            (when (and (> (length (message event)) (length prefix))

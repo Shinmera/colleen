@@ -11,7 +11,7 @@
   (v:info :startup "Loading config...")
   (load-config)
   (v:info :startup "Starting modules...")
-  (dolist (module (cons "core" (coerce (remove "core" (uc:config-tree :startup :modules) :test #'string-equal) 'list)))
+  (dolist (module (cons "core" (coerce (remove "core" (bot-config :startup :modules) :test #'string-equal) 'list)))
     (handler-case (progn (load-module module)
                          (start-module module))
       (module-system-not-found (err)
@@ -20,7 +20,7 @@
           (v:info :startup "Found module class, starting without load.")
           (start-module module)))))
   (v:info :startup "Connecting to servers...")
-  (mapc #'connect (coerce (uc:config-tree :startup :servers) 'list))
+  (mapc #'connect (coerce (bot-config :startup :servers) 'list))
   (v:info :startup "Done."))
 
 (defun shutdown ()
