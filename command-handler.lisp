@@ -280,11 +280,12 @@ BODY          ::= FORM*"
                              ,(if module-name
                                   `(with-module (,modulevar ,module-name)
                                      (when (active ,modulevar)
-                                       ,(if threaded
-                                            `(with-module-thread (,modulevar)
-                                               (with-module-lock (,modulevar)
-                                                 ,@body))
-                                            `(progn ,@body))))
+                                       (with-module-storage (,modulevar)
+                                         ,(if threaded
+                                              `(with-module-thread (,modulevar)
+                                                 (with-module-lock (,modulevar)
+                                                   ,@body))
+                                              `(progn ,@body)))))
                                   `(progn ,@body)))))
            ,(if (listp name)
                 (let ((group (car name))
