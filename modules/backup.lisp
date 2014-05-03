@@ -6,10 +6,9 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.backup
+  (:nicknames :co-backup)
   (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.backup)
-
-(defparameter *config-dir* (merge-pathnames "config/" (asdf:system-source-directory :colleen)))
 
 (define-module backup ()
     ((%interval :initform NIL :accessor interval)
@@ -18,16 +17,18 @@
   (:documentation "Automatic periodic configuration backup module."))
 
 (defmethod start ((backup backup))
-  (setf (interval backup) (config-tree :backup :interval)
-        (backup-directory backup) (parse-namestring (config-tree :backup :directory))
-        (timer backup) (trivial-timers:make-timer #'backup :name "Backup-Thread"))
+  (with-module-storage (backup)
+    (setf (interval backup) (uc:config-tree :interval)
+          (backup-directory backup) (parse-namestring (uc:config-tree :directory))
+          (timer backup) (trivial-timers:make-timer #'backup :name "Backup-Thread")))
   (start-timer))
 
 (defmethod stop ((backup backup))
   (trivial-timers:unschedule-timer (timer backup))
-  (setf (config-tree :backup :interval) (interval backup)
-        (config-tree :backup :directory) (namestring (backup-directory backup))
-        (timer backup) NIL))
+  (with-module-storage (backup)
+    (setf (uc:config-tree :interval) (interval backup)
+          (uc:config-tree :directory) (namestring (backup-directory backup))
+          (timer backup) NIL)))
 
 (defun backup ()
   (let* ((directory (backup-directory (get-module :backup)))
@@ -35,7 +36,7 @@
          (target-dir (merge-pathnames (format NIL "~a/" timestamp) directory))
          (running-modules (remove-if-not #'active (remove :backup (alexandria:hash-table-keys *bot-modules*)))))
     (flet ((copy-fun (pathname)
-             (let ((target-path (merge-pathnames (subseq (namestring pathname) (length (namestring *config-dir*))) target-dir)))
+             (let ((target-path (merge-pathnames (subseq (namestring pathname) (length (namestring *config-directory*))) target-dir)))
                (if (cl-fad:directory-pathname-p pathname)
                    (progn
                      (v:debug :backup "Ensuring directory ~a" target-path)
@@ -50,9 +51,9 @@
                                   (v:error :backup "Error stopping module ~a: ~a" module err)
                                   (invoke-restart 'skip))))
           (stop-module module)))
-      (v:debug :backup "Copying folder ~a to ~a..." (namestring *config-dir*) (namestring target-dir))
-      (copy-fun *config-dir*)
-      (cl-fad:walk-directory *config-dir* #'copy-fun :directories T)
+      (v:debug :backup "Copying folder ~a to ~a..." (namestring *config-directory*) (namestring target-dir))
+      (copy-fun *config-directory*)
+      (cl-fad:walk-directory *config-directory* #'copy-fun :directories T)
       (v:debug :backup "Starting all previously active modules...")
       (dolist (module running-modules)
         (handler-bind ((error #'(lambda (err)
@@ -67,7 +68,7 @@
          (running-modules (remove-if-not #'active (remove :backup (alexandria:hash-table-keys *bot-modules*)))))
     (assert (cl-fad:file-exists-p source-dir) () "Backup ~a does not exist!" backup-name)
     (flet ((copy-fun (pathname)
-             (let ((target-path (merge-pathnames (subseq (namestring pathname) (length (namestring source-dir))) *config-dir*)))
+             (let ((target-path (merge-pathnames (subseq (namestring pathname) (length (namestring source-dir))) *config-directory*)))
                (if (cl-fad:directory-pathname-p pathname)
                    (progn
                      (v:debug :backup "Ensuring directory ~a" target-path)
@@ -83,8 +84,8 @@
                                   (invoke-restart 'skip))))
           (stop-module module)))
       (v:debug :backup "Deleting old config folder...")
-      (cl-fad:delete-directory-and-files *config-dir* :if-does-not-exist :ignore)
-      (v:debug :backup "Copying folder ~a to ~a..." (namestring source-dir) (namestring *config-dir*))
+      (cl-fad:delete-directory-and-files *config-directory* :if-does-not-exist :ignore)
+      (v:debug :backup "Copying folder ~a to ~a..." (namestring source-dir) (namestring *config-directory*))
       (copy-fun source-dir)
       (cl-fad:walk-directory source-dir #'copy-fun :directories T)
       (v:debug :backup "Starting all previously active modules...")
@@ -105,7 +106,7 @@
       (trivial-timers:schedule-timer (timer backup) 1 :repeat-interval (interval backup)))))
 
 (defun last-backup ()
-  (let ((backups (sort (remove-if-not #'cl-fad:directory-pathname-p (cl-fad:list-directory *config-dir*))
+  (let ((backups (sort (remove-if-not #'cl-fad:directory-pathname-p (cl-fad:list-directory *config-directory*))
                        #'(lambda (a b) (string< (namestring a) (namestring b))))))
     (cdr (last (pathname-directory (cdr (last backups)))))))
 
