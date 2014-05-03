@@ -13,6 +13,30 @@
    #:module-system
    #:define-module-system
    #:load-module)
+  ;; client.lisp
+  (:export
+   #:*servers*
+   #:*current-server*
+   
+   #:server
+   #:name
+   #:auth-users
+   #:channels
+   #:nick
+   #:host
+   #:port
+   #:username
+   #:password
+   #:realname
+   
+   #:get-server
+   #:connect
+   #:disconnect
+   #:reconnect
+   #:auth-p
+   #:remove-from-auth
+   #:add-to-auth
+   #:process-event)
   ;; command-handler.lisp
   (:export
    #:*cmd-map*
@@ -79,11 +103,14 @@
    #:group)
   ;; config.lisp
   (:export
-   #:parse-json
+   #:*config-file*
+   #:*config-directory*
+   #:*default-config-file*
+   #:*config*
+   
    #:load-config
    #:save-config
-   #:config
-   #:config-tree
+   #:bot-config
    #:server-config)
   ;; event-handler.lisp
   (:export
@@ -112,6 +139,8 @@
    #:priority-num)
   ;; event.lisp
   (:export
+   #:*event-map*
+   
    #:event
    #:server
    #:prefix
@@ -142,14 +171,7 @@
    #:make-event)
   ;; globals.lisp
   (:export
-   #:*servers*
-   #:*bot-modules*
-   #:*event-map*
-   #:*conf-file*
-   #:*default-conf-file*
-   #:*conf*
    #:*debugger*
-   #:*current-server*
    #:*irc-message-limit*
    #:*privmsg-line-limit*
    #:*server-encoding*)
@@ -165,6 +187,9 @@
    #:load-storage)
   ;; module.lisp
   (:export
+   #:*bot-modules*
+   #:*current-module*
+   
    #:module
    #:active
    #:threads
@@ -191,27 +216,6 @@
   (:export
    #:*reply-code-map*
    #:reply->keyword)
-  ;; server.lisp
-  (:export
-   #:server
-   #:name
-   #:auth-users
-   #:channels
-   #:nick
-   #:host
-   #:port
-   #:username
-   #:password
-   #:realname
-   
-   #:get-server
-   #:connect
-   #:disconnect
-   #:reconnect
-   #:auth-p
-   #:remove-from-auth
-   #:add-to-auth
-   #:process-event)
   ;; toolkit.lisp
   (:export
    #:format-message
