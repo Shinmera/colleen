@@ -9,6 +9,7 @@
 (defvar *config-file* NIL "Pathname pointing to the config file being used.")
 (defvar *config-directory* (merge-pathnames "config/" (asdf:system-source-directory :colleen)))
 (defvar *default-config-file* (merge-pathnames "colleen.uc.lisp" *config-directory*))
+(defvar *sample-config-file* (merge-pathnames "sample.uc.lisp" (asdf:system-source-directory :colleen)))
 (defvar *config* NIL "Bot core config.")
 
 (defun load-config (&optional (config-file *config-file*))
@@ -16,11 +17,15 @@
   (when (not config-file)
     (setf config-file *default-config-file*))
 
+  (unless (probe-file config-file)
+    (v:warn :colleen.main "Falling back to sample config!")
+    (setf config-file *sample-config-file*))
+  
   (let ((uc:*config*))
     (uc:load-configuration config-file)
-    (setf *config* uc:*config*))
-  (setf *config-file* config-file)
-  (v:info :colleen.main "Loaded config from ~a" config-file))
+    (setf *config* uc:*config*)
+    (setf *config-file* config-file)
+    (v:info :colleen.main "Loaded config from ~a" config-file)))
 
 (defun save-config (&optional (config-file *config-file*))
   "Save the static configuration to file."
