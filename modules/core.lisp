@@ -21,7 +21,7 @@
   
   (loop for chan in (server-config (name *current-server*) :channels)
      do (irc:join chan)
-       (irc:privmsg chan (standard-message :join))))
+        (irc:privmsg chan (standard-message :join))))
 
 (define-handler (events:pong-event event) ()
   (setf (last-ping (server event)) (get-universal-time)))

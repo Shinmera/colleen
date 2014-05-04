@@ -32,7 +32,7 @@
 (defun get-unix-time ()
   (- (get-universal-time) *unix-epoch-difference*))
 
-(defun get-weather (latitude longitude &optional (timestamp (get-unix-time)) (apikey (config-tree :weather :apikey)))
+(defun get-weather (latitude longitude &optional (timestamp (get-unix-time)) (apikey (gethash :apikey (storage (get-module :weather)))))
   (let* ((stream (drakma:http-request (format NIL *weather-api* apikey latitude longitude timestamp) :want-stream T  :external-format-in :utf-8))
          (data (json:decode-json stream)))
     (close stream)

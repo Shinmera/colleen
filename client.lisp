@@ -6,6 +6,10 @@
 
 (in-package :org.tymoonnext.colleen)
 
+(defvar *servers* (make-hash-table #+sbcl :synchronized #+sbcl T) "Table containing the IRC server instances.")
+(defvar *current-server*)
+(setf (documentation '*current-server* 'variable) "Special variable containing the server in the current thread context.")
+
 (defclass server ()
   ((%name :initarg :name :initform (error "Name required.") :accessor name)
    (%auth-users :initarg :auth-users :initform () :accessor auth-users)
@@ -77,7 +81,7 @@
                                         (user (server-config server :user))
                                         (pass (server-config server :pass))
                                         (real (server-config server :real)))
-    (if (null (config-tree :servers server))
+    (if (null (bot-config :servers server))
         (v:warn server "No configuration found!"))
     (assert (not (gethash server *servers*)) () "Server already connected!")
     (connect (make-instance 'server :name server 
@@ -115,14 +119,14 @@
 
 (defgeneric disconnect (server-or-name &key quit-message &allow-other-keys)
   (:documentation "Disconnect a server instance and terminate their read-threads.")
-  (:method ((server string) &key (quit-message (config-tree :messages :quit)))
+  (:method ((server string) &key (quit-message (bot-config :messages :quit)))
     (disconnect (intern (string-upcase server) "KEYWORD") :quit-message quit-message))
 
-  (:method ((server symbol) &key (quit-message (config-tree :messages :quit)))
+  (:method ((server symbol) &key (quit-message (bot-config :messages :quit)))
     (assert (not (null (gethash server *servers*))) () "Connection ~a not found!" server)
     (disconnect (gethash server *servers*) :quit-message quit-message))
 
-  (:method ((server server) &key (quit-message (config-tree :messages :quit)) (kill-reconnect T) (quit T))
+  (:method ((server server) &key (quit-message (bot-config :messages :quit)) (kill-reconnect T) (quit T))
     (flet ((terminate-server-thread (slot)
              (when (and (slot-value server slot) (thread-alive-p (slot-value server slot)))
                (v:debug (name server) "Interrupting ~a" slot)
@@ -188,6 +192,7 @@
        (when *debugger*
          (invoke-debugger e)))))
 
+(defvar *irc-message-regex* (cl-ppcre:create-scanner "^(:([^ ]+) +)?([^ ]+)( +(.+))?"))
 (defun read-loop (&optional (server *current-server*))
   "Continuously receives and handles a message."
   (with-reconnect-handler server
@@ -227,42 +232,11 @@
     (when event
       (v:debug (name *current-server*) "HANDLE EVENT: ~a" event)
       (handler-case
-          (process-event event)
+          (dispatch event)
         (disconnect (err)
           (error err))
         (error (err)
           (v:warn (name *current-server*) "Unhandled condition: ~a" err))))))
-
-(defun process-event (event)
-  "Process and event and dispatch it to the modules."
-  (dispatch T event :ignore-errors T)
-
-  (labels ((make-command (message prefix)
-             (let ((args (split-sequence #\Space (string-trim '(#\Space) (subseq message (length prefix))))))
-               (make-instance 'command-event
-                              :server (server event)
-                              :arguments (arguments event)
-                              :prefix (prefix event)
-                              :command (string-downcase (first args))
-                              :cmd-args (cdr args))))
-
-           (check-prefix-and-build (event)
-             (loop for prefix in (config-tree :command :prefix)
-                do (when (string= prefix "$NICK$") 
-                     (setf prefix (format NIL "~a:" (server-config (name *current-server*) :nick))))
-                  (if (and (> (length (message event)) (length prefix))
-                           (string= (message event) prefix :end1 (length prefix)))
-                      (return (make-command (message event) prefix))))))
-
-    (when (eql (class-name (class-of event)) 'events::privmsg-event)
-      (let ((event (check-prefix-and-build event)))
-        (when event
-          (v:debug (name (server event)) "Received command: ~a ~a" (command event) (arguments event))
-          (handler-case
-              (dispatch T event)
-            (error (err)
-              (v:severe (name (server event)) "Uncaught error ~a on event ~a" err event)
-              (respond event "Uncaught error: ~a" err))))))))
 
 (defun ping-loop (&optional (server *current-server*))
   "Continuously send out and check pings to handle a ping-timeout."
@@ -283,3 +257,7 @@
                 (irc:ping (host server))
                 (sleep (server-config (name server) :ping-step)))))
       (v:debug name "Leaving ping loop."))))
+
+;; define standard NULL client
+(setf (gethash :null *servers*)
+      (make-instance 'server :host "NULL" :nick "NULL" :name :null :port -1 :realname "NULL"))

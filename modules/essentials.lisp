@@ -6,13 +6,13 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.essentials
+  (:nicknames :co-essentials)
   (:use :cl :colleen :events :local-time :alexandria)
   (:shadow :shutdown))
 (in-package :org.tymoonnext.colleen.mod.essentials)
 
 (define-module essentials ()
-    ((%last-seen :initform (make-hash-table :test 'equalp) :accessor last-seen)
-     (%startup :initform (get-universal-time) :accessor startup-time))
+    ((%startup :initform (get-universal-time) :accessor startup-time))
   (:documentation "A few essential bot and irc commands."))
 
 (define-command reload () (:authorization T :documentation "Reload the configuration.")
@@ -76,50 +76,31 @@
            (format-timestring NIL (now) :format 
                               '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space (:hour 2) #\: (:min 2) #\: (:sec 2) #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
 
-(define-command help (&optional command sub-command) (:documentation "Display help on a command.")
-  (if command
-      (loop for module being the hash-values of *bot-modules*
-         do (when (active module)
-              (let ((method (gethash (string-downcase command) (colleen:commands module))))
-                (when method
-                  (if sub-command
-                      (let ((group-command (colleen::get-group-command module (string-downcase command) sub-command)))
-                        (if group-command
-                            (progn
-                              (respond event "~a" (colleen:docu group-command))
-                              (respond event "USAGE: ~a ~a ~{~a~^ ~}" command (name group-command) (cmd-args group-command)))
-                            (respond event "No such sub-command found: ~a ~a" command sub-command)))
-                      (progn
-                        (respond event "~a" (docu method))
-                        (respond event "USAGE: ~a ~{~a~^ ~}" (name method) (cmd-args method))
-                        (return NIL)))))))
-      (loop with commands = () 
-            for module being the hash-values of *bot-modules*
-            if (active module)
-              do (appendf commands (alexandria:hash-table-keys (colleen:commands module)))
-            finally (respond event "Available commands: ~{~a~^, ~}" commands))))
+(define-command help (&rest command-signature) (:documentation "Display help on a command.")
+  (do-matching-command-handlers (command-signature handler)
+    (respond event "MATCH> ~a" (apropos-command-handler handler))))
 
 ;; MODULE COMMANDS
 (define-group module :documentation "Manage bot modules.")
 
 (define-command (module start) (module-name) (:authorization T :documentation "Start up a module.")
   (handler-case
-      (progn (start-module (find-symbol (string-upcase module-name) "KEYWORD"))
+      (progn (start-module module-name)
              (respond event "Module started."))
     (error (err)
       (respond event "Error: ~a" err))))
 
 (define-command (module stop) (module-name) (:authorization T :documentation "Stop a module.")
   (handler-case
-      (progn (stop-module (find-symbol (string-upcase module-name) "KEYWORD"))
+      (progn (stop-module module-name)
              (respond event "Module stopped."))
     (error (err)
       (respond event "Error: ~a" err))))
 
 (define-command (module restart) (module-name) (:authorization T :documentation "Stop&Start a module.")
   (handler-case
-      (progn (stop-module (find-symbol (string-upcase module-name) "KEYWORD"))
-             (start-module (find-symbol (string-upcase module-name) "KEYWORD"))
+      (progn (stop-module module-name)
+             (start-module module-name)
              (respond event "Module restarted."))
     (error (err)
       (respond event "Error: ~a" err))))
@@ -137,32 +118,12 @@
 (define-command (module list) () (:documentation "List available modules.")
   (respond event "Modules [* activated]: ~{~/org.tymoonnext.colleen.mod.essentials::format-module/~^ ~}" (hash-table-keys *bot-modules*)))
 
-(defmacro with-module ((module-name modulevar) &body body)
-  `(let ((,modulevar (get-module ,module-name)))
-     (if ,modulevar
-        (progn ,@body)
-        (respond event "No such module \"~a\"." ,module-name))))
-
 (define-command (module help) (module-name) (:documentation "Show the docstring for a module.")
-  (with-module (module-name instance)
+  (with-module (instance module-name)
     (respond event "~a: ~a" module-name (or (documentation (class-of instance) T) "No help available."))))
 
-(define-command (module commands) (module-name) (:documentation "List the commands a module provides.")
-  (with-module (module-name instance)
-    (let ((commands (alexandria:hash-table-keys (colleen:commands instance))))
-      (if commands
-          (respond event "~a provides: ~{~a~^, ~}" module-name commands)
-          (respond event "~a does not provide any commands." module-name)))))
-
-(define-command (module handlers) (module-name) (:documentation "List all the events this module handles.")
-  (with-module (module-name instance)
-    (let ((handlers (alexandria:hash-table-keys (colleen:handlers instance))))
-      (if handlers
-          (respond event "~a handles: ~{~a~^, ~}" module-name handlers)
-          (respond event "~a does not provide any commands." module-name)))))
-
 (define-command (module threads) (module-name) (:documentation "List threads that are currently active in this module.")
-  (with-module (module-name instance)
+  (with-module (instance module-name)
     (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
       (if threads
           (respond event "~a runs the following threads: ~{~a~^, ~}" module-name
@@ -170,7 +131,7 @@
           (respond event "~a does not have any running threads." module-name)))))
 
 (define-command (module interrupt) (module-name) (:documentation "Interrupt all the module threads.")
-  (with-module (module-name instance)
+  (with-module (instance module-name)
     (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
       (if threads
           (loop for uid in threads
@@ -182,7 +143,7 @@
           (respond event "~a does not have any running threads." module-name)))))
 
 (define-command (module kill) (module-name) (:documentation "Kill all the module threads.")
-  (with-module (module-name instance)
+  (with-module (instance module-name)
     (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
       (if threads
           (loop for uid in threads
@@ -243,10 +204,10 @@
 
 ;; LAST SEEN
 (define-handler (join-event event) ()
-  (setf (gethash (nick event) (last-seen module)) (get-universal-time)))
+  (setf (uc:config-tree :last-seen (nick event)) (get-universal-time)))
 
 (define-handler (privmsg-event event) ()
-  (setf (gethash (nick event) (last-seen module)) (get-universal-time)))
+  (setf (uc:config-tree :last-seen (nick event)) (get-universal-time)))
 
 (defun format-time-since (secs)
   (multiple-value-bind (s m h dd yy) (decode-universal-time secs)
@@ -255,8 +216,8 @@
     (format NIL "~:[~D years, ~;~*~]~:[~D days, ~;~*~]~:[~D hours, ~;~*~]~D minutes" (= yy 0) yy (= dd 0) dd (= h 0) h m)))
 
 (define-command last-seen (nick) (:documentation "Tell how long it has been since the bot last saw the requested nick.")
-  (if (gethash nick (last-seen module))
-      (respond event "I have last seen ~a ~a ago." nick (format-time-since (- (get-universal-time) (gethash nick (last-seen module)))))
+  (if (uc:config-tree :last-seen nick)
+      (respond event "I have last seen ~a ~a ago." nick (format-time-since (- (get-universal-time) (uc:config-tree :last-seen nick))))
       (respond event "I don't know anyone called ~a." nick)))
 
 (define-command uptime () (:documentation "Report how long Colleen has been started up for (or more specifically, the Essentials module).")

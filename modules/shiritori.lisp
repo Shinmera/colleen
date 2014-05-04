@@ -107,7 +107,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
              (respond event "Game ended. Everybody wins!"))
            (respond event "Nobody is playing right now!")))
       ((string-equal command "rules")
-       (let ((irc:*privmsg-line-limit* 6))
+       (let ((colleen:*privmsg-line-limit* 6))
          (respond event "Rules for Shiritori: 
 1) Players take turns.
 2) Each word has to begin with the last word's last kana.

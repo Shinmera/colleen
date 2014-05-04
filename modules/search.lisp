@@ -25,12 +25,11 @@
   (if (= (length query) 0)
       (respond event "The Common Lisp Hyperspec http://www.lispworks.com/documentation/HyperSpec/Front/index.htm")
       (colleen:dispatch
-       T (make-instance 'command-event
-                        :server (server event)
-                        :arguments (arguments event)
-                        :prefix (prefix event)
-                        :command "search"
-                        :cmd-args (cons "clhs" query)))))
+       (make-instance 'command-event
+                      :server (server event)
+                      :arguments (arguments event)
+                      :prefix (prefix event)
+                      :message (format NIL "search ~a" (message event))))))
 
 (define-group search :documentation "Perform a search on a variety of sites.")
 

@@ -21,12 +21,12 @@
 
 (defun standard-message (msgsymbol &rest otherwise-format)
   "Returns the default message designated by the symbol or if provided the otherwise-formatted string."
-  (or (config-tree :messages msgsymbol)
+  (or (bot-config :messages msgsymbol)
       (when otherwise-format (apply #'format NIL otherwise-format))))
 
 (defun fstd-message (event msgsymbol &rest otherwise-format)
   "Shorthand for (format-message (standard-message ..))."
-  (let ((msg (or (config-tree :messages msgsymbol)
+  (let ((msg (or (bot-config :messages msgsymbol)
                  (when otherwise-format (apply #'format NIL otherwise-format)))))
     (when msg (format-message event msg))))
 
@@ -76,4 +76,43 @@ Each entity is a list with the following format: (TYPE START END)"
           (incf offset (- end start))))
       (finish unclosed-fg)
       (finish unclosed-bg))
-    (values (strip-formatting string) entities)))
+    (values (strip-colors string) entities)))
+
+(defmacro with-repeating-restart ((restart-name format-string &rest format-arguments) &body forms)
+  `(loop for ret = (with-simple-restart (,restart-name ,format-string ,@format-arguments)
+                     ,@forms)
+         until ret finally (return ret)))
+
+(defun escape-regex-symbols (string)
+  (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
+
+(defun lambda-keyword-p (symbol)
+  (find symbol '(&allow-other-keys &aux &body &environment &key &optional &rest &whole)))
+
+(defun flatten-lambda-list (lambda-list)
+  (mapcar #'(lambda (a) (if (listp a) (car a) a)) lambda-list))
+
+(defun extract-lambda-vars (lambda-list)
+  (remove-if #'lambda-keyword-p (flatten-lambda-list lambda-list)))
+
+(defun required-lambda-vars (lambda-list)
+  (loop for i in lambda-list
+        until (lambda-keyword-p i)
+        collect i))
+
+(defun build-lambda-call (lambda-list)
+  (loop with return = ()
+        with keys = NIL
+        for arg in (flatten-lambda-list lambda-list)
+        do (if keys
+               (setf return (cons arg (cons (find-symbol (symbol-name arg) "KEYWORD") return)))
+               (unless (lambda-keyword-p arg)
+                 (push arg return)))
+           (when (eq arg '&key)
+             (setf keys T))
+        finally (return (nreverse return))))
+
+(defun function-arguments (function)
+  #+sbcl (sb-introspect:function-lambda-list function)
+  #+(and swank (not sbcl)) (swank-backend:arglist function)
+  #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression function))))

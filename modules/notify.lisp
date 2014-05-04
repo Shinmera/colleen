@@ -11,10 +11,8 @@
 (in-package :org.tymoonnext.colleen.mod.notify)
 
 (defparameter *timestamp-format* '(:long-weekday #\Space (:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2)))
-(defparameter *save-file* (merge-pathnames "notify-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
-(define-module notify ()
-  ((%notes :initarg :notes :initform () :accessor notes)))
+(define-module notify () () (:documentation "Simple module to send out notifications."))
 
 (defclass note ()
   ((%server :initarg :server :initform NIL :accessor server)
@@ -28,64 +26,37 @@
   (print-unreadable-object (note stream :type T)
     (format stream "~a ~a ~a ~a -> ~a" (timestamp note) (server note) (channel note) (sender note) (nick note))))
 
-(defmethod start ((notify notify))
-  (load notify))
+(uc:define-serializer (note note T)
+  (make-array 6 :initial-contents (list (server note) (channel note) (nick note) (sender note) (timestamp note) (message note))))
 
-(defmethod stop ((notify notify))
-  (save notify))
-
-(defmethod save ((notify notify))
-  (with-open-file (stream *save-file* :direction :output :if-does-not-exist :create :if-exists :supersede)
-    (let ((newlist ()))
-      (dolist (note (notes notify))
-        (let ((table (make-hash-table :test 'equal)))
-          (setf (gethash "message" table) (message note))
-          (setf (gethash "sender" table) (sender note))
-          (setf (gethash "nick" table) (nick note))
-          (setf (gethash "channel" table) (channel note))
-          (setf (gethash "server" table) (server note))
-          (setf (gethash "timestamp" table) (timestamp note))
-          (push table newlist)))
-      (yason:encode (nreverse newlist) stream)
-      (v:info :notify "Saved ~d notes." (length newlist)))))
-
-(defmethod load ((notify notify))
-  (with-open-file (stream *save-file* :if-does-not-exist NIL)
-    (when stream
-      (let ((notes (yason:parse stream))
-            (newlist ()))
-        (dolist (note notes)
-          (push (make-instance
-                 'note
-                 :message (gethash "message" note)
-                 :sender (gethash "sender" note)
-                 :nick (gethash "nick" note)
-                 :channel (gethash "channel" note)
-                 :server (gethash "server" note)
-                 :timestamp (gethash "timestamp" note))
-                newlist))
-        (setf (notes notify) (nreverse newlist))
-        (v:info :notify "Loaded ~d notes." (length newlist))))))
+(uc:define-deserializer (note array T)
+  (make-instance 'note
+                 :server (aref array 0)
+                 :channel (aref array 1)
+                 :nick (aref array 2)
+                 :sender (aref array 3)
+                 :timestamp (aref array 4)
+                 :message (aref array 5)))
 
 (define-command notify (recipient &rest message) (:modulevar notify)
   (if (string-equal recipient (nick (server event)))
       (respond event "~a: I'm right here." (nick event))
       (progn
         (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-        (appendf (notes notify) 
-                 (list (make-instance 
-                        'note 
-                        :message (format NIL "~{~a~^ ~}" message) 
-                        :sender (nick event) 
-                        :nick recipient 
-                        :channel (channel event) 
-                        :server (string-upcase (name (server event)))
-                        :timestamp (format-timestring NIL (now) :format *timestamp-format*))))
+        (push (make-instance 
+               'note 
+               :message (format NIL "~{~a~^ ~}" message) 
+               :sender (nick event) 
+               :nick recipient 
+               :channel (channel event) 
+               :server (string-upcase (name (server event)))
+               :timestamp (format-timestring NIL (now) :format *timestamp-format*))
+              (uc:config-tree :notes))
         (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))))
 
 (define-handler (privmsg-event event) (:modulevar notify)
   (let ((newlist ()))
-    (dolist (note (notes notify))
+    (dolist (note (uc:config-tree :notes))
       (if (and (string-equal (nick event) (nick note))
                (string= (channel event) (channel note))
                (string= (string-upcase (name (server event))) (server note)))
@@ -93,4 +64,4 @@
                  (respond event "~a: ~a wrote to you on ~a : ~a"
                           (nick note) (sender note) (timestamp note) (message note)))
           (push note newlist)))
-    (setf (notes notify) (nreverse newlist))))
+    (setf (uc:config-tree :notes) (nreverse newlist))))

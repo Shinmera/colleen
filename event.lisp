@@ -6,11 +6,22 @@
 
 (in-package :org.tymoonnext.colleen)
 
+(defvar *event-map* (make-hash-table :test 'equal #+sbcl :synchronized #+sbcl T) "Global event map for event codes to event classes.")
+
 (defclass event ()
   ((%server :initarg :server :reader server)
    (%prefix :initarg :prefix :reader prefix)
-   (%arguments :initarg :arguments :reader arguments))
+   (%arguments :initarg :arguments :reader arguments)
+   (%dispatched :initarg :dispatched :initform NIL :accessor dispatched)
+   (%cancelled :initarg :cancelled :initform NIL :accessor cancelled))
   (:documentation "Base event class."))
+
+(defmethod print-object ((event event) stream)
+  (print-unreadable-object (event stream :type T))
+  event)
+
+(defun cancel (event)
+  (setf (cancelled event) T))
 
 (defmacro arguments-bind ((&rest vars) expression &body body)
   "Destructuring-bind extension to make event parsing easier.
@@ -64,7 +75,8 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
                   (defmethod print-object ((,eventvar ,name) stream)
                     (print-unreadable-object (,eventvar stream :type T)
                       (format stream ,(format NIL "~{~a: ~~a~^ ~}" varlist)
-                              ,@(mapcar #'(lambda (var) `(,var ,eventvar)) varlist)))))))))
+                              ,@(mapcar #'(lambda (var) `(,var ,eventvar)) varlist)))
+                    ,eventvar))))))
 
 (defclass user-event (event)
     ((%username :initarg :username :reader username)
@@ -72,6 +84,7 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
      (%nickname :initarg :nick :reader nick))
     (:documentation "Events related to users."))
 
+(defvar *user-regex* (cl-ppcre:create-scanner "(.+)!(.+)@(.+)"))
 (defmethod initialize-instance :after ((event user-event) &rest rest)
   (declare (ignore rest))
   (cl-ppcre:register-groups-bind (nick username hostmask) (*user-regex* (prefix event))
@@ -85,7 +98,8 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
 
 (defmethod print-object ((event user-event) stream)
   (print-unreadable-object (event stream :type T)
-    (format stream "NICK: ~a USER: ~a HOST: ~a" (nick event) (username event) (hostmask event))))
+    (format stream "NICK: ~a USER: ~a HOST: ~a" (nick event) (username event) (hostmask event)))
+  event)
 
 (define-event channel-event NIL (user-event)
     (channel)
@@ -98,10 +112,24 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
     (unless (char= (aref channel 0) #\#)
       (setf channel (nick event)))))
 
+(defmethod print-object ((event channel-event) stream)
+  (print-unreadable-object (event stream :type T)
+    (format stream "~a" (channel event)))
+  event)
+
 (defclass command-event (channel-event)
-  ((%command :initarg :command :accessor command)
-   (%cmd-args :initarg :cmd-args :accessor cmd-args))
+  ((%message :initarg :message :accessor message)
+   (%handled :initarg :handled :initform NIL :accessor handled))
   (:documentation "Event for commands."))
+
+(defmethod print-object ((event command-event) stream)
+  (print-unreadable-object (event stream :type T)
+    (format stream "~a" (message event)))
+  event)
+
+(defclass generated-command-event (command-event)
+  ((%output-stream :initarg :output-stream :accessor output-stream))
+  (:documentation "Event for commands generated and handled outside of IRC streams (f.e. REPL)."))
 
 (defclass send-event (event) 
   ((%nick :initarg :nick :accessor nick)
@@ -119,7 +147,13 @@ CLASS-OPTIONS are the other options that can be passed to DEFCLASS, such as :DOC
   (:method ((event channel-event) message &rest format-args)
     (let ((message (apply #'format NIL message format-args)))
       (v:debug (name (server event)) "Replying to ~a: ~a" event message)
-      (irc:privmsg (channel event) message :server (server event)))))
+      (irc:privmsg (channel event) message :server (server event))))
+
+  (:method ((event generated-command-event) message &rest format-args)
+    (let ((message (apply #'format NIL message format-args)))
+      (v:debug (name (server event)) "Replying to ~a: ~a" event message)
+      (write-string message (output-stream event))
+      (finish-output (output-stream event)))))
 
 (defun make-event (event-name server prefix arguments)
   "Makes an event instance from the given parameters."

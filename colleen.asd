@@ -10,7 +10,7 @@
 
 (defsystem colleen
   :name "Colleen IRC Bot"
-  :version "0.9.6"
+  :version "2.0.1"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
@@ -19,20 +19,24 @@
   :components ((:file "package")
                (:file "globals")
                (:file "conditions")
-               (:file "reply-codes")
+               (:file "irc-codes")
                (:file "config")
                (:file "toolkit")
-               (:file "event")
                (:file "module")
-               (:file "server")
-               (:file "commands")
-               (:file "events")
+               (:file "module-storage")
+               (:file "event")
+               (:file "event-priority")
+               (:file "event-handler")
+               (:file "command-handler")
+               (:file "client")
+               (:file "irc-commands")
+               (:file "irc-events")
                (:file "asdf-extra")
                (:file "launcher")
                (:module "modules"
                 :components ((:file "system-definitions"))))
   :depends-on (:bordeaux-threads 
-               :yason
+               :universal-config
                :verbose
                :split-sequence
                :alexandria
