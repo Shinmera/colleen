@@ -12,6 +12,12 @@
 (define-module rules () ()
   (:documentation "Primitive rule enforcement module."))
 
+(defmethod start ((rules rules))
+  (with-module-storage (rules)
+    (unless (uc:config-tree :rules)
+      (setf (uc:config-tree :rules)
+            (make-hash-table :test 'equalp)))))
+
 (defparameter *types* '(:KICK :BAN :KILL :MUTE :SCOLD :REWARD))
 (defparameter *fields* '(:regex :type :probation :breach-msg :apology-msg :punish-msg))
 
