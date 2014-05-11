@@ -39,20 +39,22 @@
                  :message (aref array 5)))
 
 (define-command notify (recipient &rest message) (:modulevar notify)
-  (if (string-equal recipient (nick (server event)))
-      (respond event "~a: I'm right here." (nick event))
-      (progn
-        (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-        (push (make-instance 
-               'note 
-               :message (format NIL "~{~a~^ ~}" message) 
-               :sender (nick event) 
-               :nick recipient 
-               :channel (channel event) 
-               :server (string-upcase (name (server event)))
-               :timestamp (format-timestring NIL (now) :format *timestamp-format*))
-              (uc:config-tree :notes))
-        (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))))
+  (cond ((string-equal recipient (nick (server event)))
+         (respond event "~a: I'm right here." (nick event)))
+        ((string-equal recipient (nick event))
+         (respond event "~a: Are you feeling lonely?" (nick event)))
+        (T
+         (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+         (push (make-instance 
+                'note 
+                :message (format NIL "~{~a~^ ~}" message) 
+                :sender (nick event) 
+                :nick recipient 
+                :channel (channel event) 
+                :server (string-upcase (name (server event)))
+                :timestamp (format-timestring NIL (now) :format *timestamp-format*))
+               (uc:config-tree :notes))
+         (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))))
 
 (define-handler (privmsg-event event) (:modulevar notify)
   (let ((newlist ()))
