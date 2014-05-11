@@ -15,9 +15,10 @@
   (:documentation "Award medals to users."))
 
 (defun %award (module event user medal)
-  (setf medal (format NIL "~{~a~^ ~}" medal))
-  (pushnew medal (uc:config-tree (string-downcase user)) :test #'string-equal)
-  (respond event "~a has been awarded the ~a medal." user medal))
+  (with-module-storage (module)
+    (setf medal (format NIL "~{~a~^ ~}" medal))
+    (pushnew medal (uc:config-tree (string-downcase user)) :test #'string-equal)
+    (respond event "~a has been awarded the ~a medal." user medal)))
 
 (define-group medals :documentation "Manage medals.")
 
