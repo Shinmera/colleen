@@ -31,7 +31,7 @@
     (unless (char= (aref (message event) 0) #\!)
       (learn markov (message event)))
 
-    (when (< (random 100) (uc:config-tree :probability))
+    (when (< (random 100) (or (uc:config-tree :probability) 0))
       (let ((wordlist (split-sequence:split-sequence #\Space (message event) :remove-empty-subseqs T)))
         (when (cdr wordlist)
           (let ((response (generate-string markov (first wordlist) (second wordlist))))
