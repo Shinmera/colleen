@@ -76,6 +76,15 @@
            (format-timestring NIL (now) :format 
                               '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space (:hour 2) #\: (:min 2) #\: (:sec 2) #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
 
+(define-command version () (:documentation "Return version information.")
+  (let ((versionstring (format NIL "Colleen v~a" (asdf:component-version (asdf:find-system :colleen)))))
+    (when (uiop:directory-exists-p (merge-pathnames ".git" (asdf:system-source-directory :colleen)))
+      (uiop:chdir (asdf:system-source-directory :colleen))
+      (setf versionstring (format NIL "~a ~a" versionstring
+                                  (string-trim '(#\Newline) (uiop:run-program "git rev-parse HEAD" :output :string))
+                                  )))
+    (respond event versionstring)))
+
 (define-command help (&rest command-signature) (:documentation "Display help on a command.")
   (do-matching-command-handlers (command-signature handler)
     (respond event "MATCH> ~a" (apropos-command-handler handler))))
