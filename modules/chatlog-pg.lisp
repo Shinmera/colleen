@@ -49,10 +49,9 @@
   (with-module-storage (chatlog)
     (when (find (format NIL "~a/~a" server channel) (uc:config-tree :active-in) :test #'string-equal)
       (v:trace :chatlog-pg "Logging event from ~a/~a <~a> (~a)" server channel user type)
-      (bordeaux-threads:with-lock-held ((lock chatlog))
-        (postmodern:insert-dao (make-instance 'chatlog :server (princ-to-string server) :channel channel :user user
-                                                       :time (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+)
-                                                       :type type :message message))))))
+      (postmodern:insert-dao (make-instance 'chatlog :server (princ-to-string server) :channel channel :user user
+                                                     :time (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+)
+                                                     :type type :message message)))))
 
 (define-group chatlog-pg :documentation "Change chatlog-pg settings.")
 
@@ -121,31 +120,29 @@
       "never"))
 
 (define-command (chatlog-pg stats) (&optional server channel) (:documentation "Retrieve short statistics about the recorded chatlog history.")
-  (bordeaux-threads:with-lock-held ((lock module))
-    (if (and server channel)
-        (let ((server (string-downcase server))
-              (channel (string-downcase channel)))
-          (let ((events   (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2" server channel))))
-                (users    (length (pstmt "SELECT \"user\" FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2 GROUP BY \"user\"" server channel)))
-                (messages (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2 AND \"type\"='m'" server channel))))
-                (since    (first (first (pstmt "SELECT \"time\" FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2 ORDER BY \"time\" ASC LIMIT 1" server channel))))
-                (topuser  (first (pstmt "SELECT COUNT(*) AS c,user FROM \"chatlog\" WHERE lower(\"server\")=$2 AND lower(\"channel\")=$1 AND \"type\"='m' GROUP BY \"user\" ORDER BY c DESC" server channel))))
-            (respond event "Logging since ~a with a total of ~d events from ~a users, of which ~d were messages. User with most messages (~d) is ~a."
-                     (fmt since) events users messages (first topuser) (string-trim " " (second topuser)))))
-        (let ((channels (length (postmodern:query "SELECT \"channel\" FROM \"chatlog\" GROUP BY \"channel\"")))
-              (events   (first (first (postmodern:query "SELECT COUNT(*) FROM \"chatlog\""))))
-              (users    (length (postmodern:query "SELECT \"user\" FROM \"chatlog\" GROUP BY \"user\"")))
-              (messages (first (first (postmodern:query "SELECT COUNT(*) FROM \"chatlog\" WHERE \"type\"='m'"))))
-              (topuser  (first (postmodern:query "SELECT COUNT(*) AS c,\"user\" FROM \"chatlog\" WHERE \"type\"='m' GROUP BY \"user\" ORDER BY c DESC LIMIT 1"))))
-          (respond event "Logging ~d channels with a total of ~d events from ~a users, of which ~d were messages. User with most messages (~d) is ~a."
-                   channels events users messages (first topuser) (string-trim " " (second topuser)))))))
+  (if (and server channel)
+      (let ((server (string-downcase server))
+            (channel (string-downcase channel)))
+        (let ((events   (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2" server channel))))
+              (users    (length (pstmt "SELECT \"user\" FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2 GROUP BY \"user\"" server channel)))
+              (messages (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2 AND \"type\"='m'" server channel))))
+              (since    (first (first (pstmt "SELECT \"time\" FROM \"chatlog\" WHERE lower(\"server\")=$1 AND lower(\"channel\")=$2 ORDER BY \"time\" ASC LIMIT 1" server channel))))
+              (topuser  (first (pstmt "SELECT COUNT(*) AS c,user FROM \"chatlog\" WHERE lower(\"server\")=$2 AND lower(\"channel\")=$1 AND \"type\"='m' GROUP BY \"user\" ORDER BY c DESC" server channel))))
+          (respond event "Logging since ~a with a total of ~d events from ~a users, of which ~d were messages. User with most messages (~d) is ~a."
+                   (fmt since) events users messages (first topuser) (string-trim " " (second topuser)))))
+      (let ((channels (length (postmodern:query "SELECT \"channel\" FROM \"chatlog\" GROUP BY \"channel\"")))
+            (events   (first (first (postmodern:query "SELECT COUNT(*) FROM \"chatlog\""))))
+            (users    (length (postmodern:query "SELECT \"user\" FROM \"chatlog\" GROUP BY \"user\"")))
+            (messages (first (first (postmodern:query "SELECT COUNT(*) FROM \"chatlog\" WHERE \"type\"='m'"))))
+            (topuser  (first (postmodern:query "SELECT COUNT(*) AS c,\"user\" FROM \"chatlog\" WHERE \"type\"='m' GROUP BY \"user\" ORDER BY c DESC LIMIT 1"))))
+        (respond event "Logging ~d channels with a total of ~d events from ~a users, of which ~d were messages. User with most messages (~d) is ~a."
+                 channels events users messages (first topuser) (string-trim " " (second topuser))))))
 
 (define-command (chatlog-pg count) (nick) (:documentation "Counts the amount of recorded messages for a nick.")
-  (bordeaux-threads:with-lock-held ((lock module))
-    (setf nick (string-downcase nick))
-    (let ((events   (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"user\")=$1" nick))))
-          (since    (first (first (pstmt "SELECT \"time\" FROM \"chatlog\" WHERE lower(\"user\")=$1 ORDER BY \"time\" ASC LIMIT 1" nick))))
-          (messages (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"user\")=$1 AND \"type\"='m'" nick))))
-          (channels (length (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"user\")=$1 GROUP BY \"channel\"" nick))))
-      (respond event "First recorded ~a on ~a. Since then, ~a has ~d events on record, of which ~d were messages across ~d channels."
-               nick (fmt since) nick events messages channels))))
+  (setf nick (string-downcase nick))
+  (let ((events   (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"user\")=$1" nick))))
+        (since    (first (first (pstmt "SELECT \"time\" FROM \"chatlog\" WHERE lower(\"user\")=$1 ORDER BY \"time\" ASC LIMIT 1" nick))))
+        (messages (first (first (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"user\")=$1 AND \"type\"='m'" nick))))
+        (channels (length (pstmt "SELECT COUNT(*) FROM \"chatlog\" WHERE lower(\"user\")=$1 GROUP BY \"channel\"" nick))))
+    (respond event "First recorded ~a on ~a. Since then, ~a has ~d events on record, of which ~d were messages across ~d channels."
+             nick (fmt since) nick events messages channels)))
