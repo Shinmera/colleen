@@ -6,10 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.twitter
-  (:use :cl :colleen :events :chirp-objects)
-  (:shadowing-import-from :events :version :parameters :users :reason :sender :mode :user :parameter :address :language :resource :query :code :target)
-  (:shadowing-import-from :colleen :message)
-  (:shadowing-import-from :chirp-objects :start :name :events))
+  (:use :cl :colleen :events))
 (in-package :org.tymoonnext.colleen.mod.twitter)
 
 (define-module twitter ()
@@ -34,7 +31,7 @@
 
 (define-command (twitter verify) () (:documentation "Perform an ACCOUNT/VERIFY-CREDENTIALS call to see if the account was linked successfully.")
   (let ((user (chirp:account/verify-credentials)))
-    (respond event "Linked account: ~a" (screen-name user))))
+    (respond event "Linked account: ~a" (chirp:screen-name user))))
 
 (define-command (twitter initiate-authentication) (&optional api-key api-secret) (:authorization T :documentation "Initiate the authentication process.")
   (respond event "Please visit: ~a" (chirp:initiate-authentication :api-key (or api-key chirp:*oauth-api-key*) :api-secret (or api-secret chirp:*oauth-api-secret*))))
@@ -42,7 +39,7 @@
 (define-command (twitter complete-authentication) (pin) (:authorization T :documentation "Complete the authentication process.")
   (chirp:complete-authentication pin)
   (let ((user (chirp:account/verify-credentials)))
-    (respond event "Successfully authenticated as ~a" (screen-name user))))
+    (respond event "Successfully authenticated as ~a" (chirp:screen-name user))))
 
 (define-command (twitter tweet) (&rest text) (:authorization T :documentation "Tweet on behalf of the linked user.")
   (chirp:tweet (format NIL "~{~a~^ ~}" text)))
