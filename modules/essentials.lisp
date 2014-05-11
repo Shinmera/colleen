@@ -80,9 +80,11 @@
   (let ((versionstring (format NIL "Colleen v~a" (asdf:component-version (asdf:find-system :colleen)))))
     (when (uiop:directory-exists-p (merge-pathnames ".git" (asdf:system-source-directory :colleen)))
       (uiop:chdir (asdf:system-source-directory :colleen))
-      (setf versionstring (format NIL "~a ~a" versionstring
+      (uiop:run-program "git fetch")
+      (setf versionstring (format NIL "~a ~a (~a behind ~a ahead)" versionstring
                                   (string-trim '(#\Newline) (uiop:run-program "git rev-parse HEAD" :output :string))
-                                  )))
+                                  (string-trim '(#\Newline) (uiop:run-program "git rev-list HEAD..origin --count" :output :string))
+                                  (string-trim '(#\Newline) (uiop:run-program "git rev-list origin..HEAD --count" :output :string)))))
     (respond event versionstring)))
 
 (define-command help (&rest command-signature) (:documentation "Display help on a command.")
