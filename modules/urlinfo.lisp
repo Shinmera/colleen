@@ -23,10 +23,11 @@
   (flet ((r (find replace text)
            (cl-ppcre:regex-replace-all find text replace)))
     (r "\\n" ""
-       (r "&lt;" "<"
-          (r "&gt;" ">"
-             (r "&amp;" "&"
-                (r "&quot;" "\"" text)))))))
+       (r "&mdash;" "-"
+          (r "&lt;" "<"
+             (r "&gt;" ">"
+                (r "&amp;" "&"
+                   (r "&quot;" "\"" text))))))))
 
 (defun urlinfo (url)
   (multiple-value-bind (content status headers uri) (drakma:http-request url)
