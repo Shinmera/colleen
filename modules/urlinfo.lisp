@@ -16,8 +16,7 @@
 
 (defparameter *url-regex* (cl-ppcre:create-scanner "((http|https)://[\\w\\d\\-.]+\\.\\w{2,}([\\w\\d\\-%+?=&@#.;/]*)?)"))
 (defparameter *title-regex* (cl-ppcre:create-scanner "<title>((\\s|.)*)</title>" :case-insensitive-mode T))
-(defparameter *html-types* '("text/html" "text/html; charset=utf-8" "text/html;charset=utf-8"
-                             "application/xhtml+xml" "application/xhtml+xml;charset=utf-8" "application/xhtml+xml; charset=utf-8"))
+(defparameter *html-types* '("text/html" "application/xhtml+xml"))
 
 (defun decode-entities (text)
   (flet ((r (find replace text)
@@ -34,7 +33,8 @@
     (when (= status 200)
       (let ((url (make-string-output-stream)))
         (puri:render-uri uri url)            
-        (if (find (cdr (assoc :content-type headers)) *html-types* :test #'string-equal)
+        (if (find (cdr (assoc :content-type headers)) *html-types*
+                  :test #'(lambda (a b) (search b a)))
             (let ((title (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content))))
               (if title
                   (format NIL "Title: “~a” at ~a"
