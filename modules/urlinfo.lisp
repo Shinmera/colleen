@@ -19,6 +19,14 @@
 (defparameter *html-types* '("text/html" "text/html; charset=utf-8" "text/html;charset=utf-8"
                              "application/xhtml+xml" "application/xhtml+xml;charset=utf-8" "application/xhtml+xml; charset=utf-8"))
 
+(defun decode-entities (text)
+  (flet ((r (find replace text)
+           (cl-ppcre:regex-replace-all find text replace)))
+    (r "&lt;" "<"
+       (r "&gt;" ">"
+          (r "&amp;" "&"
+             (r "&quot;" "\"" text))))))
+
 (defun urlinfo (url)
   (multiple-value-bind (content status headers uri) (drakma:http-request url)
     (when (= status 200)
@@ -28,10 +36,10 @@
             (let ((title (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content))))
               (if title
                   (format NIL "Title: “~a” at ~a"
-                           (aref title 0)
-                           (get-output-stream-string url))
+                          (decode-entities (aref title 0))
+                          (get-output-stream-string url))
                   (format NIL "Invalid HTML document at ~a"
-                           (get-output-stream-string url))))
+                          (get-output-stream-string url))))
             (format NIL "~a at ~a"
                      (cdr (assoc :content-type headers))
                      (get-output-stream-string url)))))))
