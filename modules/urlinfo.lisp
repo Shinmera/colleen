@@ -15,17 +15,18 @@
   (:documentation "Follows URLs and reads information about the target site."))
 
 (defparameter *url-regex* (cl-ppcre:create-scanner "((http|https)://[\\w\\d\\-.]+\\.\\w{2,}([\\w\\d\\-%+?=&@#.;/]*)?)"))
-(defparameter *title-regex* (cl-ppcre:create-scanner "<title>(.*)</title>"))
+(defparameter *title-regex* (cl-ppcre:create-scanner "<title>((\\s|.)*)</title>" :case-insensitive-mode T))
 (defparameter *html-types* '("text/html" "text/html; charset=utf-8" "text/html;charset=utf-8"
                              "application/xhtml+xml" "application/xhtml+xml;charset=utf-8" "application/xhtml+xml; charset=utf-8"))
 
 (defun decode-entities (text)
   (flet ((r (find replace text)
            (cl-ppcre:regex-replace-all find text replace)))
-    (r "&lt;" "<"
-       (r "&gt;" ">"
-          (r "&amp;" "&"
-             (r "&quot;" "\"" text))))))
+    (r "\\n" ""
+       (r "&lt;" "<"
+          (r "&gt;" ">"
+             (r "&amp;" "&"
+                (r "&quot;" "\"" text)))))))
 
 (defun urlinfo (url)
   (multiple-value-bind (content status headers uri) (drakma:http-request url)
