@@ -15,7 +15,7 @@
   (:documentation "Follows URLs and reads information about the target site."))
 
 (defparameter *url-regex* (cl-ppcre:create-scanner "((http|https)://[\\w\\d\\-.]+\\.\\w{2,}([\\w\\d\\-%+?=&@#.;/]*)?)"))
-(defparameter *title-regex* (cl-ppcre:create-scanner "<title>((\\s|.)*)</title>" :case-insensitive-mode T))
+(defparameter *title-regex* (cl-ppcre:create-scanner "<title>((\\s|.)*?)</title>" :case-insensitive-mode T))
 (defparameter *html-types* '("text/html" "application/xhtml+xml"))
 
 (defun decode-entities (text)
