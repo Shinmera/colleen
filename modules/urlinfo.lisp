@@ -29,7 +29,7 @@
             (let ((title (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content))))
               (if title
                   (format NIL "Title: “~a”~:[ at ~a~;~*~]"
-                          (plump:decode-entities (aref title 0))
+                          (cl-ppcre:regex-replace-all "\\n" (plump:decode-entities (aref title 0)) "")
                           (string-equal target-url url) target-url)
                   (format NIL "Invalid HTML document~:[ at ~a~;~*~]"
                           (string-equal target-url url) target-url)))
