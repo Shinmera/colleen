@@ -18,16 +18,6 @@
 (defparameter *title-regex* (cl-ppcre:create-scanner "<title>((\\s|.)*?)</title>" :case-insensitive-mode T))
 (defparameter *html-types* '("text/html" "application/xhtml+xml"))
 
-(defun decode-entities (text)
-  (flet ((r (find replace text)
-           (cl-ppcre:regex-replace-all find text replace)))
-    (r "\\n" ""
-       (r "&mdash;" "-"
-          (r "&lt;" "<"
-             (r "&gt;" ">"
-                (r "&amp;" "&"
-                   (r "&quot;" "\"" text))))))))
-
 (defun urlinfo (url)
   (multiple-value-bind (content status headers uri) (drakma:http-request url)
     (when (= status 200)
@@ -38,7 +28,7 @@
             (let ((title (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content))))
               (if title
                   (format NIL "Title: “~a” at ~a"
-                          (decode-entities (aref title 0))
+                          (plump:decode-entities (aref title 0))
                           (get-output-stream-string url))
                   (format NIL "Invalid HTML document at ~a"
                           (get-output-stream-string url))))
