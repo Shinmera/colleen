@@ -21,20 +21,21 @@
 (defun urlinfo (url)
   (multiple-value-bind (content status headers uri) (drakma:http-request url)
     (when (= status 200)
-      (let ((url (make-string-output-stream)))
-        (puri:render-uri uri url)            
+      (let ((target-url (make-string-output-stream)))
+        (puri:render-uri uri target-url)
+        (setf target-url (get-output-stream-string target-url))
         (if (find (cdr (assoc :content-type headers)) *html-types*
                   :test #'(lambda (a b) (search b a)))
             (let ((title (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content))))
               (if title
-                  (format NIL "Title: “~a” at ~a"
+                  (format NIL "Title: “~a”~:[ at ~a~;~*~]"
                           (plump:decode-entities (aref title 0))
-                          (get-output-stream-string url))
-                  (format NIL "Invalid HTML document at ~a"
-                          (get-output-stream-string url))))
-            (format NIL "~a at ~a"
-                     (cdr (assoc :content-type headers))
-                     (get-output-stream-string url)))))))
+                          (string-equal target-url url) target-url)
+                  (format NIL "Invalid HTML document~:[ at ~a~;~*~]"
+                          (string-equal target-url url) target-url)))
+            (format NIL "~a~:[ at ~a~;~*~]"
+                    (cdr (assoc :content-type headers))
+                    (string-equal target-url url) target-url))))))
 
 (defun command-p (message)
   (loop for prefix in (bot-config :command :prefix)
