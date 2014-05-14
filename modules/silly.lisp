@@ -16,7 +16,7 @@
 (defparameter *thanks-match* (cl-ppcre:create-scanner "[Tt]hanks[,]? ([a-zA-Z]+)$"))
 (defparameter *bless-match* (cl-ppcre:create-scanner "[Bb]less you[,]? ([a-zA-Z]+)$"))
 
-(defun cut-to-first-vocal (string)
+(defun cut-to-first-vowel (string)
   (loop for i from 0 below (length string)
         until (find (aref string i) '(#\a #\e #\i #\o #\u))
         finally (return (subseq string i))))
@@ -41,10 +41,10 @@
     (let ((message (string-downcase (message event))))
       (cl-ppcre:register-groups-bind (name) (*thanks-match* message)
         (sleep 2)
-        (respond event "...Th~a" (cut-to-first-vocal name)))
+        (respond event "...Th~a" (cut-to-first-vowel name)))
       (cl-ppcre:register-groups-bind (name) (*bless-match* message)
         (sleep 2)
-        (respond event "...Bl~a" (cut-to-first-vocal name)))
+        (respond event "...Bl~a" (cut-to-first-vowel name)))
       
       (when (cl-ppcre:scan "^colleen: (and )?(oh )?i (love|luv|wub) (you|u|wu|wuu|wo|woo)( too)?( as well)?( (so|very|too)( much)?)?$" message)
         (respond event (format NIL "~a: ~a ~a" 
@@ -167,4 +167,4 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 (define-command thanks () (:documentation "Thanks you." :eventvar event)
   (respond event "Thanks, ~a" (nick event))
   (sleep 2)
-  (respond event "...Th~a" (cut-to-first-vocal (nick event))))
+  (respond event "...Th~a" (cut-to-first-vowel (nick event))))
