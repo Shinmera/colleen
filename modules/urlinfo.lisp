@@ -19,23 +19,24 @@
 (defparameter *html-types* '("text/html" "application/xhtml+xml"))
 
 (defun urlinfo (url)
-  (multiple-value-bind (content status headers uri) (drakma:http-request url)
-    (when (= status 200)
-      (let ((target-url (make-string-output-stream)))
-        (puri:render-uri uri target-url)
-        (setf target-url (get-output-stream-string target-url))
-        (if (find (cdr (assoc :content-type headers)) *html-types*
-                  :test #'(lambda (a b) (search b a)))
-            (let ((title (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content))))
-              (if title
-                  (format NIL "Title: “~a”~:[ at ~a~;~*~]"
-                          (cl-ppcre:regex-replace-all "\\n" (plump:decode-entities (aref title 0)) "")
-                          (string-equal target-url url) target-url)
-                  (format NIL "Invalid HTML document~:[ at ~a~;~*~]"
-                          (string-equal target-url url) target-url)))
-            (format NIL "~a~:[ at ~a~;~*~]"
-                    (cdr (assoc :content-type headers))
-                    (string-equal target-url url) target-url))))))
+  (let ((drakma:*text-content-types* (cons '("application" . "xhtml+xml") drakma:*text-content-types*)))
+    (multiple-value-bind (content status headers uri) (drakma:http-request url)
+      (when (= status 200)
+        (let ((target-url (make-string-output-stream)))
+          (puri:render-uri uri target-url)
+          (setf target-url (get-output-stream-string target-url))
+          (if (find (cdr (assoc :content-type headers)) *html-types*
+                    :test #'(lambda (a b) (search b a)))
+              (let ((title (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content))))
+                (if title
+                    (format NIL "Title: “~a”~:[ at ~a~;~*~]"
+                            (cl-ppcre:regex-replace-all "\\n" (plump:decode-entities (aref title 0)) "")
+                            (string-equal target-url url) target-url)
+                    (format NIL "Invalid HTML document~:[ at ~a~;~*~]"
+                            (string-equal target-url url) target-url)))
+              (format NIL "~a~:[ at ~a~;~*~]"
+                      (cdr (assoc :content-type headers))
+                      (string-equal target-url url) target-url)))))))
 
 (defun command-p (message)
   (loop for prefix in (bot-config :command :prefix)
