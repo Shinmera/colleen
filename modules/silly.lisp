@@ -16,10 +16,11 @@
 (defparameter *thanks-match* (cl-ppcre:create-scanner "[Tt]hanks[,]? ([a-zA-Z]+)$"))
 (defparameter *bless-match* (cl-ppcre:create-scanner "[Bb]less you[,]? ([a-zA-Z]+)$"))
 
-(defun cut-to-first-vowel (string)
-  (loop for i from 0 below (length string)
-        until (find (aref string i) '(#\a #\e #\i #\o #\u))
-        finally (return (subseq string i))))
+(defun cut-to-first-vowel (word)
+  (subseq word (or (position "aeiou" word :test #'(lambda (string b) (find b string)))
+                   (position #\y word)
+                   (position #\w word)
+                   0)))
 
 (define-group silly :documentation "Manage the silly module.")
 
