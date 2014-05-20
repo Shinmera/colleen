@@ -184,7 +184,7 @@
       (setf title (cl-ppcre:regex-replace-all " " title "_"))
       (let ((data (wiki:wiki-parse :page title :section section)))
         ($ (initialize (cl-ppcre:regex-replace-all "xml:" data "")))
-        (format NIL "~a~a : ~a" page-root title (trunc-text (first (split-sequence #\Newline ($ "p" (node) (text) (node))))))))))
+        (format NIL "~a~a : ~a" page-root title (trunc-text (first (split-sequence #\Newline ($ "p:first-only" (text) (node))))))))))
 
 (defun shorten-url (url)
   (labels ((g (data &rest path)
