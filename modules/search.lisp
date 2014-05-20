@@ -11,7 +11,7 @@
 (in-package :org.tymoonnext.colleen.mod.search)
 
 (defun drakma-utf8 (url &rest params)
-  (apply #'drakma:http-request url :external-format-in :utf-8 :external-format-out :utf-8 :user-agent :chrome :preserve-uri T params))
+  (apply #'drakma:http-request url :external-format-in :utf-8 :external-format-out :utf-8 :user-agent :chrome params))
 
 (defun trunc-text (text &optional (maxchars 200))
   (let ((text (string-trim '(#\Newline #\Space #\Linefeed #\Return) text)))
@@ -44,10 +44,9 @@
 (define-command (search image) (&rest query) (:documentation "Query google images and return the link to the first image in the results.")
   (setf query (format NIL "~{~a~^ ~}" query))
   (let* ((stream
-          (drakma:http-request "https://ajax.googleapis.com/ajax/services/search/images" :want-stream T
-                               :parameters `(("q" . ,query) ("v" . "1.0"))
-                               :external-format-out :utf-8
-                               :external-format-in :utf-8))
+           (drakma-utf8 "https://ajax.googleapis.com/ajax/services/search/images"
+                        :want-stream T
+                        :parameters `(("q" . ,query) ("v" . "1.0"))))
          (data (json:decode-json stream))
          (results (cdr (assoc :results (cdr (assoc :response-data data))))))
     (close stream)
@@ -72,19 +71,6 @@
 (define-command (search touhou) (&rest query) (:documentation "Search en.touhouwiki.net.")
   (mediawiki-search-wrap event query "http://en.touhouwiki.net/wiki/" "http://en.touhouwiki.net/api.php" 0 "title"))
 
-(define-command (search kanjidamage) (&rest query) (:documentation "Return information about a kanji symbol crawled from Kanjidamage.com")
-  (setf query (format NIL "~{~a~^ ~}" query))
-  (let ((lquery:*lquery-master-document*))
-    (multiple-value-bind (html status headers uri) (drakma-utf8 "http://kanjidamage.com/kanji/search" 
-                                                                :parameters `(("q" . ,query) ("utf8" . "✓")))
-      (declare (ignore status headers))
-      ($ (initialize html))
-      (respond event "~a : ~a ~a - ~a" 
-               uri
-               ($ "h1 .kanji_character" (text) (node))
-               ($ "h1 .translation" (text) (node))
-               (trunc-text (cl-ppcre:regex-replace-all "\\s\\s" ($ ".span12 .definition p" (text) (node)) " "))))))
-
 (define-command (search jigen) (symbol &optional n) (:documentation "Search Jigen.net, a kanji character database.")
   (let ((lquery:*lquery-master-document*))
     ($ (initialize (drakma-utf8 (format NIL "http://jigen.net/data/~a?type2=1&rs=-1" (drakma:url-encode symbol :utf-8)))))
@@ -96,24 +82,24 @@
             ($ "sup" (remove))
             (let* ((dds ($ "#kjid dl dd"))
                    (add (- (length dds) 7)))
-              (respond event "~a : Readings: ~{~a~^, ~}; Composition: ~{~a~}; Pronunciation: ~{~a~^, ~}; Display: ~a; Variants: ~{~a~^, ~}" 
+              (respond event "~a : Readings: ~{~a~^, ~}; Composition: ~{~a~}; Pronunciation: ~{~a~^, ~}; Display: ~a; Variants: ~{~a~^ ~}" 
                        page
-                       ($ dds (eq (+ add 0)) "li" (text))
-                       ($ dds (eq (+ add 2)) (text))
-                       ($ dds (eq (+ add 3)) "li" (text))
-                       ($ dds (eq (+ add 4)) (text) (node))
-                       ($ dds (eq (+ add 5)) "li" (text)))))))))
+                       (map 'list #'trunc-text ($ dds (eq (+ add 0)) "li" (text)))
+                       (map 'list #'trunc-text ($ dds (eq (+ add 2)) (text)))
+                       (map 'list #'trunc-text ($ dds (eq (+ add 3)) "li" (text)))
+                       (cl-ppcre:regex-replace-all "\\s" ($ dds (eq (+ add 4)) (text) (node)) "")
+                       (map 'list #'trunc-text ($ dds (eq (+ add 5)) "li" (text))))))))))
 
 (define-command (search cliki) (&rest query) (:documentation "Search CLiki.net, a wiki dedicated to open source lisp projects and such..")
   (setf query (format NIL "~{~a~^+~}" query))
   (let ((lquery:*lquery-master-document*))
     ($ (initialize (drakma-utf8 "http://www.cliki.net/site/search" :parameters `(("query" . ,query)))))
     (let ((results ($ "#content-area li")))
-      (if (= 0 (length results))
+      (if (< 0 (length results))
           (let ((page (format NIL "http://www.cliki.net~a" ($ results (eq 0) "a" (attr :href) (node)))))
             ($ (initialize (drakma-utf8 page)))
             (cl-ppcre:register-groups-bind (html NIL) ("<div id=\"article\">(.*?)<" ($ "#article" (serialize) (node)))
-              ($ (initialize (format NIL "<html><head></head><body>~a</body></html>" html)))
+              ($ (initialize (format NIL "<body>~a</body>" html)))
               (respond event "~a : ~a" page (trunc-text ($ "body" (text) (node))))))
           (respond event "Nothing found for ~a." query)))))
 
@@ -122,7 +108,7 @@
         (url (google-term (format NIL "clhs+Body+~{~a~^+~}" query))))
     (if url
         (progn
-          ($ (initialize (drakma:http-request url)))
+          ($ (initialize (drakma-utf8 url)))
           (respond event "~a ~a" ($ "body>a" (eq 0) (text) (node)) url))
         (respond event "Nothing found."))))
 
@@ -135,7 +121,7 @@
 (define-command (search steam) (&rest query) (:documentation "Search the steam store for games.")
   (setf query (format NIL "~{~a~^ ~}" query))
   (let ((lquery:*lquery-master-document*))
-    ($ (initialize (drakma-utf8 "http://store.steampowered.com/search/" :parameters `(("term" . ,query)) :method :post)))
+    ($ (initialize (drakma-utf8 "http://store.steampowered.com/search/" :parameters `(("term" . ,query)))))
     (let ((results ($ ".search_result_row")))
       (if (< 0 (length results))
           (let ((page ($ results (eq 0) (attr :href) (node))))
@@ -163,10 +149,8 @@
 
 (defun google-term (term)
   (let ((lquery:*lquery-master-document*))
-    ($ (initialize (drakma:http-request "http://www.google.com/search" 
-                                        :parameters `(("q" . ,term))
-                                        :external-format-out :utf-8
-                                        :external-format-in :utf-8)))
+    ($ (initialize (drakma-utf8 "http://www.google.com/search" 
+                                :parameters `(("q" . ,term)))))
     (let ((node ($ "#res #search li")))
       (unless (= 0 (length node))
         (values (cl-ppcre:register-groups-bind (url) ("\\?q=(.*?)&" ($ node "h3 a" (attr :href) (node))) url)
