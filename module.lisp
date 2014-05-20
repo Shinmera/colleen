@@ -70,7 +70,11 @@
        (setf (gethash ,uidgens (threads ,modgens))
              (make-thread #'(lambda ()
                               (handler-case
-                                  ,@thread-body
+                                  (handler-bind
+                                      ((error #'(lambda (err)
+                                                   (when *debugger*
+                                                     (invoke-debugger err)))))
+                                    ,@thread-body)
                                 (module-stop (err)
                                   (declare (ignore err))
                                   (v:debug ,modnamegens "Received module-stop condition, leaving thread ~a." ,uidgens))
