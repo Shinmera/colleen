@@ -51,7 +51,8 @@
 
 (defgeneric most-recent (stevenchan &optional rss-url))
 (defmethod most-recent ((stevenchan stevenchan) &optional (rss-url (rss-url stevenchan)))
-  (let* ((node ($ (initialize (drakma:http-request rss-url) :type :XML) "item" (first)))
+  (let* ((lquery:*lquery-master-document*)
+         (node ($ (initialize (drakma:http-request rss-url)) "item" (first)))
          (title (string-trim " " ($ node "title" (text) (node))))
          (id (parse-integer (subseq title (1+ (search "#" title)))))
          (author (string-trim " " ($ node "author" (text) (node))))
@@ -65,6 +66,7 @@
 
 (define-command (stevenchan movie) (&optional user) (:documentation "Get information about the movie night.")
   (unless user (setf user (nick event)))
-  ($ (initialize (drakma:http-request "http://movies.tymoon.eu" :external-format-in :utf-8) :type :HTML))
-  (respond event "~a: ~a. Movie nights always on Saturdays, 22:00 CE(S)T. http://livestream.com/shinmera"
-           user ($ "#content .box .largeCenter" (text) (node))))
+  (let ((lquery:*lquery-master-document*))
+    ($ (initialize (drakma:http-request "http://movies.tymoon.eu" :external-format-in :utf-8)))
+    (respond event "~a: ~a. Movie nights always on Saturdays, 22:00 CE(S)T. http://livestream.com/shinmera"
+             user ($ "#content .box .largeCenter" (text) (node)))))

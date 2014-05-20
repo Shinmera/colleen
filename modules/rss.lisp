@@ -97,9 +97,9 @@
          (data (drakma:http-request (url feed))))
     (unless (stringp data)
       (error "Feed data seems to be incompatible! (Are you sure it is an RSS feed?)"))
-    ($ (initialize data :type :XML))
+    ($ (initialize data))
     (append
-     (loop for node in ($ "item")
+     (loop for node across ($ "item")
            for i from 0
            while (or (not limit) (< i limit))
            collect (make-instance 'feed-item 
@@ -109,7 +109,7 @@
                                   :guid ($ node "guid" (text) (node))
                                   :publish-date ($ node "pubDate" (text) (node))))
      ;; Atom
-     (loop for node in ($ "entry")
+     (loop for node across ($ "entry")
            for i from 0
            while (or (not limit) (< i limit))
            collect (make-instance 'feed-item 
