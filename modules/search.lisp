@@ -145,6 +145,21 @@
                      page))
           (respond event "Nothing found for ~a." query)))))
 
+(define-command (search chinese-etymology) (hanzi) (:documentation "Search Chinese Etymology, a repository for the composition of Chinese characters.")
+  (destructuring-bind (cog phon label shuowen)
+      ($ (initialize 
+          (drakma-utf8 "http://www.chineseetymology.org/CharacterEtymology.aspx" 
+                       :parameters `(("characterInput" . ,hanzi)
+                                     ("submitButton1" . "Etymology"))))
+        (combine "#charCog" "#charPhon" "#etymologyLabel" "#ShuoWen")
+        (map #'(lambda (nodes) (mapcar #'(lambda (node) (aref (lquery-funcs:text node) 0)) nodes)))
+        (node))
+    (respond event "Label: ~a Semantic (<X|) component: ~:[~a~;~*NONE~]; phonetic (|Y>) component: ~:[~a~;~*NONE~]"
+             label (string= "" cog) cog (string= "" phon) phon)
+    (unless (or (string-equal "" shuowen)
+                (string-equal "none" shuowen))
+      (respond event "Extra credit: ~a" shuowen))))
+
 (defun google-term (term)
   (let ((lquery:*lquery-master-document*))
     ($ (initialize (drakma:http-request "http://www.google.com/search" 
