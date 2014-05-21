@@ -145,6 +145,8 @@
    #:server
    #:prefix
    #:arguments
+   #:cancelled
+   #:dispatched
    
    #:user-event
    #:username
