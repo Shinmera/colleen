@@ -8,6 +8,7 @@
 
 (define-module-system auth ("authenticate"))
 (define-module-system backup ("backup") (:trivial-timers :cl-fad))
+(define-module-system chanblock ("chanblock"))
 (define-module-system chatlog-pg ("chatlog-pg") (:postmodern :local-time))
 (define-module-system chatlog ("chatlog") (:clsql :clsql-mysql :local-time))
 (define-module-system convert ("convert") (:drakma :ieee-floats :ironclad :parse-number :cl-json))
