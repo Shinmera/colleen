@@ -18,9 +18,9 @@
 
 (defmethod load-storage :after ((backup backup))
   (with-module-storage (backup)
-    (setf (interval backup) (uc:config-tree :interval)
+    (setf (interval backup) (or (uc:config-tree :interval) 86400)
           (backup-directory backup) (parse-namestring (or (uc:config-tree :directory)
-                                                          (namestring (merge-pathnames "backup"
+                                                          (namestring (merge-pathnames "backup/"
                                                                                        (asdf:system-source-directory :colleen))))))))
 
 (defmethod save-storage :before ((backup backup))
@@ -40,7 +40,7 @@
   (let* ((directory (backup-directory (get-module :backup)))
          (timestamp (local-time:format-timestring NIL (local-time:now) :format '((:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2))))
          (target-dir (merge-pathnames (format NIL "~a/" timestamp) directory))
-         (running-modules (remove-if-not #'active (remove :backup (alexandria:hash-table-keys *bot-modules*)))))
+         (running-modules (remove-if-not #'active (remove (get-module :backup) (alexandria:hash-table-values *bot-modules*)))))
     (flet ((copy-fun (pathname)
              (let ((target-path (merge-pathnames (subseq (namestring pathname) (length (namestring *config-directory*))) target-dir)))
                (if (cl-fad:directory-pathname-p pathname)
@@ -53,10 +53,10 @@
       (v:info :backup "Starting backup.")
       (v:debug :backup "Saving storage of all active modules...")
       (dolist (module running-modules)
-        (handler-bind ((error #'(lambda (err)
-                                  (v:error :backup "Error saving storage for module ~a: ~a" module err)
-                                  (invoke-restart 'skip))))
-          (save-storage module)))
+        (handler-case
+            (save-storage module)
+          (error (err)
+            (v:error :backup "Error saving storage for module ~a: ~a" module err))))
       (v:debug :backup "Copying folder ~a to ~a..." (namestring *config-directory*) (namestring target-dir))
       (copy-fun *config-directory*)
       (cl-fad:walk-directory *config-directory* #'copy-fun :directories T)
@@ -65,7 +65,7 @@
 (defun restore (backup-name)
   (let* ((directory (backup-directory (get-module :backup)))
          (source-dir (merge-pathnames (format NIL "~a/" backup-name) directory))
-         (running-modules (remove-if-not #'active (remove :backup (alexandria:hash-table-keys *bot-modules*)))))
+         (running-modules (remove-if-not #'active (remove (get-module :backup) (alexandria:hash-table-values *bot-modules*)))))
     (assert (cl-fad:file-exists-p source-dir) () "Backup ~a does not exist!" backup-name)
     (flet ((copy-fun (pathname)
              (let ((target-path (merge-pathnames (subseq (namestring pathname) (length (namestring source-dir))) *config-directory*)))
@@ -84,10 +84,10 @@
       (cl-fad:walk-directory source-dir #'copy-fun :directories T)
       (v:debug :backup "Loading storage of all active modules...")
       (dolist (module running-modules)
-        (handler-bind ((error #'(lambda (err)
-                                  (v:error :backup "Error starting module ~a: ~a" module err)
-                                  (invoke-restart 'skip))))
-          (load-storage module)))
+        (handler-case
+            (load-storage module)
+          (error (err)
+            (v:error :backup "Error loading storage for module ~a: ~a" module err))))
       (v:info :backup "Restore complete."))))
 
 (defun start-timer ()
