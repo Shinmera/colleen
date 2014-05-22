@@ -15,9 +15,9 @@
     ((%startup :initform (get-universal-time) :accessor startup-time))
   (:documentation "A few essential bot and irc commands."))
 
-(define-command reload () (:authorization T :documentation "Reload the configuration.")
+(define-command reload () (:authorization T :documentation "Reload the bot configuration.")
   (when (auth-p (nick event))
-    (respond event (fstd-message event :config-reload "Reloading configuration."))
+    (respond event (fstd-message event :config-reload "Reloading bot configuration."))
     (load-config)))
 
 (define-command connect (server) (:authorization T :documentation "Connect to a server configuration.")
@@ -247,12 +247,3 @@
 
 (define-command uptime () (:documentation "Report how long Colleen has been started up for (or more specifically, the Essentials module).")
   (respond event "Uptime: ~a" (format-time-since (- (get-universal-time) (startup-time module)))))
-
-
-
-
-
-
-
-
-
