@@ -122,6 +122,20 @@
     (error (err)
       (respond event "Error: ~a" err))))
 
+(define-command (module storage save) (module-name) (:authorization T :documentation "Saves the storage of a module.")
+  (handler-case
+      (progn (save-storage (get-module module-name))
+             (respond event "Module storage saved."))
+    (error (err)
+      (respond event "Error: ~a" err))))
+
+(define-command (module storage load) (module-name) (:authorization T :documentation "Loads the storage of a module.")
+  (handler-case
+      (progn (load-storage (get-module module-name))
+             (respond event "Module storage loaded."))
+    (error (err)
+      (respond event "Error: ~a" err))))
+
 (defun format-module (stream module-name &rest rest)
   (declare (ignore rest))
   (format stream "~:[~a~;*~a~]" (active (get-module module-name)) module-name))
