@@ -12,7 +12,7 @@
 (define-module rules () ()
   (:documentation "Primitive rule enforcement module."))
 
-(defmethod start ((rules rules))
+(defmethod load-storage :after ((rules rules))
   (with-module-storage (rules)
     (unless (uc:config-tree :rules)
       (setf (uc:config-tree :rules)

@@ -37,4 +37,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
   (cl:eval form))
 
 (define-command eval (&rest form) (:authorization T :documentation "Evaluate a lisp form.")
-  (respond event "~s" (safe-eval (safe-read (format NIL "~{~a~^ ~}" form)))))
+  (handler-case
+      (respond event "~s" (safe-eval (safe-read (format NIL "~{~a~^ ~}" form))))
+    (error (err)
+      (respond event "ERROR: ~a" err))))

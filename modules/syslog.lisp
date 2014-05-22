@@ -23,9 +23,6 @@
       (irc:privmsg (channel faucet) (format NIL "~a" message) :server server)))
   message)
 
-(defmethod start ((syslog syslog))
-  )
-
 (defmethod stop ((syslog syslog))
   (loop for name being the hash-keys of (faucets syslog)
         do (piping:remove-segment v:*global-controller* name))

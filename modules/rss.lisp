@@ -43,11 +43,13 @@
   (print-unreadable-object (item stream :type T)
     (format stream "~a ~a~@[ ~a~]" (guid item) (title item) (publish-date item))))
 
-(defmethod start ((rss rss))
+(defmethod load-storage :after ((rss rss))
   (with-module-storage (rss)
     (unless (uc:config-tree :feeds)
       (setf (uc:config-tree :feeds)
-            (make-hash-table :test 'equalp))))
+            (make-hash-table :test 'equalp)))))
+
+(defmethod start ((rss rss))
   (with-module-thread (rss)
     (check-loop rss)))
 

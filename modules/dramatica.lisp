@@ -14,7 +14,7 @@
      (%log-loop :initarg :log-loop :initform NIL :accessor log-loop))
   (:documentation "Module related to Encyclopedia Dramatica activities."))
 
-(defmethod start ((dramatica dramatica))
+(defmethod load-storage :after ((dramatica dramatica))
   (with-module-storage (dramatica)
     (setf wiki:*wiki-api* (uc:config-tree :wiki :api))
     (when (> (length (uc:config-tree :wiki :pass)) 0)
@@ -25,7 +25,7 @@
                       (uc:config-tree :forum :user)
                       (uc:config-tree :forum :pass)))))
 
-(defmethod stop ((dramatica dramatica))
+(defmethod save-storage :before ((dramatica dramatica))
   (with-module-storage (dramatica)
     (setf (uc:config-tree :wiki :api) wiki:*wiki-api*)
     (setf (uc:config-tree :forum :url) xencl:*index*)))

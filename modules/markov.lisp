@@ -15,14 +15,14 @@
   ((%registry :initarg :registry :initform (make-hash-table :test 'equal) :accessor registry))
   (:documentation "Simple markov chain module."))
 
-(defmethod start ((markov markov))
+(defmethod load-storage :after ((markov markov))
   (let ((uc:*config*))
     (if (uc:load-configuration *registry-file* :if-does-not-exist NIL)
         (setf (registry markov) uc:*config*)
         (setf (registry markov) (make-hash-table :test 'equalp))))
   markov)
 
-(defmethod stop ((markov markov))
+(defmethod save-storage :after ((markov markov))
   (uc:save-configuration *registry-file* :object (registry markov)))
 
 (define-handler (privmsg-event event) (:modulevar markov)

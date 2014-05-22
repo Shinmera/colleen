@@ -16,7 +16,7 @@
      (%timer :initform NIL :accessor timer))
   (:documentation "Automatic periodic configuration backup module."))
 
-(defmethod load-storage :before ((backup backup))
+(defmethod load-storage :after ((backup backup))
   (with-module-storage (backup)
     (setf (interval backup) (uc:config-tree :interval)
           (backup-directory backup) (parse-namestring (or (uc:config-tree :directory)

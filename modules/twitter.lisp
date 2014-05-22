@@ -13,14 +13,14 @@
     ((streams :initform () :accessor streams))
   (:documentation "Provides access to the twitter API."))
 
-(defmethod start ((twitter twitter))
+(defmethod load-storage :after ((twitter twitter))
   (with-module-storage (twitter)
     (setf chirp:*oauth-api-key* (uc:config-tree :api-key)
           chirp:*oauth-api-secret* (uc:config-tree :api-secret) 
           chirp:*oauth-access-token* (uc:config-tree :access-token)
           chirp:*oauth-access-secret* (uc:config-tree :access-secret))))
 
-(defmethod stop ((twitter twitter))
+(defmethod save-storage :before ((twitter twitter))
   (with-module-storage (twitter)
     (setf (uc:config-tree :api-key) chirp:*oauth-api-key*
           (uc:config-tree :api-secret) chirp:*oauth-api-secret*
