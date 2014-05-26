@@ -88,23 +88,25 @@
     (respond event versionstring)))
 
 (define-command help (&rest command-signature) (:documentation "Display help on a command.")
-  (let* ((command-signature (format NIL "~{~a~^ ~}" command-signature))
-         (handler (loop for handler across *cmd-priority-array*
-                        do (when (cl-ppcre:scan (scanner handler) command-signature)
-                             (return handler)))))
-    (if handler
-        (typecase handler
-          (group-handler
-           (respond event "Closest match: [Group] ~a -- ~
+  (if command-signature
+      (let* ((command-signature (format NIL "~{~a~^ ~}" command-signature))
+             (handler (loop for handler across *cmd-priority-array*
+                            do (when (cl-ppcre:scan (scanner handler) command-signature)
+                                 (return handler)))))
+        (if handler
+            (typecase handler
+              (group-handler
+               (respond event "Closest match: [Group] ~a -- ~
                             ~:[No docstring available.~;~:*~a~]~%~
                             Commands in this group: ~:[None~;~:*~{~a~^, ~}~]"
-                    (identifier handler) (docstring handler) (subcommands handler)))
-          (command-handler
-           (respond event "Closest match: [Command] ~a -- ~
+                        (identifier handler) (docstring handler) (subcommands handler)))
+              (command-handler
+               (respond event "Closest match: [Command] ~a -- ~
                             ~:[No docstring available.~;~:*~a~]~%~
                             Arguments: ~a"
-                    (identifier handler) (docstring handler) (arguments handler))))
-        (respond event "?? Something went very wrong."))))
+                        (identifier handler) (docstring handler) (arguments handler))))
+            (respond event "?? Something went very wrong.")))
+      (respond event "This is a Colleen IRC bot. This command lets you display help information on a specific command.")))
 
 (define-command apropos (&rest command-signature) (:documentation "Display information on all matching commands.")
   (do-matching-command-handlers ((format NIL "~{~a~^ ~}" command-signature) handler)

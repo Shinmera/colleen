@@ -188,12 +188,3 @@
               (g data :long--url :data)
               (g data :global--hash :data)
               data))))
-
-
-
-
-
-
-
-
-
