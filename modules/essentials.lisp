@@ -88,8 +88,27 @@
     (respond event versionstring)))
 
 (define-command help (&rest command-signature) (:documentation "Display help on a command.")
-  (do-matching-command-handlers (command-signature handler)
-    (respond event "MATCH> ~a" (apropos-command-handler handler))))
+  (let* ((command-signature (format NIL "~{~a~^ ~}" command-signature))
+         (handler (loop for handler across *cmd-priority-array*
+                        do (when (cl-ppcre:scan (scanner handler) command-signature)
+                             (return handler)))))
+    (if handler
+        (typecase handler
+          (group-handler
+           (respond event "Closest match: [Group] ~a -- ~
+                            ~:[No docstring available.~;~:*~a~]~%~
+                            Commands in this group: ~:[None~;~:*~{~a~^, ~}~]"
+                    (identifier handler) (docstring handler) (subcommands handler)))
+          (command-handler
+           (respond event "Closest match: [Command] ~a -- ~
+                            ~:[No docstring available.~;~:*~a~]~%~
+                            Arguments: ~a"
+                    (identifier handler) (docstring handler) (arguments handler))))
+        (respond event "?? Something went very wrong."))))
+
+(define-command apropos (&rest command-signature) (:documentation "Display information on all matching commands.")
+  (do-matching-command-handlers ((format NIL "~{~a~^ ~}" command-signature) handler)
+    (respond event "~a" (apropos-command-handler handler))))
 
 ;; MODULE COMMANDS
 (define-group module :documentation "Manage bot modules.")
