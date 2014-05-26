@@ -218,6 +218,25 @@ The event will use the :NULL server, CL-USER!CL-USER@COLLEEN user ident and the 
                Commands in this group: ~{~a~^, ~}"
           (identifier handler) (pattern handler) (docstring handler) (subcommands handler)))
 
+(defun group-command-handler (event &rest args)
+  (declare (ignore args))
+  (let ((handler (loop for handler across *cmd-priority-array*
+                       do (when (cl-ppcre:scan (scanner handler) (message event))
+                            (return handler)))))
+    (if handler
+        (typecase handler
+          (group-handler
+           (respond event "!! Unknown command. Closest match: [Group] ~a -- ~
+                            ~:[No docstring available.~;~:*~a~]~%~
+                            Commands in this group: ~:[None~;~:*~{~a~^, ~}~]"
+                    (identifier handler) (docstring handler) (subcommands handler)))
+          (command-handler
+           (respond event "!! Unknown command. Closest match: [Command] ~a -- ~
+                            ~:[No docstring available.~;~:*~a~]~%~
+                            Arguments: ~a"
+                    (identifier handler) (docstring handler) (arguments handler))))
+        (respond event "?? Something went very wrong."))))
+
 (defmacro define-group (name &key documentation pattern subcommands)
   "Defines a new group with the given NAME.
 
@@ -233,10 +252,7 @@ See SET-COMMAND-FUNCTION"
   (unless pattern
     (setf pattern (format NIL "^~a(.*)" (escape-regex-symbols (string name)))))
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (set-command-function ',name ,pattern #'(lambda (event &rest args)
-                                               (if args
-                                                   (respond event (apropos-command-handler (message event)))
-                                                   (respond event (apropos-command-handler (command-handler ',name)))))
+     (set-command-function ',name ,pattern #'group-command-handler
                            :docstring ,documentation :priority :AFTER :class 'group-handler)
      ,(when subcommands
         `(setf (subcommands (command-handler ',name)) ,subcommands))))
