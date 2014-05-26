@@ -43,7 +43,8 @@
                :usocket
                :flexi-streams
                :uuid
-               :cl-ppcre))
+               :cl-ppcre
+               #+sbcl :sb-introspect))
 
 ;; (defsystem colleen-doc
 ;;   :name "Colleen Doc"
