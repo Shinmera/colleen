@@ -70,9 +70,10 @@ Necessary to ensure proper event handling order."
       (apropos-event-handler handler)))
   
   (:method ((handler event-handler))
-    (format NIL "[Event Handler] ~s for ~a with priority ~a~%~
+    (let ((*print-pretty* NIL))
+      (format NIL "[Event Handler] ~s for ~a with priority ~a~%~
                  ~:[No docstring available.~;Docstring: ~:*~a~]"
-            (identifier handler) (event-type handler) (priority-name (priority handler)) (docstring handler))))
+              (identifier handler) (event-type handler) (priority-name (priority handler)) (docstring handler)))))
 
 (defun set-handler-function (identifier event-class function &key (priority :MAIN) docstring)
   "Set a new handler function for an event class.

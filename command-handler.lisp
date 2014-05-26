@@ -111,9 +111,11 @@ CLASS            --- The class to make an instance of. Has to be subclass of
                  (apropos-command-handler handler)))))
   
   (:method ((handler command-handler))
-    (format NIL "[Command Handler] ~s matching ~s with priority ~a expecting ~s~%~
+    (let ((*print-pretty* NIL))
+      (format NIL "[Command Handler] ~s matching ~s with priority ~s expecting ~a~%~
                  ~:[No docstring available.~;Docstring: ~:*~a~]"
-            (identifier handler) (pattern handler) (priority-name (priority handler)) (arguments handler) (docstring handler))))
+              (identifier handler) (pattern handler) (priority-name (priority handler))
+              (lambda-list->string (arguments handler)) (docstring handler)))))
 
 (defun read-command (event)
   "Tries to read a command from a PRIVMSG-EVENT by matching the prefixes as defined in the config.
@@ -213,10 +215,11 @@ The event will use the :NULL server, CL-USER!CL-USER@COLLEEN user ident and the 
   (:documentation "Special command handler class for command groups."))
 
 (defmethod apropos-command-handler ((handler group-handler))
-  (format NIL "[Command Group] ~s matching ~s~%~
+  (let ((*print-pretty* NIL))
+    (format NIL "[Command Group] ~s matching ~s~%~
                ~:[No docstring available.~;Docstring: ~:*~a~]~%~
                Commands in this group: ~{~a~^, ~}"
-          (identifier handler) (pattern handler) (docstring handler) (subcommands handler)))
+            (identifier handler) (pattern handler) (docstring handler) (subcommands handler))))
 
 (defun group-command-handler (event &rest args)
   (declare (ignore args))
