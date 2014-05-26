@@ -6,6 +6,23 @@
 
 (in-package :org.tymoonnext.colleen)
 
+(defun lambda-list->string (lambda-list)
+  (with-output-to-string (stream)
+    (labels ((p (token)
+               (typecase token
+                 (null
+                  (write-string "()" stream))
+                 (list
+                  (write-char #\( stream)
+                  (p (car token))
+                  (loop for item in (cdr token)
+                        do (write-char #\Space stream)
+                           (p item))
+                  (write-char #\) stream))
+                 (symbol
+                  (write-string (string-downcase (symbol-name token)) stream)))))
+      (p lambda-list))))
+
 (defun format-message (event message &rest other-replaces)
   "Format the given message, replacing $NICK$, $CHANNEL$, $SERVER$ and $MYSELF$ with the according values."
   (let ((replaces (append other-replaces

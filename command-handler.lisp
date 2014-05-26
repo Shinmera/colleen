@@ -123,10 +123,17 @@ If a match occurs, a fitting COMMAND-EVENT is generated and dispatched."
              (setf prefix (format NIL "~a:" (nick *current-server*))))
            (when (and (> (length (message event)) (length prefix))
                       (string= (message event) prefix :end1 (length prefix)))
-             (handler-bind ((not-authorized #'(lambda (err)
-                                                (v:warn (name (server event)) "~a" err)
-                                                (respond event (fstd-message event :not-authorized))
-                                                (invoke-restart 'skip-handler))))
+             (handler-bind ((not-authorized
+                              #'(lambda (err)
+                                  (v:warn (name (server event)) "~a" err)
+                                  (respond event (fstd-message event :not-authorized))
+                                  (invoke-restart 'skip-handler)))
+                            (invalid-arguments
+                              #'(lambda (err)
+                                  (v:warn (name (server event)) "~a" err)
+                                  (respond event "Invalid arguments. Expected lambda-list: ~a"
+                                           (lambda-list->string (expected err)))
+                                  (invoke-restart 'skip-handler))))
                (dispatch (make-instance 'command-event
                                         :server (server event)
                                         :arguments (arguments event)
@@ -171,13 +178,13 @@ Unless specifically rebound, for command events the following restarts are avail
                    (multiple-value-bind (match groups) (cl-ppcre:scan-to-strings (scanner handler) (message event))
                      (when match
                        (v:trace :command "Event ~a matched ~a." event handler)
+                       (setf (cancelled event) T) ; Cancel by default
                        (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))) :remove-empty-subseqs T)))
                          (with-repeating-restart (recheck-arguments "Try checking the arguments again.")
                            (unless (arguments-match-p (arguments handler) args)
                              (error 'invalid-arguments :argslist args :expected (arguments handler) :command (identifier handler)))
                            (with-repeating-restart (retry-handler "Retry dispatching to ~a" handler)
                              (v:debug :command "Dispatching ~a to ~a." event handler)
-                             (setf (cancelled event) T) ; Cancel by default
                              (apply (handler-function handler) event args)
                              (setf (handled event) T)
                              T))))
@@ -267,10 +274,12 @@ BODY          ::= FORM*"
                       (format NIL "^~a(.*)" (escape-regex-symbols (string name))))))
   (unless module-name
     (setf module-name (get-current-module-name)))
-  (let ((funcsym (gensym "FUNCTION"))
-        (declarations (loop for form in body
-                            until (or (not (listp form)) (not (eq (first form) 'declare)))
-                            collect (pop body))))
+  (let* ((funcsym (gensym "FUNCTION"))
+         (declarations (loop for form in body
+                             until (or (not (listp form)) (not (eq (first form) 'declare)))
+                             collect (pop body)))
+         (body `(handler-bind ((error #'(lambda (err) (respond ,eventvar "!! Unexpected error: ~a" err))))
+                  ,@body)))
     (flet ((mksymb (list)
              (let ((name (format NIL "~{~a~^ ~}" list)))
                (or (find-symbol name) (intern name)))))
@@ -288,9 +297,9 @@ BODY          ::= FORM*"
                                          ,(if threaded
                                               `(with-module-thread (,modulevar)
                                                  (with-module-lock (,modulevar)
-                                                   ,@body))
-                                              `(progn ,@body)))))
-                                  `(progn ,@body)))))
+                                                   ,body))
+                                              body))))
+                                  body))))
            ,(if (listp name)
                 (let ((group (car name))
                       (name (mksymb name)))
