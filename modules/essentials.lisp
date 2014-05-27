@@ -34,35 +34,6 @@
     (loop for server being the hash-keys of *servers*
        do (disconnect server))))
 
-(define-command quickload (&optional (system "colleen")) (:authorization T :documentation "Perform a ql:quickload.")
-  (setf system (find-symbol (string-upcase system) :KEYWORD))
-  (ql:quickload system)
-  (respond event "System loaded."))
-
-(define-command update () (:authorization T :documentation "Stops all active modules (except essentials), performs a GIT pull on the project root, reloads and finally starts all previously active modules again.")
-  (flet ((report (level message &rest formatargs)
-           (apply #'respond event (format NIL "[update][~a] ~a" level message) formatargs)
-           (apply #'v:log level :essentials.update message formatargs)))
-    (let ((running-modules (remove-if-not #'active (remove :core (remove :essentials (hash-table-keys *bot-modules*))))))
-      (report :info "Force-stopping all modules...")
-      (dolist (module running-modules)
-        (handler-bind ((error #'(lambda (err)
-                                  (report :error "Error stopping module ~a: ~a" module err)
-                                  (invoke-restart 'skip))))
-          (stop-module module)))
-      (report :info "Performing GIT pull...")
-      (uiop:chdir (asdf:system-source-directory :colleen))
-      (uiop:run-program "git pull" )
-      (report :info "Reloading COLLEEN...")
-      (ql:quickload :colleen)
-      (report :info "Starting all modules...")
-      (dolist (module running-modules)
-        (handler-bind ((error #'(lambda (err)
-                                  (report :error "Error starting module ~a: ~a" module err)
-                                  (invoke-restart 'skip))))
-          (start-module module)))
-      (report :info "Update done."))))
-
 (define-command error (&optional type) (:documentation "Simulate a condition.")
   (if type
       (error (find-symbol (string-upcase type)))
@@ -75,17 +46,6 @@
   (respond event "~a: It is now ~a" (nick event)
            (format-timestring NIL (now) :format 
                               '((:year 4) #\. :month #\. :day #\, #\Space :long-weekday #\Space (:hour 2) #\: (:min 2) #\: (:sec 2) #\Space #\( :timezone #\/ #\G #\M #\T :gmt-offset #\)))))
-
-(define-command version () (:documentation "Return version information.")
-  (let ((versionstring (format NIL "Colleen v~a" (asdf:component-version (asdf:find-system :colleen)))))
-    (when (uiop:directory-exists-p (merge-pathnames ".git" (asdf:system-source-directory :colleen)))
-      (uiop:chdir (asdf:system-source-directory :colleen))
-      (uiop:run-program "git fetch")
-      (setf versionstring (format NIL "~a ~a (~a behind ~a ahead)" versionstring
-                                  (string-trim '(#\Newline) (uiop:run-program "git rev-parse HEAD" :output :string))
-                                  (string-trim '(#\Newline) (uiop:run-program "git rev-list HEAD..origin --count" :output :string))
-                                  (string-trim '(#\Newline) (uiop:run-program "git rev-list origin..HEAD --count" :output :string)))))
-    (respond event versionstring)))
 
 (define-command help (&rest command-signature) (:documentation "Display help on a command.")
   (if command-signature
@@ -111,6 +71,42 @@
 (define-command apropos (&rest command-signature) (:documentation "Display information on all matching commands.")
   (do-matching-command-handlers ((format NIL "~{~a~^ ~}" command-signature) handler)
     (respond event "~a" (apropos-command-handler handler))))
+
+;; SYSTEM COMMANDS
+(define-command version () (:documentation "Return version information.")
+  (let ((versionstring (format NIL "Colleen v~a" (asdf:component-version (asdf:find-system :colleen)))))
+    (when (uiop:directory-exists-p (merge-pathnames ".git" (asdf:system-source-directory :colleen)))
+      (uiop:chdir (asdf:system-source-directory :colleen))
+      (uiop:run-program "git fetch")
+      (setf versionstring (format NIL "~a ~a (~a behind ~a ahead)" versionstring
+                                  (string-trim '(#\Newline) (uiop:run-program "git rev-parse HEAD" :output :string))
+                                  (string-trim '(#\Newline) (uiop:run-program "git rev-list HEAD..origin --count" :output :string))
+                                  (string-trim '(#\Newline) (uiop:run-program "git rev-list origin..HEAD --count" :output :string)))))
+    (respond event versionstring)))
+
+(define-command quickload (&optional (system "colleen")) (:authorization T :documentation "Perform a ql:quickload.")
+  (setf system (find-symbol (string-upcase system) :KEYWORD))
+  (ql:quickload system)
+  (respond event "System loaded."))
+
+(define-command pull-local-projects () (:authorization T :documentation "Perform a git-pull on all projects in Quicklisp's local-projects folder.")
+  (dolist (project (uiop:directory-files (merge-pathnames "quicklisp/local-projects/" (user-homedir-pathname))))
+    (when (uiop:directory-pathname-p project)
+      (uiop:chdir project)
+      (uiop:run-program "git pull")
+      (respond event "~a now at ~a."
+               (car (last (pathname-directory project)))
+               (string-trim '(#\Newline) (uiop:run-program "git rev-parse HEAD" :output :string))))))
+
+(define-command update () (:authorization T :documentation "Stops all active modules (except essentials), performs a GIT pull on the project root, reloads and finally starts all previously active modules again.")
+  (flet ((report (level message &rest formatargs)
+           (apply #'respond event (format NIL "[update][~a] ~a" level message) formatargs)
+           (apply #'v:log level :essentials.update message formatargs)))
+    (report :info "Performing pull-local-projects...")
+    (relay-command event "pull-local-projects")
+    (report :info "Reloading colleen...")
+    (relay-command event "quickload colleen")
+    (report :info "Update done.")))
 
 ;; MODULE COMMANDS
 (define-group module :documentation "Manage bot modules.")
