@@ -64,6 +64,7 @@
    #:recheck-arguments
    #:retry-handler
    #:simulate-command
+   #:relay-command
    
    #:group-handler
    #:subcommands

@@ -210,6 +210,17 @@ The event will use the :NULL server, CL-USER!CL-USER@COLLEEN user ident and the 
                                    :message command-string :output-stream output-stream
                                    :server (get-server :null) :prefix "CL-USER!CL-USER@COLLEEN" :arguments '("INTERNAL"))))
 
+(defun relay-command (event new-command)
+  "Relays a command-event to a new command.
+
+This generates a new COMMAND-EVENT with the given NEW-COMMAND as message.
+The nick, username, etc. will be carried over from the event."
+  (dispatch-command (make-instance 'command-event
+                                   :message new-command :channel (channel event)
+                                   :nick (nick event) :hostmask (hostmask event)
+                                   :username (username event) :arguments (arguments event)
+                                   :prefix (prefix event) :server (server event))))
+
 (defclass group-handler (command-handler)
   ((%subcommands :initarg :subcommands :initform () :accessor subcommands))
   (:documentation "Special command handler class for command groups."))
