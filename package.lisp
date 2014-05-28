@@ -201,6 +201,9 @@
    
    #:start
    #:stop
+   #:module-thread
+   #:stop-module-thread
+   #:remove-module-thread
    #:with-module
    #:with-module-thread
    #:with-module-lock

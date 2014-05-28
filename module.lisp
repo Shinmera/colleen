@@ -55,41 +55,90 @@
 
   (:method ((module module))))
 
+(defun module-thread (module uuid)
+  "Returns the thread identified by UUID on MODULE or NIL if none is found."
+  (gethash uuid (threads (get-module module))))
+
+(defgeneric (setf module-thread) (thread module uuid)
+  (:documentation "Sets the UUID on the module to the specified thread.
+If a thread already exists at the specified UUID, a warning is logged.")
+  (:method (thread (module module) (uuid string))
+    (let ((threads (threads (get-module module))))
+      (when (gethash uuid threads)
+        (v:warn :module "Replacing ~a's already existing and potentially running thread ~a!" module uuid))
+      (setf (gethash uuid threads)
+            thread))))
+
+(defun stop-module-thread (module uuid)
+  "Stops the thread identified by UUID from the MODULE.
+The thread will most likely remove itself once it stops.
+It is not guaranteed that the thread will stop immediately."
+  (let ((thread (module-thread module uuid)))
+    (when (and thread (thread-alive-p thread))
+      (interrupt-thread thread #'(lambda () (error 'module-stop))))))
+
+(defun remove-module-thread (module uuid &key keep-alive)
+  "Removes the thread identified by UUID from the MODULE.
+If KEEP-ALIVE is non-NIL and the thread is alive, it is only removed.
+Otherwise if it is still alive, the thread is stopped and removed."
+  (let* ((module (get-module module))
+         (thread (gethash uuid (threads module))))
+    (when thread
+      (when (and keep-alive (thread-alive-p thread))
+        (v:warn :module "Stopping ~a's thread ~a due to removal." module uuid)
+        (interrupt-thread thread #'(lambda () (error 'module-stop))))
+      (remhash uuid (threads module)))))
+
 (defmacro with-module ((var &optional (name (get-current-module-name))) &body forms)
+  "Executes the forms in a context where VAR is bound to the module instance named by NAME.
+This also binds *CURRENT-MODULE*."
   `(let* ((,var (get-module ,name))
           (*current-module* ,var))
      ,@forms))
 
 (defmacro with-module-thread ((&optional (module '*current-module*)) &body thread-body)
+  "Executes the THREAD-BODY in a separate thread bound to the MODULE.
+The return value of this is the new thread's UUID string.
+
+The thread contains implicit condition handling constructs:
+When an error is caught at the lowest level and *DEBUGGER* is non-NIL,
+then the error is passed to INVOKE-DEBUGGER. If the condition is not
+handled or when the thread body finishes executing, the thread is ended
+and it is removed from the module's threads table."
   (let ((uidgens (gensym "UUID"))
         (modgens (gensym "MODULE"))
         (modnamegens (gensym "MODULE-NAME")))
     `(let* ((,uidgens (princ-to-string (uuid:make-v4-uuid)))
             (,modgens (get-module ,module))
             (,modnamegens (name ,modgens)))
-       (setf (gethash ,uidgens (threads ,modgens))
+       (setf (module-thread ,modgens ,uidgens)
              (make-thread #'(lambda ()
-                              (handler-case
-                                  (handler-bind
-                                      ((error #'(lambda (err)
-                                                   (when *debugger*
-                                                     (invoke-debugger err)))))
-                                    ,@thread-body)
-                                (module-stop (err)
-                                  (declare (ignore err))
-                                  (v:debug ,modnamegens "Received module-stop condition, leaving thread ~a." ,uidgens))
-                                (error (err)
-                                  (v:severe ,modnamegens "Unexpected error at thread-level: ~a" err)
-                                  (when *debugger*
-                                    (invoke-debugger err))))
-                              (v:trace ,modnamegens "Ending thread ~a." ,uidgens)
-                              (remhash ,uidgens (threads ,modgens)))
+                              (unwind-protect
+                                   (handler-case
+                                       (handler-bind
+                                           ((error #'(lambda (err)
+                                                       (v:severe ,modnamegens "Unexpected error at thread-level: ~a" err)
+                                                       (when *debugger*
+                                                         (invoke-debugger err)))))
+                                         ,@thread-body)
+                                     (module-stop (err)
+                                       (declare (ignore err))
+                                       (v:debug ,modnamegens "Received module-stop condition, leaving thread ~a." ,uidgens)))
+                                (v:trace ,modnamegens "Ending thread ~a." ,uidgens)
+                                (remhash ,uidgens (threads ,modgens))))
                           :initial-bindings (loop for symbol in '(*current-server* *current-module* uc:*config*)
                                                   when (boundp symbol)
                                                     collect (cons symbol (symbol-value symbol)))))
        ,uidgens)))
 
 (defmacro with-module-lock ((&optional (module '*current-module*) (lockvar (gensym "LOCK"))) &body forms)
+  "Creates a context with the module's lock held.
+The FORMS are only executed once the lock has been acquired.
+This is an implicit PROGN.
+
+MODULE  --- The module to use the lock of.
+LOCKVAR --- A symbol the lock is bound to.
+FORMS   ::= form*"
   `(let ((,lockvar (lock (get-module ,module))))
      (bordeaux-threads:with-lock-held (,lockvar)
        ,@forms)))
@@ -108,6 +157,7 @@
         (to-module-name (symbol-name module-name)))))
 
 (defun get-module (designator)
+  "Returns the current class instance of the module."
   (gethash (to-module-name designator) *bot-modules*))
 
 (defmethod name ((module module))
