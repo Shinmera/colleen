@@ -11,7 +11,8 @@
 
 (defclass time-handler ()
   ((%identifier :initarg :identifier :initform (error "Identifier required.") :accessor identifier)
-   (%launcher-function :initarg :launcher-function :initform (error "Launcher function required.") :accessor launcher-function)
+   (%timer-type :initarg :timer-type :initform :multiple :accessor timer-type)
+   (%arguments :initarg :arguments :initform () :accessor arguments)
    (%handler-function :initarg :handler-function :initform (error "Handler function required.") :accessor handler-function)
    (%active-timers :initarg :active-timers :initform () :accessor active-timers)
    (%handler-lock :initarg :handler-lock :initform (make-lock) :accessor handler-lock)
@@ -20,7 +21,7 @@
 
 (defmethod print-object ((handler time-handler) stream)
   (print-unreadable-object (handler stream :type T)
-    (format stream "~s" (identifier handler)))
+    (format stream "~s ~s" (identifier handler) (timer-type handler)))
   handler)
 
 (defun time-handler (identifier)
@@ -54,17 +55,19 @@
               do (destroy-thread thread)))
       (remhash identifier *timer-map*))))
 
-(defun set-timer-function (identifier launcher-function handler-function &key docstring)
+(defun set-timer-function (identifier handler-function &key (type :multiple) (arguments () a-p) docstring)
   ""
   (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
   (when (time-handler identifier)
     (v:debug :timer "Redefining handler ~a" identifier)
     (when (active-timers (time-handler identifier))
       (v:warn :timer "Redefining running timer ~a" identifier)))
+  (unless a-p
+    (setf arguments (cdr (function-arguments handler-function))))
   (setf (time-handler identifier)
-        (make-instance 'time-handler
-                       :identifier identifier :launcher-function launcher-function
-                       :handler-function handler-function :docstring docstring)))
+        (make-instance 'time-handler 
+                       :identifier identifier :handler-function handler-function
+                       :timer-type type :docstring docstring)))
 
 (defgeneric apropos-time-handler (handler)
   (:documentation "")
@@ -72,9 +75,9 @@
     (apropos-time-handler (time-handler identifier)))
   (:method ((handler time-handler))
     (let ((*print-pretty* NIL))
-      (format NIL "[Time Handler] ~s with ~d active timers.~%~
+      (format NIL "[Time Handler] ~s with ~d active timers expecting ~a.~%~
                  ~:[No docstring available.~;Docstring: ~:*~a~]"
-              (identifier handler) (length (active-timers handler)) (docstring handler)))))
+              (identifier handler) (length (active-timers handler)) (arguments handler) (docstring handler)))))
 
 (defvar *unix-epoch-difference*
   (encode-universal-time 0 0 0 1 1 1970 0))
@@ -97,18 +100,26 @@ If the delay is a LIST, the following keywords may be used:
     Creates a relative (in seconds) timestamp for the
     specified timespan.
 
-  :FROM :EVERY
+  :IN
+    Creates an absolute (universal-time) timestamp using
+    the specified relative sub-delay, which is parsed by
+    PARSE-DELAY.
+
+  :FROM :EVERY :UNTIL
     Creates a timestamp with an initial delay specified by
     :FROM and a following delay of :EVERY. Both parameters
-    are again parsed with PARSE-DELAY.")
+    are again parsed with PARSE-DELAY. If :UNTIL is passed,
+    the timestamp will only repeat until the absolute 
+    timestamp :UNTIL is reached.")
   (:method ((delay integer))
     delay)
   (:method ((delay cons))
-    (destructuring-bind (&key sec min hour day month year secs mins hours days months years unix universal from every) delay
+    (destructuring-bind (&key sec min hour day month year secs mins hours days months years unix universal in from every until) delay
       (unless (xor (or sec min hour day month year)
                    (or secs mins hours days months years)
                    (or unix universal)
-                   (or from every))
+                   (or in)
+                   (or from every until))
         (error "Cannot use multiple delay descriptors at the same time."))
       (cond
         ((or sec min hour day month year)
@@ -133,75 +144,54 @@ If the delay is a LIST, the following keywords may be used:
          (if universal
              universal
              (+ unix *unix-epoch-difference*)))
+        ((or in)
+         (+ (get-universal-time)
+            (parse-delay in)))
         ((and from every)
-         (cons (parse-delay from)
-               (parse-delay every)))))))
-
-(defun schedule-timer (timer type delay)
-  ""
-  (assert (find type '(:date :time :once :when :interval :repeating :loop :every)) ()
-          "TYPE must be one of (:DATE :TIME :ONCE :INTERVAL :REPEATING :LOOP).")
-  (let ((handler (time-handler timer))
-        (delay (parse-delay delay)))
-    (unless handler
-      (error "No such time-handler found: ~a" timer))
-    (v:debug :timer "Scheduling timer ~a with ~a ~a" timer type delay)
-    (funcall (launcher-function handler)
-             type delay)))
+         (list (parse-delay from)
+               (parse-delay every)
+               (if until (parse-delay until) -1)))))))
 
 (defun timer-timeout (type delay function)
   (flet ((inner (time-target)
            (v:trace :timer "Timing ~a seconds" (- time-target (get-universal-time)))
            (loop while (< (get-universal-time) time-target)
                  do (sleep (- time-target (get-universal-time))))
-           (funcall function)))
+           (handler-bind
+               ((error #'(lambda (err)
+                           (v:warn :timer "ERROR: ~a" err)
+                           (when *debugger*
+                             (invoke-debugger err)))))
+             (funcall function))))
     (ecase type
       ((:date :time :once :when)
        (inner (if (consp delay) (car delay) delay)))
       ((:interval :repeating :loop :every)
-       (if (consp delay)
-           (loop for current = (car delay)
-                   then (+ (get-universal-time) (cdr delay))
-                 do (inner current)
-                    (thread-yield))
+       (if (listp delay)
+           (destructuring-bind (from every until) delay
+             (loop for current = from
+                     then (+ (get-universal-time) every)
+                   while (or (< until 0)
+                             (< (get-universal-time) until))
+                   do (inner current)
+                      (thread-yield)))
            (loop do (inner (+ (get-universal-time) delay))
                     (thread-yield)))))))
 
-(defun launch-module-timer (handler-name module-name type delay)
-  (let ((handler (time-handler handler-name))
-        (module (get-module module-name))
-        (uuid) (launch-done NIL))
-    (setf uuid (with-module-thread (module)
-                 (unwind-protect
-                      (timer-timeout type delay (handler-function handler))
-                   ;; Yield until the launch has completed.
-                   (loop until launch-done do (thread-yield))
-                   (with-lock-held ((handler-lock handler))
-                     (let ((thread (module-thread module uuid)))
-                       (v:debug :timer "CLEANUP ~a" thread)
-                       (setf (active-timers handler)
-                             (delete thread (active-timers handler))))))))
-    (let ((thread (module-thread module uuid)))
-      (with-lock-held ((handler-lock handler))
-        (push thread (active-timers handler)))
-      ;; We can only set this now to ensure the thread definitely waits
-      ;; with its self-removal until we've actually pushed it.
-      (setf launch-done T)
-      thread)))
-
-(defun launch-generic-timer (handler-name type delay)
-  (let ((handler (time-handler handler-name))
-        (thread NIL) (launch-done NIL))
+(defun launch-timer (handler type delay arguments)
+  (let ((thread) (launch-done NIL))
     (setf thread (make-thread #'(lambda ()
                                   (unwind-protect
-                                       (timer-timeout type delay (handler-function handler))
+                                       (timer-timeout
+                                        type delay
+                                        #'(lambda () (apply (handler-function handler) arguments)))
                                     ;; Yield until the launch has completed.
-                                    (loop until launch-done do (thread-yield))
+                                    (loop do (thread-yield) until launch-done)
                                     (with-lock-held ((handler-lock handler))
                                       (v:debug :timer "CLEANUP ~a" thread)
                                       (setf (active-timers handler)
                                             (delete thread (active-timers handler))))))
-                              :name (format NIL "Timer thread for ~a" handler-name)))
+                              :name (format NIL "Timer thread for ~a" handler)))
     (with-lock-held ((handler-lock handler))
       (push thread (active-timers handler)))
     ;; We can only set this now to ensure the thread definitely waits
@@ -209,25 +199,64 @@ If the delay is a LIST, the following keywords may be used:
     (setf launch-done T)
     thread))
 
-(defmacro define-timer (name (&key documentation module-name (modulevar 'module)) &body body)
+(defun schedule-timer (timer type delay &key arguments (if-exists NIL iep))
   ""
+  (assert (member type '(:date :time :once :when :interval :repeating :loop :every)) ()
+          "TYPE must be one of (:DATE :TIME :ONCE :INTERVAL :REPEATING :LOOP).")
+  (assert (member if-exists '(:error :add NIL)) ()
+          "IF-EXISTS must be one of (:ERROR :ADD NIL) ~a")
+  (let ((handler (time-handler timer))
+        (delay (parse-delay delay)))
+    (unless handler
+      (error "No such time-handler found: ~a" timer))
+    (unless iep
+      (case (timer-type handler)
+        (:multiple (setf if-exists :add))
+        (:single (setf if-exists :error))))
+    (v:debug :timer "Scheduling timer ~a with ~a ~a" timer type delay)
+    (launch-timer handler type delay arguments))
+  T)
+
+(defun reschedule-timer (identifier type delay &key arguments (replace :all))
+  ""
+  (assert (find type '(:date :time :once :when :interval :repeating :loop :every)) ()
+          "TYPE must be one of (:DATE :TIME :ONCE :INTERVAL :REPEATING :LOOP).")
+  (assert (or (find replace '(:all :first :last))
+              (typep replace 'integer)) ()
+          "IF-EXISTS must be one of (:ERROR :ADD NIL INTEGER)")
+  (let ((handler (time-handler identifier))
+        (delay (parse-delay delay)))
+    (unless handler
+      (error "No such time-handler found: ~a" identifier))
+    (v:debug :timer "Rescheduling timer ~a (replacing ~a) with ~a ~a" identifier replace type delay)
+    (if (eq replace :all)
+        (loop for thread = (pop (active-timers handler))
+              while thread do (when (thread-alive-p thread)
+                                (destroy-thread thread))
+              finally (launch-timer handler type delay arguments))
+        (let ((position (case replace
+                          (:first 0)
+                          (:last (1- (length (active-timers handler))))
+                          (T replace))))
+          (launch-timer handler type delay arguments)
+          (setf (nth position (active-timers handler))
+                (pop (active-timers handler))))))
+  T)
+
+(defmacro define-timer (name (&rest args) (&key (type :multiple) documentation module-name (modulevar 'module)) &body body)
+  ""
+  (assert (find type '(:MULTIPLE :SINGLE)) () "TYPE must be one of (:MULTIPLE :SINGLE)")
   (unless module-name
     (setf module-name (get-current-module-name)))
-  (let ((launcher (gensym "LAUNCHER-FUNCTION"))
-        (handler (gensym "HANDLER-FUNCTION")))
+  (let ((handler (gensym "HANDLER-FUNCTION")))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (let ((,handler
-               #'(lambda ()
+               #'(lambda ,args
                    ,@(if module-name
                          `((with-module (,modulevar ,module-name)
                              (when (active ,modulevar)
                                (with-module-lock (,modulevar)
                                  (with-module-storage (,modulevar)
                                    ,@body)))))
-                         body)))
-             (,launcher
-               #'(lambda (type delay)
-                   ,(if module-name
-                        `(launch-module-timer ',name ',module-name type delay)
-                        `(launch-generic-timer ',name type delay)))))
-         (set-timer-function ',name ,launcher ,handler :docstring ,documentation)))))
+                         body))))
+         (set-timer-function ',name ,handler :type ,type :docstring ,documentation)))))
