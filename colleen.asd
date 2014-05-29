@@ -28,6 +28,7 @@
                (:file "event-priority")
                (:file "event-handler")
                (:file "command-handler")
+               (:file "time-handler")
                (:file "client")
                (:file "irc-commands")
                (:file "irc-events")
