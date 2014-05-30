@@ -230,7 +230,7 @@
   "Handle a raw IRC command line."
   (let ((event (make-event command *current-server* prefix arguments)))
     (when event
-      (v:debug (name *current-server*) "HANDLE EVENT: ~a" event)
+      (v:trace (name *current-server*) "HANDLE EVENT: ~a" event)
       (handler-case
           (dispatch event)
         (disconnect (err)
