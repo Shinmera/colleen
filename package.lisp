@@ -222,6 +222,33 @@
   (:export
    #:*reply-code-map*
    #:reply->keyword)
+  ;; time-handler.lisp
+  (:export
+   #:*timer-map*
+   
+   #:time-handler
+   #:identifier
+   #:timer-type
+   #:arguments
+   #:handler-function
+   #:launcher-function
+   #:schedulings
+   #:handler-lock
+   #:docstring
+   
+   #:time-handler
+   #:stop-time-handler
+   #:remove-time-handler
+   #:set-timer-function
+   #:apropos-time-handler
+   
+   #:parse-delay
+   #:schedule-timer
+   #:reschedule-timer
+   
+   #:simple-launcher
+   #:module-launcher
+   #:define-timer)
   ;; toolkit.lisp
   (:export
    #:format-message
