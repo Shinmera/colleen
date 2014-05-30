@@ -52,6 +52,7 @@
 (defgeneric most-recent (stevenchan &optional rss-url))
 (defmethod most-recent ((stevenchan stevenchan) &optional (rss-url (rss-url stevenchan)))
   (let* ((lquery:*lquery-master-document*)
+         (plump:*tag-dispatchers* ())
          (node ($ (initialize (drakma:http-request rss-url)) "item" (first)))
          (title (string-trim " " ($ node "title" (text) (node))))
          (id (parse-integer (subseq title (1+ (search "#" title)))))

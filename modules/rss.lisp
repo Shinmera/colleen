@@ -92,6 +92,7 @@
 
 (defmethod get-items ((feed feed) &key limit)
   (let* ((lquery:*lquery-master-document*)
+         (plump:*tag-dispatchers* ())
          (drakma:*text-content-types* (cons '("application" . "xml")
                                             (cons '("application" . "rss+xml")
                                                   (cons '("application" . "atom+xml")
