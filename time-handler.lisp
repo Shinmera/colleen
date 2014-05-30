@@ -208,9 +208,12 @@ If the delay is a LIST, the following keywords may be used:
                                   ;; Yield until the launch has completed.
                                   (loop do (thread-yield) until launch-done)                                  
                                   (unwind-protect
-                                       (with-simple-restart (skip-launcher "Skip the timer launcher entirely, essentially ending the scheduling.")
-                                         (funcall (launcher-function handler)
-                                                  thread #'(lambda () (timer-timeout type delay handler arguments))))
+                                       (handler-case
+                                           (with-simple-restart (skip-launcher "Skip the timer launcher entirely, essentially ending the scheduling.")
+                                             (funcall (launcher-function handler)
+                                                      thread #'(lambda () (timer-timeout type delay handler arguments))))
+                                         (error (err)
+                                           (declare (ignore err))))
                                     (with-lock-held ((handler-lock handler))
                                       (v:trace :timer "Cleaning up ~a" thread)
                                       (setf (schedulings handler)

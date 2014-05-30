@@ -121,6 +121,8 @@ and it is removed from the module's threads table."
                                                        (when *debugger*
                                                          (invoke-debugger err)))))
                                          ,@thread-body)
+                                     (error (err)
+                                       (declare (ignore err)))
                                      (module-stop (err)
                                        (declare (ignore err))
                                        (v:debug ,modnamegens "Received module-stop condition, leaving thread ~a." ,uidgens)))
