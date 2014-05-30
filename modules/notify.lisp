@@ -55,7 +55,8 @@
          (handler-case
              (let* ((date (pop message))
                     (timestamp (timestamp-to-universal
-                                (parse-timestring date))))
+                                (parse-timestring (format NIL "~a+~a:00" date
+                                                          (/ (nth-value 9 (local-time:decode-timestamp (local-time:now))) 60 60))))))
                (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
                (let ((note (make-instance 
                             'note 
