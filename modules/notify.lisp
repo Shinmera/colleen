@@ -40,11 +40,38 @@
                  :message (aref array 5)
                  :trigger (aref array 6)))
 
+(defmethod start ((notify notify))
+  (with-module-storage (notify)
+    (dolist (note (uc:config-tree :notes))
+      (when (integerp (nick note))
+        (schedule-timer 'notify :once (nick note) :arguments (list note))))))
+
 (define-command notify (recipient &rest message) (:modulevar notify)
   (cond ((string-equal recipient (nick (server event)))
          (respond event "~a: I'm right here." (nick event)))
         ((string-equal recipient (nick event))
          (respond event "~a: Are you feeling lonely?" (nick event)))
+        ((string-equal recipient "@date")
+         (handler-case
+             (let* ((date (pop message))
+                    (timestamp (timestamp-to-universal
+                                (parse-timestring date))))
+               (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+               (let ((note (make-instance 
+                            'note 
+                            :message (format NIL "~{~a~^ ~}" message) 
+                            :sender (nick event) 
+                            :nick timestamp
+                            :channel (channel event) 
+                            :server (string-upcase (name (server event)))
+                            :timestamp (format-timestring NIL (now) :format *timestamp-format*)
+                            :trigger :join)))
+                 (push note (uc:config-tree :notes))
+                 (respond event "~a: Remembered. I will repost this on ~a." (nick event) date)
+                 (schedule-timer 'notify :once timestamp :arguments (list note))))
+           (local-time::invalid-timestring (err)
+             (declare (ignore err))
+             (respond event "Invalid date. Should be an RFC3339 compatible string like so: 2014-05-30T16:22:43"))))
         ((string-equal recipient "@join")
          (let ((recipient (pop message)))
            (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
@@ -97,3 +124,10 @@
                           (nick note) (sender note) (timestamp note) (message note)))
           (push note newlist)))
     (setf (uc:config-tree :notes) (nreverse newlist))))
+
+(define-timer notify (note) (:documentation "Used for timed notifications.")
+  (v:debug :notify "Delivering note ~a." note)
+  (irc:privmsg (channel note) (format NIL "~a wrote on ~a : ~a" (nick note) (timestamp note) (message note))
+               :server (get-server (find-symbol (server note) "KEYWORD")))
+  (setf (uc:config-tree :notes)
+        (delete note (uc:config-tree :notes))))
