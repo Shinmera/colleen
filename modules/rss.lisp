@@ -24,7 +24,7 @@
 (uc:define-serializer (feed feed T)
   (make-array 3 :initial-contents (list (name feed) (url feed) (report-to feed))))
 
-(uc:define-deserializer (fed array T)
+(uc:define-deserializer (feed array T)
   (make-instance 'feed :name (aref array 0) :url (aref array 1) :report-to (aref array 2)))
 
 (defmethod print-object ((feed feed) stream)
