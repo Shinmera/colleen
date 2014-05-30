@@ -47,58 +47,62 @@
         (schedule-timer 'notify :once (nick note) :arguments (list note))))))
 
 (define-command notify (recipient &rest message) (:modulevar notify)
-  (cond ((string-equal recipient (nick (server event)))
-         (respond event "~a: I'm right here." (nick event)))
-        ((string-equal recipient (nick event))
-         (respond event "~a: Are you feeling lonely?" (nick event)))
-        ((string-equal recipient "@date")
-         (handler-case
-             (let* ((date (pop message))
-                    (timestamp (timestamp-to-universal
-                                (parse-timestring (format NIL "~a+~a:00" date
-                                                          (/ (nth-value 9 (local-time:decode-timestamp (local-time:now))) 60 60))))))
-               (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-               (let ((note (make-instance 
-                            'note 
-                            :message (format NIL "~{~a~^ ~}" message) 
-                            :sender (nick event) 
-                            :nick timestamp
-                            :channel (channel event) 
-                            :server (string-upcase (name (server event)))
-                            :timestamp (format-timestring NIL (now) :format *timestamp-format*)
-                            :trigger :join)))
-                 (push note (uc:config-tree :notes))
-                 (respond event "~a: Remembered. I will repost this on ~a." (nick event) date)
-                 (schedule-timer 'notify :once timestamp :arguments (list note))))
-           (local-time::invalid-timestring (err)
-             (declare (ignore err))
-             (respond event "Invalid date. Should be an RFC3339 compatible string like so: 2014-05-30T16:22:43"))))
-        ((string-equal recipient "@join")
-         (let ((recipient (pop message)))
+  (macrolet ((build-note (&rest overrides)
+               (let ((props (copy-list
+                             '(:message (format NIL "~{~a~^ ~}" message) 
+                               :sender (nick event) 
+                               :nick recipient 
+                               :channel (channel event) 
+                               :server (string-upcase (name (server event)))
+                               :timestamp (format-timestring NIL (now) :format *timestamp-format*)))))
+                 (loop for (key val) on overrides by #'cddr
+                       do (setf (getf props key) val))
+                 `(make-instance 'note ,@props))))
+    (cond ((string-equal recipient (nick (server event)))
+           (respond event "~a: I'm right here." (nick event)))
+          ((string-equal recipient (nick event))
+           (respond event "~a: Are you feeling lonely?" (nick event)))
+          ((string-equal recipient "@in")
+           (handler-case
+               (let* ((date (split-sequence:split-sequence #\: (pop message)))
+                      (timestamp (case (length date)
+                                   ((0 1) (error ""))
+                                   ((2 3) (destructuring-bind (h m &optional (s "0")) date
+                                            (+ (get-universal-time)
+                                               (* (parse-integer s) 1) (* (parse-integer m) 60) (* (parse-integer h) 60 60))))
+                                   (T (error "")))))
+                 (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+                 (let ((note (build-note :nick timestamp :trigger :join)))
+                   (push note (uc:config-tree :notes))
+                   (respond event "~a: Remembered. I will repost this in ~{~a~^:~}." (nick event) date)
+                   (schedule-timer 'notify :once timestamp :arguments (list note))))
+             (error (err)
+               (declare (ignore err))
+               (respond event "Invalid date. Should be an RFC3339 compatible string like so: 16:22:43"))))
+          ((string-equal recipient "@date")
+           (handler-case
+               (let* ((date (pop message))
+                      (timestamp (timestamp-to-universal
+                                  (parse-timestring (format NIL "~a+~a:00" date
+                                                            (/ (nth-value 9 (local-time:decode-timestamp (local-time:now))) 60 60))))))
+                 (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+                 (let ((note (build-note :nick timestamp :trigger :join)))
+                   (push note (uc:config-tree :notes))
+                   (respond event "~a: Remembered. I will repost this on ~a." (nick event) date)
+                   (schedule-timer 'notify :once timestamp :arguments (list note))))
+             (local-time::invalid-timestring (err)
+               (declare (ignore err))
+               (respond event "Invalid date. Should be an RFC3339 compatible string like so: 2014-05-30T16:22:43"))))
+          ((string-equal recipient "@join")
+           (let ((recipient (pop message)))
+             (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+             (push (build-note :trigger :join)
+                   (uc:config-tree :notes))
+             (respond event "~a: Remembered. I will remind ~a when he/she/it next joins." (nick event) recipient)))
+          (T
            (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-           (push (make-instance 
-                  'note 
-                  :message (format NIL "~{~a~^ ~}" message) 
-                  :sender (nick event) 
-                  :nick recipient 
-                  :channel (channel event) 
-                  :server (string-upcase (name (server event)))
-                  :timestamp (format-timestring NIL (now) :format *timestamp-format*)
-                  :trigger :join)
-                 (uc:config-tree :notes))
-           (respond event "~a: Remembered. I will remind ~a when he/she/it next joins." (nick event) recipient)))
-        (T
-         (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-         (push (make-instance 
-                'note 
-                :message (format NIL "~{~a~^ ~}" message) 
-                :sender (nick event) 
-                :nick recipient 
-                :channel (channel event) 
-                :server (string-upcase (name (server event)))
-                :timestamp (format-timestring NIL (now) :format *timestamp-format*))
-               (uc:config-tree :notes))
-         (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))))
+           (push (build-note) (uc:config-tree :notes))
+           (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient)))))
 
 (define-handler (privmsg-event event) (:modulevar notify)
   (let ((newlist ()))
