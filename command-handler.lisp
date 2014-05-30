@@ -76,8 +76,7 @@ HANDLER-FUNCTION --- The function object to dispatch the command to. Has to
 ARGUMENTS        --- A list of function arguments that the command should accept.
                      This lambda list can only contain &OPTIONAL and &REST.
                      If not provided, it will attempt to retrieve it through
-                     SB-INTROSPECT:FUNCTION-LAMBDA-LIST or FUNCTION-LAMBDA-EXPRESSION.
-                     If this fails, an error is thrown.
+                     FUNCTION-ARGUMENTS.
 PRIORITY         --- Either a key from *PRIORITY-NAMES* or a real setting the
                      priority of the handler. Higher priorities are served first.
                      Defaults to the length of CMD-PATTERN, which should be sane.
