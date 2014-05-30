@@ -76,10 +76,13 @@ LAUNCHER         --- A function that expects two arguments, the scheduluing
                      establish an environment around the timer call itself.
 DOCSTRING        --- An optional documentation string."
   (assert (symbolp identifier) () "IDENTIFIER has to be a symbol.")
-  (when (time-handler identifier)
-    (v:debug :timer "Redefining handler ~a" identifier)
-    (when (schedulings (time-handler identifier))
-      (v:warn :timer "Redefining running timer ~a" identifier)))
+  (let ((handler (time-handler identifier)))
+    (when handler
+      (v:debug :timer "Redefining handler ~a" identifier)
+      (when (schedulings handler)
+        (v:warn :timer "Redefining running timer ~a" identifier)
+        (loop for thread in (schedulings handler)
+              do (destroy-thread thread)))))
   (unless a-p
     (setf arguments (cdr (function-arguments handler-function))))
   (setf (time-handler identifier)
