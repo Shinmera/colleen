@@ -61,11 +61,13 @@
   (:documentation "Sets the UUID on the module to the specified thread.
 If a thread already exists at the specified UUID, a warning is logged.")
   (:method (thread (module module) (uuid string))
-    (let ((threads (threads (get-module module))))
+    (let* ((module (get-module module))
+           (threads (threads module)))
       (when (gethash uuid threads)
         (v:warn :module "Replacing ~a's already existing and potentially running thread ~a!" module uuid))
-      (setf (gethash uuid threads)
-            thread))))
+      (with-module-lock (module)
+        (setf (gethash uuid threads)
+              thread)))))
 
 (defun stop-module-thread (module uuid)
   "Stops the thread identified by UUID from the MODULE.
@@ -125,7 +127,8 @@ and it is removed from the module's threads table."
                                        (declare (ignore err))
                                        (v:debug ,modnamegens "Received module-stop condition, leaving thread ~a." ,uidgens)))
                                 (v:trace ,modnamegens "Ending thread ~a." ,uidgens)
-                                (remhash ,uidgens (threads ,modgens))))
+                                (with-module-lock (,modgens)
+                                  (remhash ,uidgens (threads ,modgens)))))
                           :initial-bindings (loop for symbol in '(*current-server* *current-module* uc:*config*)
                                                   when (boundp symbol)
                                                     collect (cons symbol (symbol-value symbol)))))
@@ -158,14 +161,15 @@ Returns two values: how many threads were removed and how many remain."
   (let* ((module (get-module module))
          (threads (threads module))
          (count 0))
-    (loop for k being the hash-keys of threads
-          for v being the hash-values of threads
-          unless (thread-alive-p v)
-            do (remhash k threads)
-               (incf count))
-    (let ((remaining (hash-table-count threads)))
-      (v:debug (name module) "Sweeped threads. ~d removed, ~d still active." count remaining)
-      (values count remaining))))
+    (with-module-lock (module)
+      (loop for k being the hash-keys of threads
+            for v being the hash-values of threads
+            unless (thread-alive-p v)
+              do (remhash k threads)
+                 (incf count))
+      (let ((remaining (hash-table-count threads)))
+        (v:debug (name module) "Sweeped threads. ~d removed, ~d still active." count remaining)
+        (values count remaining)))))
 
 (defun sweep-all-module-threads ()
   "Performs SWEEP-MODULE-THREADS on all modules."
