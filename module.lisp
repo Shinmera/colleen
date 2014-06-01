@@ -32,15 +32,16 @@
 
 (defgeneric start (module)
   (:documentation "Start the module and activate it for use.")
+  (:method ((module module)))
   (:method :around ((module module))
     (load-storage module)
     (call-next-method)
     (setf (active module) T)
     module))
-(defmethod start ((module module)))
 
 (defgeneric stop (module)
   (:documentation "Stop the module and attempt to clean everything up.")
+  (:method ((module module)))
   (:method :around ((module module))
     (setf (active module) NIL)
     (loop for uid being the hash-keys of (threads module)
@@ -51,7 +52,6 @@
     (call-next-method)
     (save-storage module)
     module))
-(defmethod stop ((module module)))
 
 (defun module-thread (module uuid)
   "Returns the thread identified by UUID on MODULE or NIL if none is found."
