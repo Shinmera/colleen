@@ -130,6 +130,13 @@ Each entity is a list with the following format: (TYPE START END)"
         finally (return (nreverse return))))
 
 (defun function-arguments (function)
+  "Returns the lambda-list of the function if possible.
+This is only implemented with: SBCL, SWANK, working FUNCTION-LAMBDA-EXPRESSION."
   #+sbcl (sb-introspect:function-lambda-list function)
   #+(and swank (not sbcl)) (swank-backend:arglist function)
   #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression function))))
+
+(defun force-release-lock (lock)
+  "Attempts to forcefully release the lock.
+This is only implemented with: SBCL"
+  #+sbcl (sb-thread:release-mutex lock :if-not-owner :force))
