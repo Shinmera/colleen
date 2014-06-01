@@ -207,6 +207,9 @@
    #:with-module
    #:with-module-thread
    #:with-module-lock
+   #:print-module-thread-stats
+   #:sweep-module-threads
+   #:sweep-all-module-threads
    #:to-module-name
    #:get-module
    #:name

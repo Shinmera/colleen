@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defvar *bot-modules* (make-hash-table #+sbcl :synchronized #+sbcl T) "Global module table consisting of name->instance pairs.")
+(defvar *bot-modules* (make-hash-table) "Global module table consisting of name->instance pairs.")
 (defvar *current-module*)
 (setf (documentation '*current-module* 'variable) "Special variable containing the module in the current module context.")
 
@@ -144,6 +144,35 @@ FORMS   ::= form*"
   `(let ((,lockvar (lock (get-module ,module))))
      (bordeaux-threads:with-lock-held (,lockvar)
        ,@forms)))
+
+(defun print-module-thread-stats ()
+  "Prints all modules that have recorded threads and whether the threads are active (.) or dead (x)."
+  (loop for v being the hash-values of *bot-modules*
+        when (< 0 (hash-table-count (threads v)))
+          do (format T "~25a ~2a " v (hash-table-count (threads v)))
+             (loop for tv being the hash-values of (threads v)
+                   do (format T "~:[x~;.~]" (bt:thread-alive-p tv)))
+             (format T "~%")))
+
+(defun sweep-module-threads (module)
+  "Sweeps the module's threads table and removes all dead threads.
+Returns two values: how many threads were removed and how many remain."
+  (let* ((module (get-module module))
+         (threads (threads module))
+         (count 0))
+    (loop for k being the hash-keys of threads
+          for v being the hash-values of threads
+          unless (thread-alive-p v)
+            do (remhash k threads)
+               (incf count))
+    (let ((remaining (hash-table-count threads)))
+      (v:debug (name module) "Sweeped threads. ~d removed, ~d still active." count remaining)
+      (values count remaining))))
+
+(defun sweep-all-module-threads ()
+  "Performs SWEEP-MODULE-THREADS on all modules."
+  (loop for v being the hash-values of *bot-modules*
+        do (sweep-module-threads v)))
 
 (defgeneric to-module-name (name-object)
   (:documentation "Attempts to transform the given object into the keyword name for a module.")
