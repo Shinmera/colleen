@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defvar *event-map* (make-hash-table :test 'equal #+sbcl :synchronized #+sbcl T) "Global event map for event codes to event classes.")
+(defvar *event-map* (make-hash-table :test 'equal) "Global event map for event codes to event classes.")
 
 (defclass event ()
   ((%server :initarg :server :reader server)

@@ -6,7 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 
-(defvar *servers* (make-hash-table #+sbcl :synchronized #+sbcl T) "Table containing the IRC server instances.")
+(defvar *servers* (make-hash-table) "Table containing the IRC server instances.")
 (defvar *current-server*)
 (setf (documentation '*current-server* 'variable) "Special variable containing the server in the current thread context.")
 
