@@ -172,7 +172,7 @@
                    (mapcar #'(lambda (a) (format NIL "~:[~a~;*~a~]" (bordeaux-threads:thread-alive-p (gethash a (colleen:threads instance))) a)) threads))
           (respond event "~a does not have any running threads." module-name)))))
 
-(define-command (module interrupt) (module-name) (:documentation "Interrupt all the module threads.")
+(define-command (module interrupt) (module-name) (:authorization T :documentation "Interrupt all the module threads.")
   (with-module (instance module-name)
     (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
       (if threads
@@ -184,17 +184,26 @@
                (respond event "Thread ~a interrupted." uid))
           (respond event "~a does not have any running threads." module-name)))))
 
-(define-command (module kill) (module-name) (:documentation "Kill all the module threads.")
+(define-command (module kill) (module-name) (:authorization T :documentation "Kill all the module threads by forcefully releasing the lock first if possible.")
   (with-module (instance module-name)
     (let ((threads (alexandria:hash-table-keys (colleen:threads instance))))
       (if threads
           (loop for uid in threads
-             for thread = (gethash uid (colleen:threads instance))
-             do (when (bordeaux-threads:thread-alive-p thread)
-                  (bordeaux-threads:destroy-thread thread))
-               (remhash uid (threads module))
-               (respond event "Thread ~a killed." uid))
+                for thread = (gethash uid (colleen:threads instance))
+                do (when (bordeaux-threads:thread-alive-p thread)
+                     (colleen::force-release-lock (lock instance))
+                     (bordeaux-threads:destroy-thread thread))
+                   (remhash uid (threads module))
+                   (respond event "Thread ~a killed." uid))
           (respond event "~a does not have any running threads." module-name)))))
+
+(define-command (module sweep) (module-name) (:authorization T :documentation "Sweep dead threads from the module.")
+  (multiple-value-bind (removed remaining) (sweep-module-threads module-name)
+    (respond event "~d threads removed, ~d remaining." removed remaining)))
+
+(define-command (module sweep-all) () (:authorization T :documentation "Sweep dead threads from all modules.")
+  (sweep-all-module-threads)
+  (respond event "Sweep done."))
 
 ;; IRC COMMANDS
 (define-group irc :documentation "Manage IRC commands.")
