@@ -13,7 +13,7 @@
 (defclass module ()
   ((%active :initform NIL :accessor active :allocation :class)
    (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
-   (%lock :initform (bordeaux-threads:make-lock) :accessor lock :allocation :class)
+   (%lock :initform (bt:make-recursive-lock) :accessor lock :allocation :class)
    (%storage :initform (make-hash-table :test 'equal) :accessor storage :allocation :class))
   (:documentation "Base module class."))
 
@@ -143,7 +143,7 @@ MODULE  --- The module to use the lock of.
 LOCKVAR --- A symbol the lock is bound to.
 FORMS   ::= form*"
   `(let ((,lockvar (lock (get-module ,module))))
-     (bordeaux-threads:with-lock-held (,lockvar)
+     (bt:with-recursive-lock-held (,lockvar)
        ,@forms)))
 
 (defun print-module-thread-stats ()
@@ -218,7 +218,7 @@ Note that all module slots are always allocated on the class."
        (defclass ,name (module ,@direct-superclasses)
          ((%active :initform NIL :reader active :allocation :class)
           (%threads :initform (make-hash-table :test 'equalp) :accessor threads :allocation :class)
-          (%lock :initform (bordeaux-threads:make-lock ,(string name)) :accessor lock :allocation :class)
+          (%lock :initform (bt:make-recursive-lock ,(string name)) :accessor lock :allocation :class)
           (%storage :initform (make-hash-table :test 'equal) :accessor storage :allocation :class)
           ,@(mapcar #'(lambda (slot) (append slot '(:allocation :class))) direct-slots))
          ,@options)
