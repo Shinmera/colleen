@@ -27,7 +27,7 @@
 (define-module-system rules ("rules") (:alexandria))
 (define-module-system search ("search") (:lquery :split-sequence :drakma :cl-wiki))
 (define-module-system shiritori ("shiritori"))
-(define-module-system silly ("silly") (:cl-ppcre))
+(define-module-system silly ("silly") (:cl-ppcre :drakma))
 (define-module-system stevenchan ("stevenchan") (:lquery :drakma :alexandria))
 (define-module-system syslog ("syslog"))
 (define-module-system markov-twitter-bridge ("markov-twitter-bridge") (:co-markov :chirp))

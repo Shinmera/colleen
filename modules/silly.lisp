@@ -173,3 +173,11 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
   (respond event "Thanks, ~a" (nick event))
   (sleep 2)
   (respond event "...Th~a" (cut-to-first-vowel (nick event))))
+
+(defparameter *title-regex* (cl-ppcre:create-scanner "<title>((\\s|.)*?)</title>" :case-insensitive-mode T))
+(define-command jerkcity () (:documentation "Links to a random jerkcity strip.")
+  (multiple-value-bind (content status headers uri) (drakma:http-request "http://jerkcity.com/random/?_")
+    (declare (ignore status headers))
+    (respond event "~a ~a"
+             (with-output-to-string (s) (puri:render-uri uri s))
+             (cl-ppcre:regex-replace-all "\\n" (plump:decode-entities (aref (nth-value 1 (cl-ppcre:scan-to-strings *title-regex* content)) 0)) ""))))
