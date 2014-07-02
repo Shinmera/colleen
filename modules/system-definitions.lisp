@@ -32,5 +32,5 @@
 (define-module-system syslog ("syslog"))
 (define-module-system markov-twitter-bridge ("markov-twitter-bridge") (:co-markov :chirp))
 (define-module-system twitter ("twitter") (:chirp))
-(define-module-system urlinfo ("urlinfo") (:drakma :cl-ppcre :plump))
+(define-module-system urlinfo ("urlinfo") (:drakma :cl-ppcre :lquery))
 (define-module-system weather ("weather") (:drakma :cl-json))
