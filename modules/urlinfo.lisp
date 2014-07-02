@@ -30,7 +30,7 @@
                    (let ((title (lquery:$ (initialize (drakma::read-body stream headers NIL T)) "title" (text) (node))))
                      (if title
                          (format NIL "Title: “~a”~:[ at ~a~;~*~]"
-                                 title (string-equal target-url url) target-url)
+                                 (string-trim " " (cl-ppcre:regex-replace-all "\\n" title "")) (string-equal target-url url) target-url)
                          (format NIL "Invalid HTML document~:[ at ~a~;~*~]"
                                  (string-equal target-url url) target-url)))
                    (format NIL "~a~:[ at ~a~;~*~]"
