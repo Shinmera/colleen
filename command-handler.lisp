@@ -270,7 +270,7 @@ See SET-COMMAND-FUNCTION"
      ,(when subcommands
         `(setf (subcommands (command-handler ',name)) ,subcommands))))
 
-(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern (priority :DEFAULT) (threaded T)) &body body)
+(defmacro define-command (name (&rest args) (&key authorization documentation (eventvar 'event) module-name (modulevar 'module) pattern priority (threaded T)) &body body)
   "Defines a new command with the given NAME.
 
 NAME          ::= IDENTIFIER | (GROUP IDENTIFIER)
@@ -337,5 +337,5 @@ BODY          ::= FORM*"
                           `(pushnew ',name (subcommands (command-handler ',group)))
                           `(progn (warn 'implicit-group-definition :group ',group)
                                   (define-group ,group :subcommands (list ',name))))
-                     (set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation)))
-                `(set-command-function ',name ,pattern ,funcsym :arguments ',args :priority ,priority :docstring ,documentation)))))))
+                     (set-command-function ',name ,pattern ,funcsym :arguments ',args ,@(when priority `(:priority ,priority)) :docstring ,documentation)))
+                `(set-command-function ',name ,pattern ,funcsym :arguments ',args ,@(when priority `(:priority ,priority)) :docstring ,documentation)))))))
