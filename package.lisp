@@ -267,7 +267,7 @@
 
 (defpackage org.tymoonnext.colleen.commands
   (:use :cl)
-  (:import-from :colleen :*privmsg-line-limit* :*current-server* :*irc-message-limit* :*server-encoding* :name :channels :message-too-long)
+  (:import-from :colleen :*privmsg-line-limit* :*current-server* :*irc-message-limit* :*server-encoding* :name :channels :message-too-long :break-string)
   (:nicknames :irc)
   (:export
    :send-raw

@@ -157,9 +157,12 @@
   (raw server "INFO~@[ ~a~]" remote-server))
 
 ;; SENDING MESSAGES
-(defun privmsg (target message &key (server *current-server*) (line-limit *privmsg-line-limit*))
+(defun privmsg (target message &key (server *current-server*) (line-limit *privmsg-line-limit*) (length-limit 350) (break-string T))
   "Send a PRIVMSG."
   (when message
+    (when (and break-string (< length-limit (length message)))
+      (warn 'message-too-long :message message :limit length-limit)
+      (setf message (break-string message :limit length-limit)))
     (v:trace (name server) "Sending privmsg to ~a: ~a" target message)
     (colleen:dispatch (make-instance 'colleen:send-event :server server :nick (colleen:nick server) :channel target :message message))
     (loop for message in (split-sequence:split-sequence #\Newline message)
