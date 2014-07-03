@@ -95,6 +95,22 @@ Each entity is a list with the following format: (TYPE START END)"
       (finish unclosed-bg))
     (values (strip-colors string) entities)))
 
+(defun break-string (string &key (limit *irc-message-limit*) (max-backstep 30) (break-char #\Newline) (latch-char #\Space))
+  "Break the string into parts of a maximal length of LIMIT, intermitting BREAK-CHAR.
+If possible, use LATCH-CHAR to find a more apropriate breaking point within the limit of MAX-BACKSTEP."
+  (string-trim
+   '(#\Space #\Newline #\Tab #\Return #\Linefeed #\Page)
+   (with-output-to-string (stream)
+     (loop for last = 0 then pos
+           for pos = limit then (+ pos limit)
+           until (<= (length string) pos)
+           do (let ((breakpos (or (position latch-char string :from-end T :end pos :start (if (< pos max-backstep) 0 (- pos max-backstep)) :test #'char=)
+                                  pos)))
+                (write-string (subseq string last breakpos) stream)
+                (write-char break-char stream)
+                (setf pos (1+ breakpos)))
+           finally (write-string (subseq string last (length string)) stream)))))
+
 (defmacro with-repeating-restart ((restart-name format-string &rest format-arguments) &body forms)
   `(loop for ret = (with-simple-restart (,restart-name ,format-string ,@format-arguments)
                      ,@forms)

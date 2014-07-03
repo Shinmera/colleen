@@ -260,7 +260,9 @@
 
    #:mirc-color->name
    #:strip-colors
-   #:color-entities)
+   #:color-entities
+
+   #:break-string)
   (:shadow time trace))
 
 (defpackage org.tymoonnext.colleen.commands
