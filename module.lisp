@@ -39,6 +39,9 @@
     (setf (active module) T)
     module))
 
+(defmethod start ((module module))
+  module)
+
 (defgeneric stop (module)
   (:documentation "Stop the module and attempt to clean everything up.")
   (:method ((module module)))
@@ -52,6 +55,9 @@
     (call-next-method)
     (save-storage module)
     module))
+
+(defmethod stop ((module module))
+  module)
 
 (defun module-thread (module uuid)
   "Returns the thread identified by UUID on MODULE or NIL if none is found."
