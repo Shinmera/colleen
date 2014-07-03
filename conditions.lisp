@@ -58,10 +58,12 @@
              (format s "Failed to find ASDF system for ~a" (name c)))))
 
 (define-condition message-too-long (warning)
-  ((%message :initarg :message :reader message))
+  ((%message :initarg :message :initform (error "Message required") :reader message)
+   (%limit-form :initarg :limit :initform '*irc-message-limit* :reader limit-form))
   (:documentation "Condition signalled when an IRC message exceeds the byte limit set by *IRC-MESSAGE-LIMIT*")
   (:report (lambda (c s)
-             (format s "Message ~s exceeds *IRC-MESSAGE-LIMIT*" (message c)))))
+             (format s "Message ~s exceeds ~a (~a)" (message c) (limit-form c)
+                     (let ((*package* (find-package "COLLEEN"))) (eval (limit-form c)))))))
 
 (define-condition implicit-group-definition (style-warning)
   ((%group :initarg :group :reader group))
