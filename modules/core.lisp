@@ -8,6 +8,9 @@
 
 (define-module core () () (:documentation "Colleen core module, handling a few standard events."))
 
+(defmethod start ((core core))
+  (schedule-timer 'thread-sweeper :every '(:hour 1) :if-exists NIL))
+
 (defmethod stop ((core core))
   (v:info :core "Saving colleen config.")
   (save-config))
@@ -50,3 +53,7 @@
     (when (and (string-equal (nick (server event)) (format NIL "~a_" true-nick))
                (string-equal (nick event) true-nick))
       (irc:nick true-nick))))
+
+(define-timer thread-sweeper () (:type :single :documentation "Regularly performs (sweep-all-module-threads)")
+  (v:info :core "Performing thread sweep.")
+  (sweep-all-module-threads))
