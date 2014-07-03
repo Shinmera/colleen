@@ -156,7 +156,7 @@ FORMS   ::= form*"
   "Prints all modules that have recorded threads and whether the threads are active (.) or dead (x)."
   (loop for v being the hash-values of *bot-modules*
         when (< 0 (hash-table-count (threads v)))
-          do (format T "~25a ~2a " v (hash-table-count (threads v)))
+          do (format T "~25a ~4a " v (hash-table-count (threads v)))
              (loop for tv being the hash-values of (threads v)
                    do (format T "~:[x~;.~]" (bt:thread-alive-p tv)))
              (format T "~%")))
