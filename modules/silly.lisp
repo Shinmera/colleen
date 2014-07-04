@@ -186,7 +186,12 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
         for code from (char-code #\A) to (char-code #\Z)
         for char = (code-char code)
         do (lquery:$ (initialize (drakma:http-request (format NIL "http://www.urbandictionary.com/popular.php?character=~a" char)))
-             "li.popular a" (text) (each #'(lambda (word) (push (string-capitalize word) (gethash char wordmap)))))
+             "li.popular a" (text) (each #'(lambda (word)
+                                             (loop for word in (cl-ppcre:split "\\s" word)
+                                                   when (< 0 (length word))
+                                                     do (pushnew (string-capitalize word) (gethash (aref word 0) wordmap)
+                                                                 :test #'string-equal))
+                                             T)))
         finally (return wordmap)))
 
 (defvar *ud-word-cache* (get-ud-words))
