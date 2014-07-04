@@ -180,3 +180,20 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
     (respond event "~a ~a"
              (with-output-to-string (s) (puri:render-uri uri s))
              (lquery:$ (initialize content) "title" (text) (node)))))
+
+(defun get-ud-words ()
+  (loop with wordmap = (make-hash-table)
+        for code from (char-code #\A) to (char-code #\Z)
+        for char = (code-char code)
+        do (lquery:$ (initialize (drakma:http-request (format NIL "http://www.urbandictionary.com/popular.php?character=~a" char)))
+             "li.popular a" (text) (each #'(lambda (word) (push (string-capitalize word) (gethash char wordmap)))))
+        finally (return wordmap)))
+
+(defvar *ud-word-cache* (get-ud-words))
+
+(define-command expand (acronym) (:documentation "Expands an acronym using the power of the internet.")
+  (respond event "~a: ~{~a~^ ~}"
+           acronym
+           (loop for char across (cl-ppcre:regex-replace-all "\\." acronym "")
+                 collect (let* ((list (gethash (char-upcase char) *ud-word-cache*)))
+                           (nth (random (length list)) list)))))
