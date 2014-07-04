@@ -200,5 +200,6 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
   (respond event "~a: ~{~a~^ ~}"
            acronym
            (loop for char across (cl-ppcre:regex-replace-all "\\." acronym "")
-                 collect (let* ((list (gethash (char-upcase char) *ud-word-cache*)))
-                           (nth (random (length list)) list)))))
+                 when (alpha-char-p char)
+                   collect (let* ((list (gethash (char-upcase char) *ud-word-cache*)))
+                             (nth (random (length list)) list)))))
