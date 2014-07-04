@@ -59,6 +59,18 @@
   (save-storage module)
   module)
 
+(defmacro with-module-lock ((&optional (module '*current-module*) (lockvar (gensym "LOCK"))) &body forms)
+  "Creates a context with the module's lock held.
+The FORMS are only executed once the lock has been acquired.
+This is an implicit PROGN.
+
+MODULE  --- The module to use the lock of.
+LOCKVAR --- A symbol the lock is bound to.
+FORMS   ::= form*"
+  `(let ((,lockvar (lock (get-module ,module))))
+     (bt:with-recursive-lock-held (,lockvar)
+       ,@forms)))
+
 (defun module-thread (module uuid)
   "Returns the thread identified by UUID on MODULE or NIL if none is found."
   (gethash uuid (threads (get-module module))))
@@ -140,18 +152,6 @@ and it is removed from the module's threads table."
                                                   when (boundp symbol)
                                                     collect (cons symbol (symbol-value symbol)))))
        ,uidgens)))
-
-(defmacro with-module-lock ((&optional (module '*current-module*) (lockvar (gensym "LOCK"))) &body forms)
-  "Creates a context with the module's lock held.
-The FORMS are only executed once the lock has been acquired.
-This is an implicit PROGN.
-
-MODULE  --- The module to use the lock of.
-LOCKVAR --- A symbol the lock is bound to.
-FORMS   ::= form*"
-  `(let ((,lockvar (lock (get-module ,module))))
-     (bt:with-recursive-lock-held (,lockvar)
-       ,@forms)))
 
 (defun print-module-thread-stats ()
   "Prints all modules that have recorded threads and whether the threads are active (.) or dead (x)."
