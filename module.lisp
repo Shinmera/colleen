@@ -31,32 +31,32 @@
   (format stream "<[~a]>" (class-name (class-of module))))
 
 (defgeneric start (module)
-  (:documentation "Start the module and activate it for use.")
-  (:method ((module module)))
-  (:method :around ((module module))
-    (load-storage module)
-    (call-next-method)
-    (setf (active module) T)
-    module))
+  (:documentation "Start the module and activate it for use."))
 
 (defmethod start ((module module))
   module)
 
+(defmethod start :around ((module module))
+  (load-storage module)
+  (call-next-method)
+  (setf (active module) T)
+  module)
+
 (defgeneric stop (module)
-  (:documentation "Stop the module and attempt to clean everything up.")
-  (:method ((module module)))
-  (:method :around ((module module))
-    (setf (active module) NIL)
-    (loop for uid being the hash-keys of (threads module)
-          for thread being the hash-values of (threads module)
-          do (if (thread-alive-p thread)
-                 (interrupt-thread thread #'(lambda () (error 'module-stop)))
-                 (remhash uid (threads module))))
-    (call-next-method)
-    (save-storage module)
-    module))
+  (:documentation "Stop the module and attempt to clean everything up."))
 
 (defmethod stop ((module module))
+  module)
+
+(defmethod stop :around ((module module))
+  (setf (active module) NIL)
+  (loop for uid being the hash-keys of (threads module)
+        for thread being the hash-values of (threads module)
+        do (if (thread-alive-p thread)
+               (interrupt-thread thread #'(lambda () (error 'module-stop)))
+               (remhash uid (threads module))))
+  (call-next-method)
+  (save-storage module)
   module)
 
 (defun module-thread (module uuid)
@@ -65,15 +65,16 @@
 
 (defgeneric (setf module-thread) (thread module uuid)
   (:documentation "Sets the UUID on the module to the specified thread.
-If a thread already exists at the specified UUID, a warning is logged.")
-  (:method (thread (module module) (uuid string))
-    (let* ((module (get-module module))
-           (threads (threads module)))
-      (when (gethash uuid threads)
-        (v:warn :module "Replacing ~a's already existing and potentially running thread ~a!" module uuid))
-      (with-module-lock (module)
-        (setf (gethash uuid threads)
-              thread)))))
+If a thread already exists at the specified UUID, a warning is logged."))
+
+(defmethod (setf module-thread) (thread (module module) (uuid string))
+  (let* ((module (get-module module))
+         (threads (threads module)))
+    (when (gethash uuid threads)
+      (v:warn :module "Replacing ~a's already existing and potentially running thread ~a!" module uuid))
+    (with-module-lock (module)
+      (setf (gethash uuid threads)
+            thread))))
 
 (defun stop-module-thread (module uuid)
   "Stops the thread identified by UUID from the MODULE.
@@ -198,6 +199,14 @@ Returns two values: how many threads were removed and how many remain."
 (defun get-module (designator)
   "Returns the current class instance of the module."
   (gethash (to-module-name designator) *bot-modules*))
+
+(defun module (designator)
+  (get-module designator))
+
+(defgeneric (setf module) (instance designator)
+  (:documentation "Assign a new module instance to a module designator."))
+(defmethod (setf module) (instance designator)
+  (setf (gethash (to-module-name designator) *bot-modules*) instance))
 
 (defmethod name ((module module))
   (find-symbol (princ-to-string (class-name (class-of module))) :KEYWORD))
