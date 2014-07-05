@@ -197,6 +197,15 @@
                    (respond event "Thread ~a killed." uid))
           (respond event "~a does not have any running threads." module-name)))))
 
+(define-command (module thread-stats) () (:authorization T :documentation "Command version of PRINT-MODULE-THREAD-STATS")
+  (loop for v being the hash-values of *bot-modules*
+        when (< 0 (hash-table-count (threads v)))
+          do (respond event "~a"
+                      (with-output-to-string (stream)
+                        (format stream "~25a ~4a " v (hash-table-count (threads v)))
+                        (loop for tv being the hash-values of (threads v)
+                              do (format stream "~:[x~;.~]" (bt:thread-alive-p tv)))))))
+
 (define-command (module sweep) (module-name) (:authorization T :documentation "Sweep dead threads from the module.")
   (multiple-value-bind (removed remaining) (sweep-module-threads module-name)
     (respond event "~d threads removed, ~d remaining." removed remaining)))
