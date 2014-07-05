@@ -6,12 +6,14 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.rss
+  (:nicknames :co-rss)
   (:use :cl :colleen :events :lquery))
 (in-package :org.tymoonnext.colleen.mod.rss)
 
 (defparameter *save-file* (merge-pathnames "rss-feed-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 
-(define-module rss () ()
+(define-module rss ()
+  ((%thread-id :initform NIL :accessor thread-id))
   (:documentation "Update about new RSS feed items."))
 
 (defclass feed ()
@@ -50,10 +52,12 @@
             (make-hash-table :test 'equalp)))))
 
 (defmethod start ((rss rss))
-  (with-module-thread (rss)
-    (check-loop rss)))
+  (setf (thread-id rss)
+        (with-module-thread (rss)
+          (check-loop rss))))
 
-(define-condition recheck (error) ())
+(define-condition recheck (error)
+  ((%event :initarg :event :initform NIL :reader event)))
 (defmethod check-loop ((rss rss))
   (v:debug :rss "Starting check-loop.")
   (loop with startup = T
@@ -76,8 +80,11 @@
                               (error (err)
                                 (v:warn :rss "<~a> Error in check-loop: ~a" feed err)))))
                (recheck (err) 
-                 (declare (ignore err))
-                 (v:debug :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately."))))
+                 (v:warn :rss "[Check-Loop] Skipping whatever it is I'm doing and rechecking immediately.")
+                 (when (event err)
+                   (respond (event err) "Rechecking now...")))
+               (error (err)
+                 (v:warn :rss "Error in check-loop: ~a" err))))
        (setf startup NIL))
   (v:debug :rss "Leaving check-loop."))
 
@@ -176,3 +183,7 @@
       (let ((item (first (get-items (uc:config-tree :feeds name) :limit 1))))
         (respond event "~a: ~a ~a~@[ ~a~]" (nick event) (title item) (link item) (publish-date item)))
       (respond event "No feed called \"~a\" could be found!" name)))
+
+(define-command (rss recheck) () (:authorization T :documentation "Forces an immediate recheck.")
+  (bt:interrupt-thread (module-thread module (thread-id module))
+                       #'(lambda () (signal 'recheck :event event))))
