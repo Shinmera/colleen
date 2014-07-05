@@ -307,7 +307,9 @@ BODY          ::= FORM*"
          (declarations (loop for form in body
                              until (or (not (listp form)) (not (eq (first form) 'declare)))
                              collect (pop body)))
-         (body `(handler-bind ((error #'(lambda (err) (respond ,eventvar "!! Unexpected error: ~a" err))))
+         (body `(handler-bind ((error #'(lambda (err)
+                                          (let ((*print-pretty* NIL))
+                                            (respond ,eventvar "!! Unexpected error: ~a" err)))))
                   ,@body)))
     (flet ((mksymb (list)
              (let ((name (format NIL "~{~a~^ ~}" list)))
