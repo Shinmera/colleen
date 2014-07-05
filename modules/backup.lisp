@@ -99,10 +99,10 @@
       (v:info :backup "Starting backup timer... (Interval of ~d seconds)" (interval backup))
       (trivial-timers:schedule-timer (timer backup) 1 :repeat-interval (interval backup)))))
 
-(defun last-backup ()
-  (let ((backups (sort (remove-if-not #'cl-fad:directory-pathname-p (cl-fad:list-directory *config-directory*))
-                       #'(lambda (a b) (string< (namestring a) (namestring b))))))
-    (cdr (last (pathname-directory (cdr (last backups)))))))
+(defun last-backup (backup)
+  (let ((backups (sort (remove-if-not #'cl-fad:directory-pathname-p (cl-fad:list-directory (backup-directory backup)))
+                       #'(lambda (a b) (string> (namestring a) (namestring b))))))
+    (car (last (pathname-directory (first backups))))))
 
 (defun format-time-since (secs)
   (multiple-value-bind (s m h dd yy) (decode-universal-time secs)
@@ -124,7 +124,7 @@
   (respond event "Current backup interval: ~a" (format-time-since (interval module))))
 
 (define-command (backup last) () (:documentation "Show the date of the last performed backup.")
-  (respond event "Last backup was: ~a" (last-backup)))
+  (respond event "Last backup was: ~a" (last-backup module)))
 
 (define-command (backup now) () (:authorization T :documentation "Perform a backup now.")
   (respond event "Backing up now. All modules will be restarted in the process.")
