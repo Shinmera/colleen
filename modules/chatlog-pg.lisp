@@ -22,7 +22,7 @@
 (defclass chatlog ()
   ((server :col-type (string 36) :initarg :server :accessor r-server)
    (channel :col-type (string 36) :initarg :channel :accessor r-channel)
-   (user :col-type (string 36) :initarg :user :accessor r-user)
+   (nick :col-type (string 36) :initarg :user :accessor r-nick)
    (time :col-type integer :initarg :time :accessor r-time)
    (type :col-type (string 1) :initarg :type :accessor r-type)
    (message :col-type text :initarg :message :accessor r-message))
