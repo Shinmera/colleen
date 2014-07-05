@@ -27,7 +27,8 @@
                (setf target-url (get-output-stream-string target-url))
                (if (find (cdr (assoc :content-type headers)) *html-types*
                          :test #'(lambda (a b) (search b a)))
-                   (let ((title (lquery:$ (initialize (drakma::read-body stream headers NIL T)) "title" (text) (node))))
+                   (let* ((text (drakma::read-body stream headers T T))
+                          (title (lquery:$ (initialize text) "title" (text) (node))))
                      (if title
                          (format NIL "Title: “~a”~:[ at ~a~;~*~]"
                                  (string-trim " " (cl-ppcre:regex-replace-all "\\n" title "")) (string-equal target-url url) target-url)
