@@ -6,6 +6,7 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.google
+  (:nicknames :co-google)
   (:use :cl :colleen :events :split-sequence)
   (:shadow :timezone))
 (in-package :org.tymoonnext.colleen.mod.google)
@@ -18,7 +19,7 @@
 (define-group google :documentation "Interact with various google services.")
 
 (defmacro with-key ((slot-accessor &key (eventvar 'event) (modulevar 'module)) &body body)
-  `(if (gethash slot-accessor (storage ,modulevar))
+  `(if (gethash ,slot-accessor (storage ,modulevar))
        (progn ,@body)
        (respond ,eventvar "Required API key for this function is not set! Please contact the bot administrator.")))
 
@@ -32,23 +33,23 @@
 
 (define-command (google translate) (&rest text) (:documentation "Translate a given text into english.")
   (with-key (:translate-key)
-    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (config-tree :translate-key))
+    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (uc:config-tree :translate-key))
       (respond event "[~a → en] ~a" language translation))))
 
 (define-command (google translate-to) (target-language &rest text) (:documentation "Translate a given text into a specific language.")
   (with-key (:translate-key)
-    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (config-tree :translate-key) :to target-language)
+    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (uc:config-tree :translate-key) :to target-language)
       (respond event "[~a → ~a] ~a" language target-language translation))))
 
 (define-command (google translate-from) (source-language &rest text) (:documentation "Translate a given text from a specific language into english.")
   (with-key (:translate-key)
-    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (config-tree :translate-key) :from source-language)
+    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (uc:config-tree :translate-key) :from source-language)
       (declare (ignore language))
       (respond event "[~a → en] ~a" source-language translation))))
 
 (define-command (google translate-from-to) (source-language target-language &rest text) (:documentation "Translate a given text from a language into another.")
   (with-key (:translate-key)
-    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (config-tree :translate-key) :from source-language :to target-language)
+    (multiple-value-bind (translation language) (translate (format NIL "~{~a~^ ~}" text) (uc:config-tree :translate-key) :from source-language :to target-language)
       (declare (ignore language))
       (respond event "[~a → ~a] ~a" source-language target-language translation))))
 
@@ -61,6 +62,7 @@
   (let ((parameters `(("key" . ,api-key) ("q" . ,text) ("target" . ,(ensure-known-language to)))))
     (when from (push `("source" . ,(ensure-known-language from)) parameters))
     (let ((json (json-request "https://www.googleapis.com/language/translate/v2" parameters)))
+      (print json)
       (let ((data (first (cdr (assoc :translations (cdr (assoc :data json)))))))
         (values (cdr (assoc :translated-text data))
                 (cdr (assoc :detected-source-language data)))))))
