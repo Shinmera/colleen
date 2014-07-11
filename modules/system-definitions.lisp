@@ -31,6 +31,7 @@
 (define-module-system silly ("silly") (:cl-ppcre :drakma :lquery))
 (define-module-system stevenchan ("stevenchan") (:lquery :drakma :alexandria))
 (define-module-system syslog ("syslog"))
+(define-module-system throttle ("throttle"))
 (define-module-system markov-twitter-bridge ("markov-twitter-bridge") (:co-markov :chirp))
 (define-module-system twitter ("twitter") (:chirp))
 (define-module-system urlinfo ("urlinfo") (:drakma :cl-ppcre :lquery))
