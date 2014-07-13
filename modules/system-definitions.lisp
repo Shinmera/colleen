@@ -36,3 +36,4 @@
 (define-module-system twitter ("twitter") (:chirp))
 (define-module-system urlinfo ("urlinfo") (:drakma :cl-ppcre :lquery))
 (define-module-system weather ("weather") (:drakma :cl-json))
+(define-module-system welcome ("welcome") (:cl-ppcre))
