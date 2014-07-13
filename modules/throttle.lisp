@@ -25,7 +25,9 @@
   (let* ((real-nick (format NIL "~a/~a" (name (server event)) (nick event)))
          (throttle-val (gethash real-nick *throttles*)))
     (setf (gethash real-nick *throttles*) (get-universal-time))
-    (when (and throttle-val (< (- (get-universal-time) throttle-val) (uc:config-tree :amount)))
+    (when (and throttle-val
+               (< (- (get-universal-time) throttle-val) (uc:config-tree :amount))
+               (not (auth-p (nick event))))
       (setf (cancelled event) T)
       (v:warn :throttle "Throttling ~a by ~a" event real-nick)
       (respond event "~a" (fstd-message event :throttle "~a: Calm down for ~r second~:p, jeez." (nick event) (uc:config-tree :amount))))))
