@@ -13,7 +13,8 @@
 
 (defvar *language-code-map*)
 
-(define-module google () ()
+(define-module google ()
+    ((%interpreted-chans :initform () :accessor interpreted-chans))
   (:documentation "Interact with various Google APIs."))
 
 (define-group google :documentation "Interact with various google services.")
@@ -30,6 +31,22 @@
          (data (drakma:http-request url :parameters parameters :external-format-in :utf-8 :external-format-out :utf-8)))
     (cl-json:decode-json-from-string data)))
 
+(defun real-chan (event)
+  (format NIL "~a/~a" (name (server event)) (channel event)))
+
+(defun ensure-known-language (language)
+  (let ((short (or (gethash language *language-code-map*) language)))
+    (assert (find short (alexandria:hash-table-values *language-code-map*) :test #'string-equal) () "No such language: ~a" language)
+    short))
+
+(defun translate (text api-key &key (to "en") from)
+  (let ((parameters `(("key" . ,api-key) ("q" . ,text) ("target" . ,(ensure-known-language to)))))
+    (when from (push `("source" . ,(ensure-known-language from)) parameters))
+    (let ((json (json-request "https://www.googleapis.com/language/translate/v2" parameters)))
+      (print json)
+      (let ((data (first (cdr (assoc :translations (cdr (assoc :data json)))))))
+        (values (cdr (assoc :translated-text data))
+                (cdr (assoc :detected-source-language data)))))))
 
 (define-command (google translate) (&rest text) (:documentation "Translate a given text into english.")
   (with-key (:translate-key)
@@ -53,19 +70,21 @@
       (declare (ignore language))
       (respond event "[~a → ~a] ~a" source-language target-language translation))))
 
-(defun ensure-known-language (language)
-  (let ((short (or (gethash language *language-code-map*) language)))
-    (assert (find short (alexandria:hash-table-values *language-code-map*) :test #'string-equal) () "No such language: ~a" language)
-    short))
+(define-command |interpreter start| () (:documentation "Begin interpreting (translating) live as they happen in this channel.")
+  (pushnew (real-chan event) (interpreted-chans module) :test #'string-equal)
+  (respond event "Interpreting active."))
 
-(defun translate (text api-key &key (to "en") from)
-  (let ((parameters `(("key" . ,api-key) ("q" . ,text) ("target" . ,(ensure-known-language to)))))
-    (when from (push `("source" . ,(ensure-known-language from)) parameters))
-    (let ((json (json-request "https://www.googleapis.com/language/translate/v2" parameters)))
-      (print json)
-      (let ((data (first (cdr (assoc :translations (cdr (assoc :data json)))))))
-        (values (cdr (assoc :translated-text data))
-                (cdr (assoc :detected-source-language data)))))))
+(define-command |interpreter stop| () (:documentation "Stop live translation on this channel.")
+  (setf (interpreted-chans module)
+        (delete (real-chan event) (interpreted-chans module) :test #'string-equal))
+  (respond event "Interpreting deactivated."))
+
+(define-handler (privmsg-event event) ()
+  (when (and (member (real-chan event) (interpreted-chans module) :test #'string-equal)
+             (not (command-p (message event)))
+             (uc:config-tree :translate-key))
+    (multiple-value-bind (translation language) (translate (message event) (uc:config-tree :translate-key))
+      (respond event "[~a → en] ~a" language translation))))
 
 
 (define-command (google geocode) (&rest address) (:documentation "Look up geocoding information about an address.")
