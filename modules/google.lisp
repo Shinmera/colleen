@@ -70,7 +70,7 @@
       (declare (ignore language))
       (respond event "[~a → ~a] ~a" source-language target-language translation))))
 
-(define-command |interpreter start| () (:documentation "Begin interpreting (translating) live as they happen in this channel.")
+(define-command |interpreter start| () (:documentation "Begin interpreting (translating) live using google translate as messages happen in this channel.")
   (pushnew (real-chan event) (interpreted-chans module) :test #'string-equal)
   (respond event "Interpreting active."))
 
