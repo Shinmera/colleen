@@ -39,13 +39,6 @@
                            (string-equal target-url url) target-url))))
         (close stream)))))
 
-(defun command-p (message)
-  (loop for prefix in (bot-config :command :prefix)
-        when (and (> (length message) (length prefix))
-                  (string= message prefix :end1 (length prefix)))
-          do (return T)
-        finally (return NIL)))
-
 (define-handler (privmsg-event event) ()
   (when (and (find (format NIL "~a/~a" (name (server event)) (channel event))
                    (uc:config-tree :active-in) :test #'string-equal)
