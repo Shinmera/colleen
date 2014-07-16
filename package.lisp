@@ -50,7 +50,8 @@
    #:handler-function
    #:priority
    #:docstring
-   
+
+   #:command-p
    #:generate-priority-cache
    #:command-handler
    #:remove-command-handler
