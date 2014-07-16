@@ -45,7 +45,7 @@
     (let ((json (json-request "https://www.googleapis.com/language/translate/v2" parameters)))
       (print json)
       (let ((data (first (cdr (assoc :translations (cdr (assoc :data json)))))))
-        (values (cdr (assoc :translated-text data))
+        (values (plump:decode-entities (cdr (assoc :translated-text data)))
                 (cdr (assoc :detected-source-language data)))))))
 
 (define-command (google translate) (&rest text) (:documentation "Translate a given text into english.")
