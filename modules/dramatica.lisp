@@ -217,3 +217,7 @@
 (define-edf-command shoutbox-post (&rest message) (:authorization T :documentation "Posted a message to the shoutbox.")
   (xencl:post (make-instance 'xencl:shoutbox) (format NIL "~{~a~^ ~}" message))
   (respond event "Message posted."))
+
+(define-edf-command status-post (&rest message) (:authorization T :documentation "Post a status update to the bot profile.")
+  (xencl:start-thread xencl:*user* (format NIL "~{~a~^ ~}" message))
+  (respond event "Status posted."))
