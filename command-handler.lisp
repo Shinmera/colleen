@@ -131,22 +131,23 @@ the matched prefix is returned and otherwise NIL."
   "Tries to read a command from a PRIVMSG-EVENT by matching the prefixes as defined in the config.
 If a match occurs, a fitting COMMAND-EVENT is generated and dispatched."
   (let ((prefix (command-p (message event))))
-    (handler-bind ((not-authorized
-                     #'(lambda (err)
-                         (v:warn (name (server event)) "~a" err)
-                         (respond event (fstd-message event :not-authorized))
-                         (invoke-restart 'skip-handler)))
-                   (invalid-arguments
-                     #'(lambda (err)
-                         (v:warn (name (server event)) "~a" err)
-                         (respond event "Invalid arguments. Expected lambda-list: ~a"
-                                  (lambda-list->string (expected err)))
-                         (invoke-restart 'skip-handler))))
-      (dispatch (make-instance 'command-event
-                               :server (server event)
-                               :arguments (arguments event)
-                               :prefix (prefix event)
-                               :message (subseq (message event) (length prefix)))))))
+    (when prefix
+      (handler-bind ((not-authorized
+                       #'(lambda (err)
+                           (v:warn (name (server event)) "~a" err)
+                           (respond event (fstd-message event :not-authorized))
+                           (invoke-restart 'skip-handler)))
+                     (invalid-arguments
+                       #'(lambda (err)
+                           (v:warn (name (server event)) "~a" err)
+                           (respond event "Invalid arguments. Expected lambda-list: ~a"
+                                    (lambda-list->string (expected err)))
+                           (invoke-restart 'skip-handler))))
+        (dispatch (make-instance 'command-event
+                                 :server (server event)
+                                 :arguments (arguments event)
+                                 :prefix (prefix event)
+                                 :message (subseq (message event) (length prefix))))))))
 (set-handler-function :command-reader 'events:privmsg-event #'read-command)
 
 (defmacro do-matching-command-handlers ((command-signature handlervar) &body body)
