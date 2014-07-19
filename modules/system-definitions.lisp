@@ -15,7 +15,7 @@
 (define-module-system core ("core"))
 (define-module-system counter ("counter"))
 (define-module-system dictionary ("dictionary") (:alexandria))
-(define-module-system dramatica ("dramatica") (#|:xencl|# :cl-wiki))
+(define-module-system dramatica ("dramatica") (:cl-wiki :xencl))
 (define-module-system emoticon ("emoticon"))
 (define-module-system essentials ("essentials") (:uiop :local-time :alexandria))
 (define-module-system eval ("eval"))
