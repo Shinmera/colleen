@@ -54,6 +54,11 @@
                (string-equal (nick event) true-nick))
       (irc:nick true-nick))))
 
+(define-handler (events:kick-event event) ()
+  ;; If we get kicked, part so that the server's channel list stays proper.
+  (when (string-equal (events:target event) (nick (server event)))
+    (irc:part (channel event))))
+
 (define-timer thread-sweeper () (:type :single :documentation "Regularly performs (sweep-all-module-threads)")
   (v:info :core "Performing thread sweep.")
   (sweep-all-module-threads))
