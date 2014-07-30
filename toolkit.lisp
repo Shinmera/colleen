@@ -150,7 +150,7 @@ If possible, use LATCH-CHAR to find a more apropriate breaking point within the 
 This is only implemented with: SBCL, SWANK, working FUNCTION-LAMBDA-EXPRESSION."
   #+sbcl (sb-introspect:function-lambda-list function)
   #+(and swank (not sbcl)) (swank-backend:arglist function)
-  #-(or sbcl swank) (second (nth-value 2 (function-lambda-expression function))))
+  #-(and sbcl swank) (second (nth-value 2 (function-lambda-expression function))))
 
 (defun force-release-lock (lock)
   "Attempts to forcefully release the lock.
