@@ -68,7 +68,7 @@
   (v:debug :notify "Creating new note for anyone by ~a" (nick event))
   (push (make-note event :any message)
         (uc:config-tree :notes))
-  (respond event "~a: Remembered. I will repost this whenever someone else next next talks." (nick event)))
+  (respond event "~a: Remembered. I will repost this whenever someone else next talks." (nick event)))
 
 (define-command |notify @date| (date &rest message) (:documentation "Notify MESSAGE to this channel once DATE is reached. DATE should be Y.M.DTh:m:s")
   (handler-case
