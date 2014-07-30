@@ -46,7 +46,6 @@
       (when (integerp (nick note))
         (schedule-timer 'notify :once (nick note) :arguments (list note))))))
 
-
 (define-command |notify @join| (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next join this channel.")
   (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
   (push (make-instance
@@ -61,22 +60,19 @@
         (uc:config-tree :notes))
   (respond event "~a: Remembered. I will remind ~a when he/she/it next joins." (nick event) recipient))
 
-(define-command |notify @any-activity| (&rest message)
-  (:documentation "Say MESSAGE when any lines are spoken in the chatroom.")
-  
+(define-command |notify @any| (&rest message) (:documentation "Say MESSAGE when any lines are spoken in the chatroom.")
   (v:debug :notify "Creating new note for anyone by ~a" (nick event))
   (push (make-instance
          'note
          :message (format nil "~{~a~^ ~}" message)
          :sender (nick event)
-         :nick :any-but-sender
+         :nick :any
          :channel (channel event)
          :server (string-upcase (name (server event)))
          :timestamp (format-timestring nil (now) :format *timestamp-format*)
          :trigger :message)
         (uc:config-tree :notes))
-  (respond event "~a: Remembered. I will repost this when anyone speaks next." (nick event)))
-                      
+  (respond event "~a: Remembered. I will repost this whenever someone else next next talks." (nick event)))
 
 (define-command |notify @date| (date &rest message) (:documentation "Notify MESSAGE to this channel once DATE is reached. DATE should be Y.M.DTh:m:s")
   (handler-case
@@ -148,25 +144,26 @@
 (define-handler (privmsg-event event) (:documentation "Checks for notifications to deliver to the speaker.")
   (let ((newlist ()))
     (dolist (note (uc:config-tree :notes))
-      (cond ((and (stringp (nick note))
-                  (string-equal (nick note) (nick event))
-                  (string= (channel note) (channel event))
-                  (string= (server note) (string-upcase (name (server event))))
-                  (eql (trigger note) :message))
-             (v:debug :notify "Delivering note ~a." note)
-             (respond event "~a: ~a wrote to you on ~a : ~a"
-                      (nick note) (sender note) (timestamp note) (message note)))
-            ((and (keywordp (nick note))
-                  (eql (nick note) :any-but-sender)
-                  (string-not-equal (nick event) (sender note)) ; the "but sender" part of any-but-sender
-                  (string= (channel note) (channel event))
-                  (string= (server note) (string-upcase (name (server event))))
-                  (eql (trigger note) :message))
-             (v:debug :notify "Delivering note ~a." note)
-             (respond event "~a wrote on ~a: ~a"
-                      (nick note) (timestamp note) (message note)))
-            (t (push note newlist)))
-    (setf (uc:config-tree :notes) (nreverse newlist))))
+      (cond
+        ((and (eql (trigger note) :message)
+              (string= (channel note) (channel event))
+              (string= (server note) (string-upcase (name (server event)))))
+         (cond
+           ((and (stringp (nick note))
+                 (string-equal (nick note) (nick event)))
+            (v:debug :notify "Delivering note ~a." note)
+            (respond event "~a: ~a wrote to you on ~a : ~a"
+                     (nick note) (sender note) (timestamp note) (message note)))
+               
+           ((and (keywordp (nick note))
+                 (eql (nick note) :any)
+                 (string-not-equal (nick event) (sender note)))
+            (v:debug :notify "Delivering note ~a." note)
+            (respond event "~a wrote on ~a: ~a"
+                     (nick note) (timestamp note) (message note)))))
+        
+        (t (push note newlist)))
+      (setf (uc:config-tree :notes) (nreverse newlist)))))
 
 (define-handler (join-event event) (:documentation "Checks for notifications to deliver to the joiner.")
   (let ((newlist ()))
