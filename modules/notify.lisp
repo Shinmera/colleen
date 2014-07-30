@@ -58,6 +58,9 @@
           do (setf (getf args key) val))
     (apply #'make-instance 'note args)))
 
+(define-command |notify @queue| () (:documentation "Tells you how many notifications are queued up.")
+  (respond event "Currently ~d notes in queue." (length (uc:config-tree :notes))))
+
 (define-command |notify @join| (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next join this channel.")
   (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
   (push (make-note event recipient message :trigger :join)
