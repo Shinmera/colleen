@@ -46,31 +46,27 @@
       (when (integerp (nick note))
         (schedule-timer 'notify :once (nick note) :arguments (list note))))))
 
+(defun make-note (event recipient message &rest overrides)
+  (let ((args (list :message (format NIL "~{~a~^ ~}" message)
+                    :nick recipient
+                    :sender (nick event)
+                    :channel (channel event)
+                    :server (string-upcase (name (server event)))
+                    :timestamp (format-timestring NIL (now) :format *timestamp-format*)
+                    :trigger :message)))
+    (loop for (key val) on overrides by #'cddr
+          do (setf (getf args key) val))
+    (apply #'make-instance 'note args)))
+
 (define-command |notify @join| (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next join this channel.")
   (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-  (push (make-instance
-         'note
-         :message (format NIL "~{~a~^ ~}" message) 
-         :sender (nick event) 
-         :nick recipient 
-         :channel (channel event) 
-         :server (string-upcase (name (server event)))
-         :timestamp (format-timestring NIL (now) :format *timestamp-format*)
-         :trigger :join)
+  (push (make-note event recipient message :trigger :join)
         (uc:config-tree :notes))
   (respond event "~a: Remembered. I will remind ~a when he/she/it next joins." (nick event) recipient))
 
 (define-command |notify @any| (&rest message) (:documentation "Say MESSAGE when any lines are spoken in the chatroom.")
   (v:debug :notify "Creating new note for anyone by ~a" (nick event))
-  (push (make-instance
-         'note
-         :message (format nil "~{~a~^ ~}" message)
-         :sender (nick event)
-         :nick :any
-         :channel (channel event)
-         :server (string-upcase (name (server event)))
-         :timestamp (format-timestring nil (now) :format *timestamp-format*)
-         :trigger :message)
+  (push (make-note event :any message)
         (uc:config-tree :notes))
   (respond event "~a: Remembered. I will repost this whenever someone else next next talks." (nick event)))
 
@@ -80,15 +76,7 @@
                         (parse-timestring (format NIL "~a+~a:00" date
                                                    (/ (nth-value 9 (local-time:decode-timestamp (local-time:now))) 60 60))))))
         (v:debug :notify "Creating new note by ~a scheduled for ~a" (nick event) timestamp)
-        (let ((note (make-instance
-                     'note
-                     :message (format NIL "~{~a~^ ~}" message) 
-                     :sender (nick event) 
-                     :nick timestamp 
-                     :channel (channel event) 
-                     :server (string-upcase (name (server event)))
-                     :timestamp (format-timestring NIL (now) :format *timestamp-format*)
-                     :trigger :date)))
+        (let ((note (make-note event timestamp message :trigger :date)))
           (push note (uc:config-tree :notes))
           (schedule-timer 'notify :once timestamp :arguments (list note))
           (respond event "~a: Remembered. I will repost this on ~a." (nick event) date)))
@@ -106,15 +94,7 @@
                                       (* (parse-integer s) 1) (* (parse-integer m) 60) (* (parse-integer h) 60 60))))
                           (T (error "")))))
         (v:debug :notify "Creating new note by ~a scheduled for ~a" (nick event) timestamp)
-        (let ((note (make-instance
-                     'note
-                     :message (format NIL "~{~a~^ ~}" message) 
-                     :sender (nick event) 
-                     :nick timestamp 
-                     :channel (channel event) 
-                     :server (string-upcase (name (server event)))
-                     :timestamp (format-timestring NIL (now) :format *timestamp-format*)
-                     :trigger :time)))
+        (let ((note (make-note event timestamp message :trigger :time)))
           (push note (uc:config-tree :notes))
           (schedule-timer 'notify :once timestamp :arguments (list note))
           (respond event "~a: Remembered. I will repost this in ~a." (nick event) time)))
@@ -129,15 +109,7 @@
          (respond event "~a: Are you feeling lonely?" (nick event)))
         (T
          (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-         (push (make-instance
-                'note
-                :message (format NIL "~{~a~^ ~}" message) 
-                :sender (nick event) 
-                :nick recipient 
-                :channel (channel event) 
-                :server (string-upcase (name (server event)))
-                :timestamp (format-timestring NIL (now) :format *timestamp-format*)
-                :trigger :message)
+         (push (make-note event recipient message)
                (uc:config-tree :notes))
          (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))))
 
