@@ -132,14 +132,14 @@
                
            ((and (keywordp (nick note))
                  (eql (nick note) :any)
-                 (string-not-equal (nick event) (sender note)))
+                 (not (string-equal (nick event) (sender note))))
             (v:debug :notify "Delivering note ~a." note)
             (respond event "~a: ~a wrote on ~a: ~a"
                      (nick event) (sender note) (timestamp note) (message note)))
            
            (T (push note newlist))))
-        (T (push note newlist)))
-      (setf (uc:config-tree :notes) (nreverse newlist)))))
+        (T (push note newlist))))
+    (setf (uc:config-tree :notes) (nreverse newlist))))
 
 (define-handler (join-event event) (:documentation "Checks for notifications to deliver to the joiner.")
   (let ((newlist ()))
