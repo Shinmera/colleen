@@ -101,7 +101,7 @@
 (define-command (search clhs) (&rest query) (:documentation "Search the Common Lisp Hyperspec and return the short explanation.")
   (let ((target-url (make-string-output-stream))
         (text ""))
-    (multiple-value-bind (content status headers uri) (drakma-utf8 (format NIL "http://l1sp.org/cl/~{~a~^ ~}" query))
+    (multiple-value-bind (content status headers uri) (drakma-utf8 (format NIL "http://l1sp.org/cl/~{~a~^%20~}" query))
       (declare (ignore headers))
       (puri:render-uri uri target-url)
       (setf target-url (get-output-stream-string target-url))
