@@ -99,13 +99,17 @@
           (respond event "Nothing found for ~a." query)))))
 
 (define-command (search clhs) (&rest query) (:documentation "Search the Common Lisp Hyperspec and return the short explanation.")
-  (let ((lquery:*lquery-master-document*)
-        (url (google-term (format NIL "clhs+Body+~{~a~^+~}" query))))
-    (if url
-        (progn
-          ($ (initialize (drakma-utf8 url)))
-          (respond event "~a ~a" ($ "body>a" (eq 0) (text) (node)) url))
-        (respond event "Nothing found."))))
+  (let ((target-url (make-string-output-stream))
+        (text ""))
+    (multiple-value-bind (content status headers uri) (drakma-utf8 (format NIL "http://l1sp.org/cl/~{~a~^%20~}" query))
+      (declare (ignore headers))
+      (puri:render-uri uri target-url)
+      (setf target-url (get-output-stream-string target-url))
+      (if (= status 200)
+          (progn
+            (ignore-errors (setf text ($ (initialize content) "body>a" (eq 0) (text) (node))))
+            (respond event "~a ~a" text target-url))
+          (respond event "Nothing found.")))))
 
 (define-command (search shorten) (&rest address) (:documentation "Create a shortened URL through bit.ly .")
   (let ((short (shorten-url (format NIL "~{~a~^ ~}" address))))

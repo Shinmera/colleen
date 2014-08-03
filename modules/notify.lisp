@@ -58,6 +58,9 @@
           do (setf (getf args key) val))
     (apply #'make-instance 'note args)))
 
+(define-command |notify @queue| () (:documentation "Tells you how many notifications are queued up.")
+  (respond event "Currently ~d notes in queue." (length (uc:config-tree :notes))))
+
 (define-command |notify @join| (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next join this channel.")
   (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
   (push (make-note event recipient message :trigger :join)
@@ -129,13 +132,14 @@
                
            ((and (keywordp (nick note))
                  (eql (nick note) :any)
-                 (string-not-equal (nick event) (sender note)))
+                 (not (string-equal (nick event) (sender note))))
             (v:debug :notify "Delivering note ~a." note)
-            (respond event "~a wrote on ~a: ~a"
-                     (nick note) (timestamp note) (message note)))))
-        
-        (t (push note newlist)))
-      (setf (uc:config-tree :notes) (nreverse newlist)))))
+            (respond event "~a: ~a wrote on ~a: ~a"
+                     (nick event) (sender note) (timestamp note) (message note)))
+           
+           (T (push note newlist))))
+        (T (push note newlist))))
+    (setf (uc:config-tree :notes) (nreverse newlist))))
 
 (define-handler (join-event event) (:documentation "Checks for notifications to deliver to the joiner.")
   (let ((newlist ()))
