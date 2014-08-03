@@ -189,16 +189,13 @@
   (flet ((format-and-print (divisor transport-method)
            (format NIL "Human terms: ~,3f hours away by ~a, using an average speed of ~d km/h."
                    (/ distance divisor) transport-method divisor)))
-    (cond
-      ((< distance 0))
-      ((< distance 150)
-       (format-and-print 50 "car"))
-      ((< distance 2500)
-       (format-and-print 130 "train"))
-      ((< distance 12500)
-       (format-and-print 800 "plane"))
-      (T
-       (format-and-print 18000 "ICBM")))))
+    (loop for (distance-cutoff representative-speed transport-method)
+            in '((150      50 "car")
+                 (2500    130 "train")
+                 (12500   800 "plane"))
+          when (< distance distance-cutoff)
+            return (format-and-print representative-speed transport-method)
+          finally (return (format-and-print 18000 "ICBM")))))
 
 (defun estimated-distance (origin destination)
   (multiple-value-bind (from-latitude from-longitude) (coordinates origin)
