@@ -85,11 +85,10 @@
     (respond event versionstring)))
 
 (define-command quickload (&optional (system "colleen")) (:authorization T :documentation "Perform a ql:quickload.")
-  (setf system (find-symbol (string-upcase system) :KEYWORD))
   (ql:quickload system)
-  (respond event "System loaded."))
+  (respond event "System ~a loaded." system))
 
-(define-command pull-local-projects () (:authorization T :documentation "Perform a git-pull on all projects in Quicklisp's local-projects folder.")
+(defun pull-local-projects (event)
   (dolist (project (uiop:directory-files (merge-pathnames "quicklisp/local-projects/" (user-homedir-pathname))))
     (when (uiop:directory-pathname-p project)
       (uiop:chdir project)
@@ -98,14 +97,23 @@
                (car (last (pathname-directory project)))
                (string-trim '(#\Newline) (uiop:run-program "git rev-parse HEAD" :output :string))))))
 
+(define-command pull-local-projects () (:authorization T :documentation "Perform a git-pull on all projects in Quicklisp's local-projects folder.")
+  (pull-local-projects event))
+
 (define-command update () (:authorization T :documentation "Stops all active modules (except essentials), performs a GIT pull on the project root, reloads and finally starts all previously active modules again.")
   (flet ((report (level message &rest formatargs)
-           (apply #'respond event (format NIL "[update][~a] ~a" level message) formatargs)
+           (apply #'respond event (format NIL "[update] ~a" message) formatargs)
            (apply #'v:log level :essentials.update message formatargs)))
     (report :info "Performing pull-local-projects...")
-    (relay-command event "pull-local-projects")
+    (pull-local-projects event)
     (report :info "Reloading colleen...")
-    (relay-command event "quickload colleen")
+    (ql:quickload :colleen)
+    (report :info "Reloading modules...")
+    (dolist (system (asdf:registered-systems))
+      (when (and (< 3 (length system)) (string-equal "co-" system :end2 3)
+                 (module (subseq system 3)))
+        (report :info "Loading ~a" system)
+        (ql:quickload system)))
     (report :info "Update done.")))
 
 ;; MODULE COMMANDS
