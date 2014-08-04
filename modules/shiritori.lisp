@@ -15,7 +15,7 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (defparameter *romaji->hiragana-map*
   (let ((map (make-hash-table :test 'equal)))
-    (dolist (var `(("a" . "あ") ("i" . "い") ("u" . "う") ("e" . "え") ("o" . "お")
+    (dolist (var '(("a" . "あ") ("i" . "い") ("u" . "う") ("e" . "え") ("o" . "お")
                    ("ka" . "か") ("ki" . "き") ("ku" . "く") ("ke" . "け") ("ko" . "こ")
                    ("sa" . "さ") ("shi". "し") ("su" . "す") ("se" . "せ") ("so" . "そ")
                    ("ta" . "た") ("chi". "ち") ("tsu". "つ") ("te" . "て") ("to" . "と")

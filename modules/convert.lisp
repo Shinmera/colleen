@@ -20,16 +20,25 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (define-group convert-to :documentation "Convert between various formats and units.")
 
-;;                                  A    B       A->B                        B->A
-(defparameter *metrics* (list (list "mm" "in"    #'(lambda (x) (* x 0.0394)) #'(lambda (x) (/ x 0.03937)))
-                              (list "cm" "ft"    #'(lambda (x) (* x 3.2808)) #'(lambda (x) (/ x 3.2808)))
-                              (list "m"  "yd"    #'(lambda (x) (* x 1.0936)) #'(lambda (x) (/ x 1.0936)))
-                              (list "km" "mile"  #'(lambda (x) (* x 0.6214)) #'(lambda (x) (/ x 0.6214)))
-                              (list "mg" "grain" #'(lambda (x) (* x 0.0154)) #'(lambda (x) (/ x 0.0154)))
-                              (list "g"  "oz"    #'(lambda (x) (* x 0.0353)) #'(lambda (x) (/ x 0.0353)))
-                              (list "kg" "lb"    #'(lambda (x) (* x 2.2046)) #'(lambda (x) (/ x 2.2046)))
-                              (list "t"  "ton"   #'(lambda (x) (* x 0.9842)) #'(lambda (x) (/ x 0.9842)))
-                              (list "c"  "f"     #'(lambda (x) (+ (* x (/ 9 5)) 32)) #'(lambda (x) (* (- x 32) (/ 5 9))))))
+(defun scale-factor (fac &optional inv)
+  "Generates conversion factor functions in the form y = mx or y = x/m depending on the inv flag."
+  (if inv
+      #'(lambda (x) (/ x fac))
+      #'(lambda (x) (* x fac))))
+
+(defparameter *metrics*
+  ;; Exact ratios: cm/ft = 25/762; m/yd = 1143/1250; km/mile = 15625/25146.
+  ;; Not sure if should use for things larger than 6 chars long.
+  ;;          A    B       A->B                  B->A 
+  (list (list "mm" "in"    (scale-factor 5/127 ) (scale-factor 5/127 t)) ; 1 in ≡ 25.4 
+        (list "cm" "ft"    (scale-factor 25/762) (scale-factor 25/762 t))
+        (list "m"  "yd"    (scale-factor 1.0936) (scale-factor 1.0936 t))
+        (list "km" "mile"  (scale-factor 0.6214) (scale-factor 0.6214 t))
+        (list "mg" "grain" (scale-factor 0.0154) (scale-factor 0.0154 t))
+        (list "g"  "oz"    (scale-factor 0.0353) (scale-factor 0.0353 t))
+        (list "kg" "lb"    (scale-factor 2.2046) (scale-factor 2.2046 t))
+        (list "t"  "ton"   (scale-factor 0.9842) (scale-factor 0.9842 t))
+        (list "c"  "f"     #'(lambda (x) (+ (* x (/ 9 5)) 32)) #'(lambda (x) (* (- x 32) (/ 5 9))))))
 
 (define-command (convert-to metric) (unit amount) (:documentation "Convert to metric units. (mm, cm, m, km, mg, g, kg, t, c)")
   (let ((amount (parse-number:parse-number amount))
