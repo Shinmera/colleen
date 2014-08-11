@@ -15,7 +15,9 @@
 (defun load-config (&optional (config-file *config-file*))
   "(Re)load the static configuration."
   (when (not config-file)
-    (setf config-file *default-config-file*))
+    (setf config-file *default-config-file*)
+    (ensure-directories-exist config-file))
+  (setf *config-file* config-file)
 
   (unless (probe-file config-file)
     (v:warn :colleen.main "Falling back to sample config!")
@@ -24,14 +26,13 @@
   (let ((uc:*config*))
     (uc:load-configuration config-file)
     (setf *config* uc:*config*)
-    (setf *config-file* config-file)
     (v:info :colleen.main "Loaded config from ~a" config-file)))
 
 (defun save-config (&optional (config-file *config-file*))
   "Save the static configuration to file."
   (when (not config-file)
     (setf config-file *default-config-file*))
-  
+
   (uc:save-configuration config-file :object *config*)
   (v:info :colleen.main "Saved config to ~a" config-file))
 
