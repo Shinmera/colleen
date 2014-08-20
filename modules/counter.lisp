@@ -13,13 +13,15 @@
   (:documentation "Count objects."))
 
 (define-handler (privmsg-event event) ()
-  (loop for name being the hash-keys of uc:*config*
-        for (regexp count active-in) being the hash-values of uc:*config*
-        do (when (and (find (format NIL "~a/~a" (name (server event)) (channel event)) active-in :test #'string-equal)
-                      (cl-ppcre:scan regexp (string-downcase (message event))))
-             (setf (second (uc:config-tree name))
-                   (1+ count))
-             (respond event "~a counter: ~d" name (1+ count)))))
+  (let ((out (make-string-output-stream)))
+    (loop for name being the hash-keys of uc:*config*
+          for (regexp count active-in) being the hash-values of uc:*config*
+          do (when (and (find (format NIL "~a/~a" (name (server event)) (channel event)) active-in :test #'string-equal)
+                        (cl-ppcre:scan regexp (string-downcase (message event))))
+               (setf (second (uc:config-tree name))
+                     (1+ count))
+               (format out "~a counter: ~d " name (1+ count))))
+    (respond event "~a" (get-output-stream-string out))))
 
 (define-group counter :documentation "Checks messages for a regexp and ups a counter if matched.")
 
