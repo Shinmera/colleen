@@ -21,7 +21,9 @@
                (setf (second (uc:config-tree name))
                      (1+ count))
                (format out "~a counter: ~d " name (1+ count))))
-    (respond event "~a" (get-output-stream-string out))))
+    (let ((out (string-trim " " (get-output-stream-string out))))
+      (unless (string= out "")
+        (respond event "~a" out)))))
 
 (define-group counter :documentation "Checks messages for a regexp and ups a counter if matched.")
 
