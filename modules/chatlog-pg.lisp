@@ -13,6 +13,8 @@
   ((%lock :initform (bordeaux-threads:make-lock "DB") :accessor lock))
   (:documentation "Logs messages in channels to a database."))
 
+(defvar *connection* ())
+
 (defmethod start ((chatlog chatlog-pg))
   (connect-db chatlog))
 
@@ -36,22 +38,24 @@
           (user (or user (uc:config-tree :user)))
           (pass (or pass (uc:config-tree :pass))))
       (v:info :chatlog-pg "Connecting ~a@~a:~a/~a" user host port db)
-      (postmodern:connect-toplevel db user pass host :port port)
-      (unless (postmodern:table-exists-p 'chatlog)
-        (postmodern:execute (postmodern:dao-table-definition 'chatlog))))))
+      (postmodern:with-connection (list db user pass host :port port)
+        (unless (postmodern:table-exists-p 'chatlog)
+          (postmodern:execute (postmodern:dao-table-definition 'chatlog))))
+      (setf *connection* (list db user pass host :port port)))))
 
 (defmethod disconnect-db ((chatlog chatlog-pg))
   (v:info :chatlog-pg "Disconnecting.")
-  (postmodern:disconnect-toplevel))
+  (setf *connection* NIL))
 
 (defconstant +UNIX-EPOCH-DIFFERENCE+ (encode-universal-time 0 0 0 1 1 1970 0))
 (defmethod insert-record ((chatlog chatlog-pg) server channel user type message)
   (with-module-storage (chatlog)
     (when (find (format NIL "~a/~a" server channel) (uc:config-tree :active-in) :test #'string-equal)
       (v:trace :chatlog-pg "Logging event from ~a/~a <~a> (~a)" server channel user type)
-      (postmodern:insert-dao (make-instance 'chatlog :server (princ-to-string server) :channel channel :user user
-                                                     :time (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+)
-                                                     :type type :message message)))))
+      (postmodern:with-connection *connection*
+        (postmodern:insert-dao (make-instance 'chatlog :server (princ-to-string server) :channel channel :user user
+                                                       :time (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+)
+                                                       :type type :message message))))))
 
 (define-group chatlog-pg :documentation "Change chatlog-pg settings.")
 
@@ -112,7 +116,8 @@
   (insert-record chatlog (name (server event)) (channel event) (nick event) "t" (format NIL " ** TOPIC ~a" (topic event))))
 
 (defun pstmt (statement &rest vars)
-  (apply (postmodern:prepare statement) vars))
+  (postmodern:with-connection *connection*
+    (apply (postmodern:prepare statement) vars)))
 
 (defun fmt (unix)
   (if unix
