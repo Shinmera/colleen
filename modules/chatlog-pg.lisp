@@ -21,15 +21,6 @@
 (defmethod stop ((chatlog chatlog-pg))
   (disconnect-db chatlog))
 
-(defclass chatlog ()
-  ((server :col-type (string 36) :initarg :server :accessor r-server)
-   (channel :col-type (string 36) :initarg :channel :accessor r-channel)
-   (nick :col-type (string 36) :initarg :user :accessor r-nick)
-   (time :col-type integer :initarg :time :accessor r-time)
-   (type :col-type (string 1) :initarg :type :accessor r-type)
-   (message :col-type text :initarg :message :accessor r-message))
-  (:metaclass postmodern:dao-class))
-
 (defmethod connect-db ((chatlog chatlog-pg) &key db host port user pass)
   (with-module-storage (chatlog)
     (let ((db (or db (uc:config-tree :db)))
@@ -39,8 +30,14 @@
           (pass (or pass (uc:config-tree :pass))))
       (v:info :chatlog-pg "Connecting ~a@~a:~a/~a" user host port db)
       (postmodern:with-connection (list db user pass host :port port)
-        (unless (postmodern:table-exists-p 'chatlog)
-          (postmodern:execute (postmodern:dao-table-definition 'chatlog))))
+        (unless (postmodern:table-exists-p "chatlog")
+          (postmodern:execute "CREATE TABLE \"chatlog\"
+ (\"server\" character varying(36) NOT NULL,
+  \"channel\" character varying(36) NOT NULL,
+  \"nick\" character varying(36) NOT NULL,
+  \"time\" bigint NOT NULL,
+  \"type\" character(1) NOT NULL,
+  \"message\" text NOT NULL)")))
       (setf *connection* (list db user pass host :port port)))))
 
 (defmethod disconnect-db ((chatlog chatlog-pg))
@@ -50,12 +47,17 @@
 (defconstant +UNIX-EPOCH-DIFFERENCE+ (encode-universal-time 0 0 0 1 1 1970 0))
 (defmethod insert-record ((chatlog chatlog-pg) server channel user type message)
   (with-module-storage (chatlog)
-    (when (find (format NIL "~a/~a" server channel) (uc:config-tree :active-in) :test #'string-equal)
-      (v:trace :chatlog-pg "Logging event from ~a/~a <~a> (~a)" server channel user type)
-      (postmodern:with-connection *connection*
-        (postmodern:insert-dao (make-instance 'chatlog :server (princ-to-string server) :channel channel :user user
-                                                       :time (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+)
-                                                       :type type :message message))))))
+    (let ((server (string-downcase server))
+          (channel (string-downcase channel)))
+      (when (find (format NIL "~a/~a" server channel) (uc:config-tree :active-in) :test #'string-equal)
+        (v:debug :chatlog-pg "Logging event from ~a/~a <~a> (~a) ~s" server channel user type message)
+        (handler-bind ((error #'invoke-debugger))
+          (let ((con (apply #'postmodern:connect *connection*)))
+            (unwind-protect
+                 (progn
+                   (cl-postgres:prepare-query con "" "INSERT INTO \"chatlog\" (\"server\", \"channel\", \"nick\", \"time\", \"type\", \"message\") VALUES ($1,$2,$3,$4,$5,$6)")
+                   (cl-postgres:exec-prepared con "" (list (princ-to-string server) channel user (- (get-universal-time) +UNIX-EPOCH-DIFFERENCE+) type message)))
+              (postmodern:disconnect con))))))))
 
 (define-group chatlog-pg :documentation "Change chatlog-pg settings.")
 
