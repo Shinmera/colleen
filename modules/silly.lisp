@@ -12,7 +12,6 @@
 (define-module silly () ()
   (:documentation "Silly things."))
 
-(defparameter *save-file* (merge-pathnames "silly.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 (defparameter *thanks-match* (cl-ppcre:create-scanner "[Tt]hanks[,]? ([a-zA-Z]+)$"))
 (defparameter *bless-match* (cl-ppcre:create-scanner "[Bb]less you[,]? ([a-zA-Z]+)$"))
 
@@ -138,9 +137,13 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
          (respond event "I would never hurt my mom!")
          (respond event "Down the hill rolls the fatty...")))
     ((or (string-equal times "joint") (string-equal size "joint"))
-     (respond event "Don't do drugs, kids!"))
+     (respond event "Drugs are bad, mkay."))
     ((string-equal size "over")
      (respond event "No."))
+    ((or (string-equal size "dice")
+         (and (string-equal size "the")
+              (string-equal times "dice")))
+     (respond event "1d6: ~d" (1+ (random 6))))
     (T
      (setf size (parse-integer size :junk-allowed T))
      (setf times (parse-integer times :junk-allowed T))
