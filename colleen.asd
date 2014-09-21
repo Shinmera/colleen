@@ -46,8 +46,3 @@
                :uuid
                :cl-ppcre
                #+sbcl :sb-introspect))
-
-;; (defsystem colleen-doc
-;;   :name "Colleen Doc"
-;;   :components ((:file "documentation"))
-;;   :depends-on (:colleen :lquery-doc))
