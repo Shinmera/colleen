@@ -38,6 +38,9 @@
   "Retrieve a server by its keyword name, if it is connected."
   (gethash keyword *servers*))
 
+(defmethod server ((symbol symbol))
+  (get-server (find-symbol (string symbol) "KEYWORD")))
+
 (defun auth-p (nick)
   "Return T if the requested nick is on the server's authenticated users list."
   (find nick (auth-users *current-server*) :test #'equal))
