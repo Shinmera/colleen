@@ -43,7 +43,7 @@
 
 (defun auth-p (nick)
   "Return T if the requested nick is on the server's authenticated users list."
-  (find nick (auth-users *current-server*) :test #'equal))
+  (find nick (auth-users *current-server*) :test #'equalp))
 
 (defun remove-from-auth (nick &optional reason)
   "Remove the user from the authenticated list. The optional reason string is only for logging."
