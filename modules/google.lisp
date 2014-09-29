@@ -138,9 +138,10 @@
     (multiple-value-bind (id name dst raw) (timezone latitude longitude)
       (let ((local-time:*default-timezone* local-time:+utc-zone+))
         (respond event "Time for ~a: ~a ~a, ~a (UTC~@f, DST~@f)"
-                 address (local-time:format-timestring
-                          NIL (local-time:adjust-timestamp! (local-time:now) (offset :sec raw))
-                          :format '((:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2)))
+                 address (let ((local-time:*default-timezone* local-time:+utc-zone+))
+                           (local-time:format-timestring
+                            NIL (local-time:adjust-timestamp! (local-time:now) (offset :sec (+ dst raw)))
+                            :format '((:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2))))
                  id name (/ raw 60 60) (/ dst 60 60))))))
 
 (define-command (google distance) (origin destination &optional (mode "driving") departure-timestamp) (:documentation "Look up google maps distance data.")
