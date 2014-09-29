@@ -113,6 +113,9 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
         (sleep (/ (random 20) 10))
         (respond event "Nespresso."))
 
+      (when (cl-ppcre:scan "more" message)
+        (scan-for-more (message event)))
+
       (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
         (sleep (/ (random 10) 20))
         (respond event "The ~a ruse was a.........." thing)
@@ -206,3 +209,34 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
                  when (alpha-char-p char)
                    collect (let* ((list (gethash (char-upcase char) *ud-word-cache*)))
                              (nth (random (length list)) list)))))
+
+(defvar *prepositions*
+  '("aboard"  "about"  "above"  "across"  "after"  "against"  "along"  "among"  "around"  "as"   "at"  "before"  "behind"   "below" "beneath" "beside"  "between"  "beyond"  "but" "except"  "by"  "concerning"  "despite"  "down"  "during"  "except" "for"  "from"  "in"  "into"  "like" "near"  "of"  "off"  "on"  "onto"  "out"  "outside"  "over"  "past"  "per"  "regarding"  "since"  "through" "throughout"  "till"  "to"  "toward"  "under" "underneath"  "until"  "up"   "upon"  "with"  "within"  "without"))
+(defvar *conjunctions* '("for" "and" "nor" "but" "or" "yet" "so"))
+(defvar *articles* '("an" "a" "the"))
+(defvar *chant* "CODE")
+
+(defun scan-for-more (s)
+  (or
+   (let ((str (nth-value 1 (cl-ppcre:scan-to-strings "MORE\\W+((\\W|[A-Z0-9])+)([A-Z0-9])($|[^A-Z0-9])" s))))
+     (and str (setf *chant* (concatenate 'string (elt str 0) (elt str 2)))))
+   (let ((str (nth-value 1 (cl-ppcre:scan-to-strings "(?i)more\\W+(\\w+)\\W+(\\w+)\\W+(\\w+)" s))))
+     (and str
+          (or (member (elt str 0) *prepositions* :test #'string-equal)
+              (member (elt str 0) *conjunctions* :test #'string-equal)
+              (member (elt str 0) *articles* :test #'string-equal))
+          (or (member (elt str 1) *prepositions* :test #'string-equal)
+              (member (elt str 1) *conjunctions* :test #'string-equal)
+              (member (elt str 1) *articles* :test #'string-equal))
+          (setf *chant* (string-upcase (concatenate 'string (elt str 0) " " (elt str 1) " " (elt str 2))))))
+   (let ((str (nth-value 1 (cl-ppcre:scan-to-strings "(?i)more\\W+(\\w+)\\W+(\\w+)" s))))
+     (and str
+          (or (member (elt str 0) *prepositions* :test #'string-equal)
+              (member (elt str 0) *conjunctions* :test #'string-equal)
+              (member (elt str 0) *articles* :test #'string-equal))
+          (setf *chant* (string-upcase (concatenate 'string (elt str 0) " " (elt str 1))))))
+   (let ((str (nth-value 1 (cl-ppcre:scan-to-strings "(?i)more\\W+(\\w+)" s))))
+     (and str (setf *chant* (string-upcase (elt str 0)))))))
+
+(define-command chant () (:documentation "Chants.")
+  (respond event "MORE ~a" *chant*))
