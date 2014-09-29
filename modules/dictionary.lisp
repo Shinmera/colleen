@@ -22,14 +22,14 @@
        (string= definition "=>" :end1 2)
        (string-trim " " (subseq definition 2))))
 
-(defun about-term (module event term)
+(defun about-term (module event term &optional target)
   (with-module-storage (module)
     (let* ((term (string-trim " " term))
            (definition (uc:config-tree term)))
       (when-let ((link (link-p definition)))
         (setf definition (uc:config-tree link)
               term (format NIL "~a: ~a" term link)))
-      (respond event (format-message event (format NIL "~a: ~:[Unknown term.~;~:*~a~]" term definition))))))
+      (respond event (format-message event (format NIL "~@[~a, look at ~]~a: ~:[Unknown term.~;~:*~a~]" target term definition))))))
 
 (defun define-term (module event term definition)
   (with-module-storage (module)
@@ -45,12 +45,13 @@
       (respond event "~:[New~;Old~] term ~:*~:[~;re~]defined." old-definition))))
 
 (define-handler (privmsg-event event) ()
-  (let ((regex (format NIL "^~a: (define (.*?):(.*)|(tell me |tell |define |explain )?(about )?(.*))" (nick (server event)))))
-    (cl-ppcre:register-groups-bind (clause to-define definition fill0 fill1 term) (regex (message event))
-      (declare (ignore clause fill0 fill1))
-      (if term
-          (about-term module event term)
-          (define-term module event to-define definition)))))
+  (let ((regex (format NIL "(?i)^~a: (define (.*?):(.*)|(tell me |tell ([^ ]+)|define |explain |do )?(\\s?about )?(.*))" (nick (server event)))))
+    (cl-ppcre:register-groups-bind (NIL to-define definition action target NIL term) (regex (message event))
+      (cond
+        (to-define (define-term module event to-define definition))
+        ((string= action "do ") (relay-command event term))
+        (target (about-term module event term target))
+        (term (about-term module event term))))))
 
 (define-group dictionary :documentation "Manage the general purpose dictionary.")
 
