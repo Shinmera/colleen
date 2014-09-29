@@ -19,10 +19,11 @@
                (sleep (+ (* 60 15) (random (* 8 (* 60 60)))))))))
 
 (define-command markov-tweet () (:documentation "Tweets a markov message.")
-  (markov-tweet))
+  (respond event "The birds sing: ~a" (markov-tweet)))
 
 (defun markov-tweet ()
   (let ((message (loop for msg = (org.tymoonnext.colleen.mod.markov::generate-string (get-module :markov))
                        until (<= (length msg) 140)
                        finally (return msg))))
-    (chirp:tweet message)))
+    (chirp:tweet message)
+    message))
