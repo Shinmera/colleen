@@ -164,7 +164,9 @@
   (if (uc:config-tree :feeds name)
       (progn
         (pushnew (cons (name (server event)) (channel event))
-                 (report-to (uc:config-tree :feeds name)))
+                 (report-to (uc:config-tree :feeds name))
+                 :test #'(lambda (a b) (and (eql (car a) (car b))
+                                            (string-equal (cdr a) (cdr b)))))
         (respond event "Now watching ~a on this channel." name))
       (respond event "No feed called \"~a\" could be found!" name)))
 
