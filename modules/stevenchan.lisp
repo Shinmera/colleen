@@ -10,7 +10,7 @@
 (in-package :org.tymoonnext.colleen.mod.stevenchan)
 
 (define-module stevenchan ()
-  ((%rss-url :initarg :rss-url :initform "http://api.tymoon.eu/chan/rss" :accessor rss-url)
+  ((%rss-url :initarg :rss-url :initform "http://chan.tymoon.eu/api/purplish/atom" :accessor rss-url)
    (%last-id :initarg :last-id :initform 0 :accessor last-id)
    (%stream-api :initarg :stream-api :initform "http://xshinmerax.api.channel.livestream.com/2.0/livestatus.xml" :accessor stream-api)
    (%stream-live :initform NIL :accessor stream-live)))
