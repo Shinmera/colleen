@@ -29,7 +29,9 @@
       (when-let ((link (link-p definition)))
         (setf definition (uc:config-tree link)
               term (format NIL "~a: ~a" term link)))
-      (respond event (format-message event (format NIL "~@[~a, look at ~]~a: ~:[Unknown term.~;~:*~a~]" target term definition))))))
+      (if definition
+          (respond event (format-message event (format NIL "~@[~a, look at ~]~s: ~a" target term definition)))
+          (respond event (format-message event (format NIL "~a: Sorry, I don't know anything about ~s." (or target (nick event)) term)))))))
 
 (defun define-term (module event term definition)
   (with-module-storage (module)
@@ -45,13 +47,21 @@
       (respond event "~:[New~;Old~] term ~:*~:[~;re~]defined." old-definition))))
 
 (define-handler (privmsg-event event) ()
-  (let ((regex (format NIL "(?i)^~a: (define (.*?):(.*)|(tell me |tell ([^ ]+)|define |explain |do )?(\\s?about )?(.*))" (nick (server event)))))
-    (cl-ppcre:register-groups-bind (NIL to-define definition action target NIL term) (regex (message event))
-      (cond
-        (to-define (define-term module event to-define definition))
-        ((string= action "do ") (relay-command event term))
-        (target (about-term module event term target))
-        (term (about-term module event term))))))
+  (let ((pre (format NIL "(?i)^~a[:,]\\s+(.*)" (nick (server event)))))
+    (cl-ppcre:register-groups-bind (message) (pre (message event))
+      (or (cl-ppcre:register-groups-bind (NIL NIL NIL NIL term definition)
+              ("(?i)^(remember|define)\\s*(this)?\\s*(about|on|for)?\\s*(\\[?([^:\\]]+)\\]?):(.*)" message)
+            (define-term module event term definition)
+            T)
+          (cl-ppcre:register-groups-bind (NIL command)
+              ("(?i)^(do|execute|exec):?\\s*(.*)" message)
+            (relay-command event command)
+            T)
+          (cl-ppcre:register-groups-bind (NIL NIL person term)
+              ("(?i)^(define|tell|explain)?\\s*((me|[^\\s]+)\\s*about)?\\s*(.+)" message)
+            (if (and person (string-equal person "me"))
+                (about-term module event term (nick event))
+                (about-term module event term person)))))))
 
 (define-group dictionary :documentation "Manage the general purpose dictionary.")
 
