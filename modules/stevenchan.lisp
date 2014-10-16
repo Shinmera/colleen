@@ -6,7 +6,8 @@
 
 (in-package :org.tymoonnext.colleen)
 (defpackage org.tymoonnext.colleen.mod.stevenchan
-  (:use :cl :colleen :events :alexandria :lquery))
+  (:use :cl :colleen :events :alexandria :lquery)
+  (:nicknames #:co-stevenchan))
 (in-package :org.tymoonnext.colleen.mod.stevenchan)
 
 (define-module stevenchan ()
@@ -53,11 +54,12 @@
 (defmethod most-recent ((stevenchan stevenchan) &optional (rss-url (rss-url stevenchan)))
   (let* ((lquery:*lquery-master-document*)
          (plump:*tag-dispatchers* ())
-         (node ($ (initialize (drakma:http-request rss-url)) "item" (first)))
-         (title (string-trim " " ($ node "title" (text) (node))))
-         (id (parse-integer (subseq title (1+ (search "#" title)))))
-         (author (string-trim " " ($ node "author" (text) (node))))
-         (link (string-trim " " ($ node "link" (text) (node)))))
+         (drakma:*text-content-types* '(("application" . "atom+xml")))
+         (node ($ (initialize (drakma:http-request rss-url)) "entry" (first)))
+         (id ($ node "id" (text) (node)))
+         (id (parse-integer (subseq id (+ (search "#post-" id) (length "#post-")))))
+         (author (string-trim " " ($ node "author name" (text) (node))))
+         (link (string-trim " " ($ node "link" (attr :href) (node)))))
     (list id author link)))
 
 (define-group stevenchan :documentation "Interact with Stevenchan.")
