@@ -84,7 +84,7 @@ DOCSTRING        --- An optional documentation string."
         (loop for thread in (schedulings handler)
               do (destroy-thread thread)))))
   (unless a-p
-    (setf arguments (cdr (function-arguments handler-function))))
+    (setf arguments (cdr (arg:arglist handler-function))))
   (setf (time-handler identifier)
         (make-instance 'time-handler 
                        :identifier identifier

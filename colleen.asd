@@ -46,4 +46,4 @@
                :flexi-streams
                :uuid
                :cl-ppcre
-               #+sbcl :sb-introspect))
+               :trivial-arguments))
