@@ -11,30 +11,22 @@
 (in-package :org.tymoonnext.colleen.mod.backup)
 
 (define-module backup ()
-    ((%interval :initform NIL :accessor interval)
-     (%directory :initform NIL :accessor backup-directory)
-     (%timer :initform NIL :accessor timer))
+    ((%directory :initform NIL :accessor backup-directory))
   (:documentation "Automatic periodic configuration backup module."))
 
 (defmethod load-storage :after ((backup backup))
   (with-module-storage (backup)
-    (setf (interval backup) (or (uc:config-tree :interval) 86400)
-          (backup-directory backup) (parse-namestring (or (uc:config-tree :directory)
+    (setf (backup-directory backup) (parse-namestring (or (uc:config-tree :directory)
                                                           (namestring (merge-pathnames "backup/"
                                                                                        (asdf:system-source-directory :colleen))))))))
 
 (defmethod save-storage :before ((backup backup))
   (with-module-storage (backup)
-    (setf (uc:config-tree :interval) (interval backup)
-          (uc:config-tree :directory) (namestring (backup-directory backup)))))
+    (setf (uc:config-tree :directory) (namestring (backup-directory backup)))))
 
 (defmethod start ((backup backup))
-  (setf (timer backup) (trivial-timers:make-timer #'backup :name "Backup-Thread"))
-  (start-timer))
-
-(defmethod stop ((backup backup))
-  (trivial-timers:unschedule-timer (timer backup))
-  (setf (timer backup) NIL))
+  (with-module-storage (backup)
+    (reschedule (or (uc:config-tree :interval) (* 60 60 24)))))
 
 (defun backup ()
   (let* ((directory (backup-directory (get-module :backup)))
@@ -90,15 +82,6 @@
             (v:error :backup "Error loading storage for module ~a: ~a" module err))))
       (v:info :backup "Restore complete."))))
 
-(defun start-timer ()
-  (let ((backup (get-module :backup)))
-    (when (and (timer backup) (interval backup))
-      (when (trivial-timers:timer-scheduled-p (timer backup))
-        (v:info :backup "Interrupting previously scheduled timer.")
-        (trivial-timers:unschedule-timer (timer backup)))
-      (v:info :backup "Starting backup timer... (Interval of ~d seconds)" (interval backup))
-      (trivial-timers:schedule-timer (timer backup) 1 :repeat-interval (interval backup)))))
-
 (defun last-backup (backup)
   (let ((backups (sort (remove-if-not #'cl-fad:directory-pathname-p (cl-fad:list-directory (backup-directory backup)))
                        #'(lambda (a b) (string> (namestring a) (namestring b))))))
@@ -110,18 +93,26 @@
     (format NIL "~@[~D years ~]~@[~D days ~]~@[~D hours ~]~@[~D minutes ~]~@[~D seconds~]"
             (unless (= yy 0) yy) (unless (= dd 0) dd) (unless (= h 0) h) (unless (= m 0) m) (unless (= s 0) s))))
 
+(define-timer backup () (:type :single :documentation "Automatically performs configuration backups.")
+  (backup))
+
+(defun reschedule (interval)
+  (stop-time-handler 'backup)
+  (schedule-timer 'backup :every interval))
+
 (define-group backup :documentation "Set backup settings or perform backup actions.")
 
 (define-command (backup interval) (&optional interval (metric "d")) (:authorization T :documentation "Change or view the backup interval.")
   (assert (find metric '("w" "d" "h" "m" "s") :test #'string-equal) () "Metric has to be one of (w  d h m s).")
   (when interval
-    (setf (interval module)
-          (cond ((string= metric "w") (* (parse-integer interval) 60 60 24 7))
-                ((string= metric "d") (* (parse-integer interval) 60 60 24))
-                ((string= metric "h") (* (parse-integer interval) 60 60))
-                ((string= metric "m") (* (parse-integer interval) 60))
-                ((string= metric "s") (parse-integer interval)))))
-  (respond event "Current backup interval: ~a" (format-time-since (interval module))))
+    (reschedule
+     (setf (uc:config-tree :interval)
+           (cond ((string= metric "w") (* (parse-integer interval) 60 60 24 7))
+                 ((string= metric "d") (* (parse-integer interval) 60 60 24))
+                 ((string= metric "h") (* (parse-integer interval) 60 60))
+                 ((string= metric "m") (* (parse-integer interval) 60))
+                 ((string= metric "s") (parse-integer interval))))))
+  (respond event "Current backup interval: ~a" (format-time-since (uc:config-tree :interval))))
 
 (define-command (backup last) () (:documentation "Show the date of the last performed backup.")
   (respond event "Last backup was: ~a" (last-backup module)))
