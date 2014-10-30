@@ -46,7 +46,8 @@
 
 (define-command (twitter stream-home) () (:authorization T :documentation "Stream the home timeline to the current channel.")
   (push (list (with-module-thread (:twitter)
-                (chirp:stream/user #'(lambda (o) (stream-handler o event))))
+                (loop
+                  (chirp:stream/user #'(lambda (o) (stream-handler o event)))))
               (colleen:name (server event))
               (channel event))
         (streams module)))
