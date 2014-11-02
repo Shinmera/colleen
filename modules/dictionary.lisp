@@ -30,6 +30,7 @@
     (let* ((wiki:*wiki-api* "http://en.wikipedia.org/w/api.php")
            (title (cdr (assoc :TITLE (first (wiki:wiki-search term :limit 1 :what "text"))))))
       (when title
+        (setf title (cl-ppcre:regex-replace-all " " title "_"))
         (let ((data (wiki:wiki-parse :page title :section 0)))
           (format NIL "~a [http://en.wikipedia.org/wiki/~a]"
                   (parse-wiki-content data) title))))))
