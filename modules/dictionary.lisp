@@ -13,9 +13,26 @@
 (define-module dictionary () ()
   (:documentation "A general purpose dictionary provider."))
 
-(defmethod stop ((dictionary dictionary))
+(defmethod start ((dictionary dictionary))
   (unless (eq (hash-table-test (storage dictionary)) 'equalp)
     (setf (storage dictionary) (make-hash-table :test 'equalp))))
+
+(defun wiki-lookup (term)
+  (labels ((trunc-text (text)
+             (let ((text (string-trim '(#\Newline #\Space #\Linefeed #\Return) text)))
+               (if (> (length text) 200)
+                   (format NIL "~a..." (subseq text 0 200))
+                   text)))
+           (parse-wiki-content (data)
+             (trunc-text (first (cl-ppcre:split
+                                 "\\n" (lquery:$ (initialize (cl-ppcre:regex-replace-all "xml:" data ""))
+                                         "p:first-only" (text) (node)))))))
+    (let* ((wiki:*wiki-api* "http://en.wikipedia.org/w/api.php")
+           (title (cdr (assoc :TITLE (first (wiki:wiki-search term :limit 1 :what "text"))))))
+      (when title
+        (let ((data (wiki:wiki-parse :page title :section 0)))
+          (format NIL "~a [http://en.wikipedia.org/wiki/~a]"
+                  (parse-wiki-content data) title))))))
 
 (defun link-p (definition)
   (and definition (< 2 (length definition))
@@ -25,7 +42,8 @@
 (defun about-term (module event term &optional target)
   (with-module-storage (module)
     (let* ((term (string-trim " " term))
-           (definition (uc:config-tree term)))
+           (definition (or (uc:config-tree term)
+                           (wiki-lookup term))))
       (when-let ((link (link-p definition)))
         (setf definition (uc:config-tree link)
               term (format NIL "~a: ~a" term link)))
@@ -98,3 +116,5 @@
 
 (define-command (dictionary is-link) (term) (:documentation "If the term is a link, returns the original term or otherwise NIL.")
   (respond event "~a" (link-p (uc:config-tree term))))
+
+

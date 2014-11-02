@@ -14,7 +14,7 @@
 (define-module-system convert ("convert") (:drakma :ieee-floats :ironclad :parse-number :cl-json))
 (define-module-system core ("core"))
 (define-module-system counter ("counter"))
-(define-module-system dictionary ("dictionary") (:alexandria))
+(define-module-system dictionary ("dictionary") (:alexandria :lquery :cl-wiki))
 (define-module-system dramatica ("dramatica") (:cl-wiki :xencl))
 (define-module-system emoticon ("emoticon"))
 (define-module-system essentials ("essentials") (:uiop :local-time :alexandria))
