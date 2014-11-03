@@ -53,16 +53,19 @@
         (streams module)))
 
 (defun stream-handler (o event)
-  (when (and o (typep o 'chirp:status))
-    (if (chirp:retweeted-status o)
-        (let ((rt (chirp:statuses/show (chirp:id (chirp:retweeted-status o)))))
-          (respond event "[Twitter] ~a RT: ~a: ~a"
-                   (chirp:screen-name (chirp:user o))
-                   (chirp:screen-name (chirp:user rt))
-                   (chirp:xml-decode (chirp:text-with-expanded-urls rt))))
-        (respond event "[Twitter] ~a: ~a"
-                 (chirp:screen-name (chirp:user o))
-                 (chirp:xml-decode (chirp:text-with-expanded-urls o)))))
+  (flet ((process-text (o len)
+           (cl-ppcre:regex-replace-all
+            "\\n" (chirp:xml-decode (chirp:text-with-expanded-urls o))
+            (format NIL "~%~v< ~>" len))))
+    (when (and o (typep o 'chirp:status))
+      (let ((preamble (format NIL "[Twitter] ~a: " (chirp:screen-name (chirp:user o)))))
+        (when (chirp:retweeted-status o)
+          (let ((rt (chirp:statuses/show (chirp:id (chirp:retweeted-status o)))))
+            (setf preamble (format NIL "~aRT ~a: " preamble (chirp:screen-name (chirp:user rt))))
+            (setf o rt)))
+        (respond event "~a~a"
+                 preamble
+                 (process-text o (length preamble))))))
   (bordeaux-threads:thread-yield)
   (not (typep o 'chirp:stream-disconnect)))
 
