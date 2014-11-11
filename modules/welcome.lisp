@@ -44,7 +44,8 @@
                                     "*grunt*" "*snirk*" "*snicker*" ; Noises
                                     "<GREETING-OF-CHOICE>" "Good <APPROPRIATE-PART-OF-DAY>." ;; Robotic
                                     ))
-(defparameter *default-greetings* '("hello" "hullo" "hi" "mornin" "morning" "evening" "afternoon" "night" "heya" "heyo"))
+(defparameter *default-greetings* '("hello" "hullo" "hi" "mornin" "morning" "evening" "afternoon" "night" "heya" "heyo"
+                                    "howdy" "eyy" "sup" "butts" "scream" "screech" "u+g+h+"))
 
 (defun is-greeting (string)
   (let ((string (string-downcase (string-trim " '.~-!?" string))))

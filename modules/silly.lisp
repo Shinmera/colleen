@@ -101,7 +101,7 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 　（　　,ﾊ　　　　ヽ _ﾝ　 　人! 　　　　 | ||ヽ、　　　　　　 ,ｲ| ||ｲ| /
 ,.ﾍ,）､　　）＞,､ _____,　,.イ　 ハ　　　　レ ル｀ ー--─ ´ルﾚ　ﾚ´"))))
 
-      (when (cl-ppcre:scan "how ((is (this|that) (even )?possible)|the hell|in the world)" message)
+      (when (cl-ppcre:scan "(how ((is (this|that) (even )?possible)))|(how the hell)|(how in the world)|how('d| would) that even work" message)
         (sleep (/ (random 20) 10))
         (respond event "NANO MACHINES, SON"))
 
@@ -115,6 +115,10 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 
       (when (cl-ppcre:scan "more" message)
         (scan-for-more (message event)))
+
+      (when (cl-ppcre:scan "go\\s?go\\s?go" message)
+        (sleep (/ (random 20) 10))
+        (respond event "GALO SENGEN"))
 
       (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
         (sleep (/ (random 10) 20))
