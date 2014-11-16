@@ -44,13 +44,15 @@
   (with-module-storage (module)
     (let* ((term (string-trim " " term))
            (definition (or (uc:config-tree term)
-                           (wiki-lookup term))))
-      (when-let ((link (link-p definition)))
-        (setf definition (uc:config-tree link)
-              term (format NIL "~a: ~a" term link)))
+                           (wiki-lookup term)))
+           (link (link-p definition)))
+      (if link
+          (setf definition (uc:config-tree link)
+                term (format NIL "~s: ~s" term link))
+          (setf term (format NIL "~s" term)))
       (if definition
-          (respond event (format-message event (format NIL "~@[~a, look at ~]~s: ~a" target term definition)))
-          (respond event (format-message event (format NIL "~a: Sorry, I don't know anything about ~s." (or target (nick event)) term)))))))
+          (respond event (format-message event (format NIL "~@[~a, look at ~]~a: ~a" target term definition)))
+          (respond event (format-message event (format NIL "~a: Sorry, I don't know anything about ~a." (or target (nick event)) term)))))))
 
 (defun define-term (module event term definition)
   (with-module-storage (module)
