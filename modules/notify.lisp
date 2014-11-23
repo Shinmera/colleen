@@ -58,6 +58,17 @@
           do (setf (getf args key) val))
     (apply #'make-instance 'note args)))
 
+(define-command show-notifications (user) (:documentation "Show notifications queued for USER.")
+  (let ((shown NIL))
+    (dolist (note (uc:config-tree :notes))
+      (when (and (stringp (nick note))
+                 (string-equal (nick note) user))
+        (setf shown T)
+        (respond event "By ~a on ~a : ~a"
+                 (sender note) (timestamp note) (message note))))
+    (unless shown
+      (respond event "No notifications for ~a." user))))
+
 (define-command |notify @queue| () (:documentation "Tells you how many notifications are queued up.")
   (respond event "Currently ~d notes in queue." (length (uc:config-tree :notes))))
 
