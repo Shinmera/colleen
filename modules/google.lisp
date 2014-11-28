@@ -43,7 +43,6 @@
   (let ((parameters `(("key" . ,api-key) ("q" . ,text) ("target" . ,(ensure-known-language to)))))
     (when from (push `("source" . ,(ensure-known-language from)) parameters))
     (let ((json (json-request "https://www.googleapis.com/language/translate/v2" parameters)))
-      (print json)
       (let ((data (first (cdr (assoc :translations (cdr (assoc :data json)))))))
         (values (plump:decode-entities (cdr (assoc :translated-text data)))
                 (cdr (assoc :detected-source-language data)))))))
