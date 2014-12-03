@@ -13,10 +13,13 @@
   (:documentation "Simple database for :emoticon:s."))
 
 (define-handler (privmsg-event event) ()
-  (cl-ppcre:register-groups-bind (emoticon NIL) ("(:([^\\s]+?):)" (message event))
-    (let ((emoticon (uc:config-tree (string-downcase emoticon))))
-      (when emoticon
-        (respond event emoticon)))))
+  (let ((emotes ()))
+    (cl-ppcre:do-register-groups (emoticon NIL) ("(:([^\\s]+?):)" (message event))
+      (let ((emoticon (uc:config-tree (string-downcase emoticon))))
+        (when emoticon
+          (push emoticon emotes))))
+    (when emotes
+      (respond event "~{~a~^ ~}" (nreverse emotes)))))
 
 (define-group emoticon :documentation "Manage :emoticon:s.")
 
