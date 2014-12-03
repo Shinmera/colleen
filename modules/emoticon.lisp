@@ -13,9 +13,10 @@
   (:documentation "Simple database for :emoticon:s."))
 
 (define-handler (privmsg-event event) ()
-  (let ((emoticon (uc:config-tree (string-downcase (message event)))))
-    (when emoticon
-      (respond event emoticon))))
+  (cl-ppcre:register-groups-bind (emoticon NIL) ("(:([^\\s]+?):)" (message event))
+    (let ((emoticon (uc:config-tree (string-downcase emoticon))))
+      (when emoticon
+        (respond event emoticon)))))
 
 (define-group emoticon :documentation "Manage :emoticon:s.")
 
