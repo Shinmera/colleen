@@ -244,3 +244,33 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 
 (define-command chant () (:documentation "Chants.")
   (respond event "MORE ~a" *chant*))
+
+(defvar *last-quit* (make-hash-table :test 'equalp))
+(defvar *known-users* (make-hash-table :test 'equalp))
+(defvar *lamentations* '("We will miss you, ~a."
+                         "~a has departed from this world."
+                         "I regret to report that ~a has passed away."
+                         "It is hard for me too, but, we will have to accept that ~a is no longer with us."
+                         "May your soul find peace in the other world, ~a"))
+
+(defun id (event &optional (channel (channel event)))
+  (format NIL "~a/~a" (server event) channel))
+
+(define-handler (privmsg-event event) (:identifier user-recording-msg)
+  (push (channel event)
+        (gethash (id event (nick event)) *known-users*)))
+
+(define-handler (quit-event event) ()
+  (dolist (channel (gethash (id event (nick event)) *known-users*))
+    (setf (gethash (format NIL "~a/~a" (server event) channel) *last-quit*)
+          (nick event)))
+  (setf (gethash (id event (nick event)) *known-users*) NIL))
+
+(define-handler (join-event event) (:identifier user-recording-join)
+  (when (string-equal (gethash (id event) *last-quit*) (nick event))
+    (remhash (id event) *last-quit*)))
+
+(define-command lament () (:documentation "Lament the most recent departure.")
+  (let ((quit (gethash (format NIL "~a/~a" (server event) (channel event)) *last-quit*)))
+    (when quit
+      (respond event (nth (random (length *lamentations*)) *lamentations*) quit))))
