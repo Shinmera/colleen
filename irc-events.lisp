@@ -404,8 +404,32 @@
     (:documentation "Reply to vanilla WHO (See RFC). This format can be very different if the 'WHOX' version of the command is used (see ircu)."))
 
 (define-event namreply-event :RPL_NAMREPLY (event)
-    (target name-type channel &rest nickinfo)
+    (target name-type channel nickinfo)
     (:documentation "Reply to NAMES (See RFC)"))
+
+;; KLUDGE!
+;; IRC reply messages include a way to specify a "rest" argument.
+;; This argument is separated from the rest by a colon. The rest
+;; argument can contain arbitrary data, from a message string to
+;; anything else, even useful things such as, in this case, a nick
+;; list. In order to accommodate for the general case, Colleen
+;; bunches the "rest" argument into a whole string, meaning we
+;; can't simply use the &rest clause in our definition above.
+;;
+;; Even though our definition system contains an extra &string
+;; clause that would make this duality trivial to handle, it would
+;; also require me going through all of the events in this file
+;; manually and seeing which ones make use of the "rest" argument
+;; when it should be kept a string and which ones require a list.
+;; Since this file is big and the change could break other things
+;; I'm not going to bother with it right now. However, this is
+;; definitely something that should be fixed in the future.
+(defmethod initialize-instance :after ((event namreply-event) &key)
+  (colleen::arguments-bind (target name-type channel nickinfo) (arguments event)
+    (setf (slot-value event '%target) target)
+    (setf (slot-value event '%name-type) name-type)
+    (setf (slot-value event '%channel) channel)
+    (setf (slot-value event '%nickinfo) (cl-ppcre:split "\\s+" nickinfo))))
 
 (define-event links-event :RPL_LINKS (event)
     (target mask server-name hopcount server-info)
