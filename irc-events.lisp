@@ -332,7 +332,7 @@
     (:documentation "Reply to WHOIS - Channel list for user (See RFC)"))
 
 (define-event list-start-event :RPL_LISTSTART (event)
-    (target channels users  name)
+    (target channels message)
     (:documentation "Channel list - Header"))
 
 (define-event list-event :RPL_LIST (event)

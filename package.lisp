@@ -621,7 +621,6 @@
    #:server-info
    #:privileges
    #:seconds
-   #:users
    #:visible
    #:mode-params
    #:nickname
