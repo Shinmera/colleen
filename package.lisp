@@ -30,6 +30,7 @@
    #:realname
    
    #:get-server
+   #:ensure-server
    #:connect
    #:disconnect
    #:reconnect

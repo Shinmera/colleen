@@ -41,6 +41,16 @@
 (defmethod server ((symbol symbol))
   (get-server (find-symbol (string symbol) "KEYWORD")))
 
+(defun ensure-server (thing)
+  "Ensures that THING is a server instance.
+
+Thing can be a SERVER, STRING, or SYMBOL."
+  (etypecase thing
+    (server thing)
+    (string (get-server (find-symbol (string-upcase thing) "KEYWORD")))
+    (keyword (get-server thing))
+    (symbol (server thing))))
+
 (defun auth-p (nick)
   "Return T if the requested nick is on the server's authenticated users list."
   (find nick (auth-users *current-server*) :test #'equalp))
