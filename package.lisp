@@ -264,7 +264,9 @@
    #:strip-colors
    #:color-entities
 
-   #:break-string)
+   #:break-string
+   ;; modules/core.lisp
+   #:users)
   (:shadow #:time #:trace))
 
 (defpackage #:org.tymoonnext.colleen.commands

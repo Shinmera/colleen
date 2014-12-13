@@ -8,13 +8,19 @@
 
 (define-module core () () (:documentation "Colleen core module, handling a few standard events."))
 
+;; Bot internals
 (defmethod start ((core core))
   (schedule-timer 'thread-sweeper :every '(:hour 1) :if-exists NIL))
+
+(define-timer thread-sweeper () (:type :single :documentation "Regularly performs (sweep-all-module-threads)")
+  (v:info :core "Performing thread sweep.")
+  (sweep-all-module-threads))
 
 (defmethod stop ((core core))
   (v:info :core "Saving colleen config.")
   (save-config))
 
+;; Basic ping pong and nick handling.
 (define-handler (events:welcome-event event) ()
   (v:info (name (server event)) "Got welcome, joining channels.")
   (let ((nickservpw (server-config (name (server event)) :nickservpw)))
@@ -59,6 +65,63 @@
   (when (string-equal (events:target event) (nick (server event)))
     (irc:part (channel event))))
 
-(define-timer thread-sweeper () (:type :single :documentation "Regularly performs (sweep-all-module-threads)")
-  (v:info :core "Performing thread sweep.")
-  (sweep-all-module-threads))
+;; Channel user list handling.
+(defvar *channel-user-list* ())
+
+(defun users (channel &optional (server *current-server*))
+  "Retrieve a list of currently active users in CHANNEL.
+
+Returns two values: The list of nicks and whether the channel
+is even on record or not."
+  (let ((server (ensure-server server)))
+    (loop for (ident . users) in *channel-user-list*
+          for (cur-server . cur-channel) = ident
+          when (and (eql cur-server server)
+                    (string-equal cur-channel channel))
+          do (return (values users T))
+          finally (return (values NIL NIL)))))
+
+(defun (setf users) (users channel &optional (server *current-server*))
+  "Sets the USERS list for CHANNEL."
+  (let ((server (ensure-server server)))
+    (loop for list in *channel-user-list*
+          for (cur-server . cur-channel) = (car list) 
+          when (and (eql cur-server server)
+                    (string-equal cur-channel channel))
+          do (return (setf (cdr list) users))
+          finally (push (list* (cons server channel) users)
+                        *channel-user-list*)))
+  users)
+
+;; Explicit nick list retrieval
+(define-handler (events:namreply-event event) ()
+  (dolist (nick (events:nickinfo event))
+    ;; Cut off note
+    (let ((nick (case (aref nick 0)
+                  ((#\@ #\+  #\~) (subseq nick 1))
+                  (T nick))))
+      (pushnew nick (users (channel event) (server event))
+               :test #'string-equal))))
+
+;;; Implicit balancing
+;; We want these all to run last so that modules can make comparisons of their own
+;; to see where users quit from.
+(define-handler (events:join-event event) (:identifier userlist-balancer-join :priority :last)
+  (pushnew (nick event) (users (channel event) (server event))
+           :test #'string-equal))
+
+(define-handler (events:part-event event) (:identifier userlist-balancer-part :priority :last)
+  (setf (users (channel event) (server event))
+        (delete (nick event) (users (channel event) (server event))
+                :test #'string-equal)))
+
+(define-handler (events:kick-event event) (:identifier userlist-balancer-kick :priority :last)
+  (setf (users (channel event) (server event))
+        (delete (events:target event) (users (channel event) (server event))
+                :test #'string-equal)))
+
+(define-handler (events:quit-event event) (:identifier userlist-balancer-quit :priority :last)
+  (dolist (channel (channels (server event)))
+    (setf (users channel (server event))
+          (delete (nick event) (users channel (server event))
+                  :test #'string-equal))))
