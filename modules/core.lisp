@@ -125,3 +125,8 @@ is even on record or not."
     (setf (users channel (server event))
           (delete (nick event) (users channel (server event))
                   :test #'string-equal))))
+
+(defun refresh-channel-user-lists ()
+  (loop for server being the hash-values of *servers*
+        do (dolist (channel (channels server))
+             (irc:names channel :server server))))
