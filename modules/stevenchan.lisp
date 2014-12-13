@@ -42,7 +42,7 @@
               (when (string-equal status "true")
                 (v:debug :Stevenchan "Stream is now live!")
                 (irc:privmsg "#Stevenchan" "[livestream] Stream is now live!")
-                (irc:privmsg "#Stevenchan" "~{~a: ~} ^" (remove (nick (server :tynet)) (users "#Stevenchan") :test #'string-equal))))))
+                (irc:privmsg "#Stevenchan" (format NIL "~{~a: ~} ^" (remove (nick (server :tynet)) (users "#Stevenchan") :test #'string-equal)))))))
       (error (err)
         (v:warn :Stevenchan "Error in checker ~a" err)))))
 
