@@ -97,7 +97,8 @@
 
 (define-handler (quit-event event) (:modulevar chatlog)
   (dolist (channel (channels (server event)))
-    (insert-record chatlog (name (server event)) channel (nick event) "q" (format NIL " ** QUIT ~a" (reason event)))))
+    (when (find (nick event) (users channel (server event)) :test #'string-equal)
+      (insert-record chatlog (name (server event)) channel (nick event) "q" (format NIL " ** QUIT ~a" (reason event))))))
 
 (define-handler (part-event event) (:modulevar chatlog)
   (insert-record chatlog (name (server event)) (channel event) (nick event) "p" " ** PART"))
