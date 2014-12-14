@@ -5,9 +5,10 @@
 |#
 
 (in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.silly
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.silly)
+(defpackage #:org.tymoonnext.colleen.mod.silly
+  (:nicknames #:co-silly)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.silly)
 
 (define-module silly () ()
   (:documentation "Silly things."))
@@ -254,7 +255,7 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
                          "May your soul find peace in the other world, ~a"))
 
 (defun id (event &optional (channel (channel event)))
-  (format NIL "~a/~a" (server event) channel))
+  (format NIL "~a/~a" (name (server event)) channel))
 
 (define-handler (privmsg-event event) (:identifier user-recording-msg)
   (push (channel event)
@@ -262,7 +263,7 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
 
 (define-handler (quit-event event) ()
   (dolist (channel (gethash (id event (nick event)) *known-users*))
-    (setf (gethash (format NIL "~a/~a" (server event) channel) *last-quit*)
+    (setf (gethash (id event channel) *last-quit*)
           (nick event)))
   (setf (gethash (id event (nick event)) *known-users*) NIL))
 
@@ -271,6 +272,6 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
     (remhash (id event) *last-quit*)))
 
 (define-command lament () (:documentation "Lament the most recent departure.")
-  (let ((quit (gethash (format NIL "~a/~a" (server event) (channel event)) *last-quit*)))
+  (let ((quit (gethash (id event) *last-quit*)))
     (when quit
       (respond event (nth (random (length *lamentations*)) *lamentations*) quit))))
