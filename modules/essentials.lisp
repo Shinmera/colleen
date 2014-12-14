@@ -15,6 +15,12 @@
     ((%startup :initform (get-universal-time) :accessor startup-time))
   (:documentation "A few essential bot and irc commands."))
 
+(defmethod start ((essentials essentials))
+  (with-module-storage (essentials)
+    (unless (uc:config-tree :last-seen)
+      (setf (uc:config-tree :last-seen)
+            (make-hash-table :test 'equalp)))))
+
 (define-command reload () (:authorization T :documentation "Reload the bot configuration.")
   (when (auth-p (nick event))
     (respond event (fstd-message event :config-reload "Reloading bot configuration."))
