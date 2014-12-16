@@ -36,12 +36,12 @@ If all works nicely, you'll see some log messages informing you of the connectio
 (setf (v:repl-level) :trace)
 ```
 
-This'll show you quite ab it of output, including pings and all forms of event handling. It'll likely be much too noisy, but it can be very useful for debugging purposes.
+This'll show you quite a bit of output, including pings and all forms of event handling. It'll likely be much too noisy, but it can be very useful for debugging purposes.
 
 Since Colleen is not just a bot, but also a framework, we can use its functions to communicate ourselves.
 
 ```
-(irc:privmsg "this-is-my-nick-here" "Hello REPL!" :server (get-server :freenode))
+(irc:privmsg "this-is-my-nick-here" "Hello REPL!" :server (server :freenode))
 ```
 
 Obviously change the nick to your own first.
@@ -134,7 +134,7 @@ By default within a `define-command` or `define-handler` body, the symbols `even
     (setf (uc:config-tree :last-message) (message event))))
 
 (define-command last-message () ()
-  (respond event (uc:Config-tree :last-message)))
+  (respond event (uc:config-tree :last-message)))
 ```
 
 Aside from commands and handlers, Colleen also includes a timer functionality in order to schedule tasks. See `define-timer` and `schedule-timer`. Generally having a look at all the already existing modules should give a good idea on how to make your own, they usually aren't big and shouldn't be hard to understand in what they do.
