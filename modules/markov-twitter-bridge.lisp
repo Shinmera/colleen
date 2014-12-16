@@ -23,7 +23,7 @@
   (respond event "The birds sing: ~a" (markov-tweet)))
 
 (defun markov-tweet ()
-  (let ((message (loop for msg = (org.shirakumo.colleen.mod.markov::generate-string (get-module :markov))
+  (let ((message (loop for msg = (co-markov:generate-string (get-module :markov))
                        until (<= (length msg) 140)
                        finally (return msg))))
     (chirp:tweet message)

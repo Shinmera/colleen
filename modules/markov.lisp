@@ -7,7 +7,8 @@
 (in-package #:org.shirakumo.colleen)
 (defpackage #:org.shirakumo.colleen.mod.markov
   (:nicknames #:co-markov)
-  (:use #:cl #:colleen #:events #:alexandria))
+  (:use #:cl #:colleen #:events #:alexandria)
+  (:export #:learn #:generate-string))
 (in-package #:org.shirakumo.colleen.mod.markov)
 
 (defvar *registry-file* (merge-pathnames "markov.registry.uc.lisp" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
@@ -30,12 +31,12 @@
   (when (and (char= (aref (channel event) 0) #\#)
              (find (format NIL "~a/~a" (name (server event)) (channel event)) (uc:config-tree :active-in) :test #'string-equal))
     (unless (char= (aref (message event) 0) #\!)
-      (learn markov (message event)))
+      (learn (message event)))
 
     (when (< (random 100) (or (uc:config-tree :probability) 0))
       (let ((wordlist (split-sequence:split-sequence #\Space (message event) :remove-empty-subseqs T)))
         (when (cdr wordlist)
-          (let ((response (generate-string markov (first wordlist) (second wordlist))))
+          (let ((response (generate-string (first wordlist) (second wordlist))))
             (when (and response (not (string= (message event) response)))
               (respond event "~a" response))))))))
 
@@ -72,7 +73,7 @@
 
 (define-command (markov say) (&optional arg1 arg2) (:documentation "Let the bot say something." :modulevar markov)
   (if (and arg1 (not arg2)) (setf arg2 arg1 arg1 "!NONWORD!"))
-  (let ((message (generate-string markov (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))))
+  (let ((message (generate-string (or arg1 "!NONWORD!") (or arg2 "!NONWORD!"))))
     (if (and message (> (length message) 1))
         (respond event "~a" message)
         (respond event (fstd-message event :markov-nothing)))))
@@ -80,29 +81,30 @@
 (define-command (markov registry) () (:documentation "Report the markov registry size." :modulevar markov)
   (respond event "Markov registry size: ~,,'':d" (hash-table-count (registry markov))))
 
-(defmethod learn ((markov markov) message)
-  (let ((wordlist (split-sequence:split-sequence #\Space message :remove-empty-subseqs T)))
+(defun learn (message)
+  (let ((registry (registry (module :markov)))
+        (wordlist (split-sequence:split-sequence #\Space message :remove-empty-subseqs T)))
     (when (cddr wordlist)
       (v:debug :markov "Learning from: ~a" message)
       (loop for word1 = "!NONWORD!" then word2
          for word2 = "!NONWORD!" then word3
          for k = (format NIL "~a ~a" word1 word2)
          for word3 in wordlist
-         do (push word3 (gethash k (registry markov)))
-         finally (push "!NONWORD!" (gethash k (registry markov)))))))
+         do (push word3 (gethash k registry))
+         finally (push "!NONWORD!" (gethash k registry))))))
 
-(defgeneric generate-string (markov &optional word1 word2))
-(defmethod generate-string ((markov markov) &optional (word1 "!NONWORD!") (word2 "!NONWORD!"))
-  (let* ((output (if (string= word1 "!NONWORD!") "" (format NIL "~a ~a" word1 word2))))
+(defun generate-string (&optional (word1 "!NONWORD!") (word2 "!NONWORD!"))
+  (let ((registry (registry (module :markov)))
+        (output (if (string= word1 "!NONWORD!") "" (format NIL "~a ~a" word1 word2))))
     (unless (string= word1 "!NONWORD!")
-      (let ((wordlist (remove "!NONWORD!" (gethash output (registry markov)) :test #'string=)))
+      (let ((wordlist (remove "!NONWORD!" (gethash output registry) :test #'string=)))
         (when wordlist
           (let ((word3 (random-elt wordlist)))
             (setf output (format NIL "~a ~a" output word3)
                   word1 word2
                   word2 word3)))))
     (loop for i from 0 below 50
-       for wordlist = (gethash (format NIL "~a ~a" word1 word2) (registry markov))
+       for wordlist = (gethash (format NIL "~a ~a" word1 word2) registry)
        while wordlist
        for word3 = (random-elt wordlist)
        until (string= word3 "!NONWORD!")
