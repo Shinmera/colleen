@@ -4,11 +4,11 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.auth
-  (:nicknames :co-auth)
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.auth)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.auth
+  (:nicknames #:co-auth)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.auth)
 
 (define-module auth () ())
 

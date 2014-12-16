@@ -4,10 +4,11 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.chatlog
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.chatlog)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.chatlog
+  (:nicknames #:co-chatlog)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.chatlog)
 
 (define-module chatlog ()
   ((%lock :initform (bordeaux-threads:make-lock "DATABASE") :accessor lock))

@@ -4,10 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.twitter
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.twitter)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.twitter
+  (:nicknames #:co-twitter)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.twitter)
 
 (define-module twitter ()
     ((streams :initform () :accessor streams))

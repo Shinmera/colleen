@@ -4,12 +4,12 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.google
-  (:nicknames :co-google)
-  (:use :cl :colleen :events :split-sequence)
-  (:shadow :timezone))
-(in-package :org.tymoonnext.colleen.mod.google)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.google
+  (:nicknames #:co-google)
+  (:use #:cl #:colleen #:events #:split-sequence)
+  (:shadow #:timezone))
+(in-package #:org.tymoonnext.colleen.mod.google)
 
 (defvar *language-code-map*)
 

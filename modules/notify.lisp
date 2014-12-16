@@ -1,14 +1,14 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.notify
-  (:use :cl :colleen :events :local-time)
-  (:nicknames :co-notify))
-(in-package :org.tymoonnext.colleen.mod.notify)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.notify
+  (:nicknames #:co-notify)
+  (:use #:cl #:colleen #:events #:local-time))
+(in-package #:org.tymoonnext.colleen.mod.notify)
 
 (defparameter *timestamp-format* '(:long-weekday #\Space (:year 4) #\. (:month 2) #\. (:day 2) #\Space (:hour 2) #\: (:min 2) #\: (:sec 2)))
 

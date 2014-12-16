@@ -1,10 +1,10 @@
 #|
-This file is a part of Colleen
-(c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen.mod.google)
+(in-package #:org.tymoonnext.colleen.mod.google)
 
 (defparameter *language-code-map*
   (let ((table (make-hash-table :test 'equalp)))

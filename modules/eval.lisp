@@ -1,14 +1,15 @@
 #|
-This file is a part of Colleen
-(c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.eval
-  (:use :cl :colleen :events :alexandria)
-  (:shadow :eval))
-(in-package :org.tymoonnext.colleen.mod.eval)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.eval
+  (:nicknames #:co-eval)
+  (:use #:cl #:colleen #:events #:alexandria)
+  (:shadow #:eval))
+(in-package #:org.tymoonnext.colleen.mod.eval)
 
 (defun get-all-symbols (&optional package)
   "Gets all symbols within a package."

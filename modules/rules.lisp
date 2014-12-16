@@ -4,10 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.rules
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.rules)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.rules
+  (:nicknames #:co-rules)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.rules)
 
 (define-module rules () ()
   (:documentation "Primitive rule enforcement module."))

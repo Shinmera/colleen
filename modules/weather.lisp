@@ -1,13 +1,14 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.weather
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.weather)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.weather
+  (:nicknames #:co-weather)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.weather)
 
 (define-module weather () ()
   (:documentation "Check the weather status on locations."))

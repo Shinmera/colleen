@@ -4,10 +4,11 @@ This file is a part of Colleen
 Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.convert
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.convert)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.convert
+  (:nicknames #:co-convert)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.convert)
 
 (defun json-request (url &rest drakma-params)
   (let ((drakma:*text-content-types* (cons '("application" . "json")

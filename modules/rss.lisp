@@ -1,14 +1,14 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.rss
-  (:nicknames :co-rss)
-  (:use :cl :colleen :events :lquery))
-(in-package :org.tymoonnext.colleen.mod.rss)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.rss
+  (:nicknames #:co-rss)
+  (:use #:cl #:colleen #:events #:lquery))
+(in-package #:org.tymoonnext.colleen.mod.rss)
 
 (defparameter *save-file* (merge-pathnames "rss-feed-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 

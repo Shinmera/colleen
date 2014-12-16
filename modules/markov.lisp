@@ -1,13 +1,14 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.markov
-  (:use :cl :colleen :events :alexandria))
-(in-package :org.tymoonnext.colleen.mod.markov)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.markov
+  (:nicknames #:co-markov)
+  (:use #:cl #:colleen #:events #:alexandria))
+(in-package #:org.tymoonnext.colleen.mod.markov)
 
 (defvar *registry-file* (merge-pathnames "markov.registry.uc.lisp" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 

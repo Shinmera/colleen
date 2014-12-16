@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.throttle
-  (:nicknames :co-throttle)
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.throttle)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.throttle
+  (:nicknames #:co-throttle)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.throttle)
 
 (defvar *throttles* (make-hash-table :test 'equalp))
 (defvar *throttle-time* 8)

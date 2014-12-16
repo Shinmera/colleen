@@ -1,14 +1,14 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.stevenchan
-  (:use :cl :colleen :events :alexandria :lquery)
-  (:nicknames #:co-stevenchan))
-(in-package :org.tymoonnext.colleen.mod.stevenchan)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.stevenchan
+  (:nicknames #:co-stevenchan)
+  (:use #:cl #:colleen #:events #:alexandria #:lquery))
+(in-package #:org.tymoonnext.colleen.mod.stevenchan)
 
 (define-module stevenchan ()
   ((%rss-url :initarg :rss-url :initform "http://chan.tymoon.eu/api/purplish/atom" :accessor rss-url)

@@ -4,10 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.emoticons
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.emoticons)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.emoticon
+  (:nicknames #:co-emoticon)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.emoticon)
 
 (define-module emoticon () ()
   (:documentation "Simple database for :emoticon:s."))

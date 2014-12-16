@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.chanblock
-  (:nicknames :co-chanblock)
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.chanblock)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.chanblock
+  (:nicknames #:co-chanblock)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.chanblock)
 
 (define-module chanblock () ())
 

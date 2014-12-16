@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.dictionary
-  (:nicknames :co-dictionary)
-  (:use :cl :colleen :events :alexandria))
-(in-package :org.tymoonnext.colleen.mod.dictionary)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.dictionary
+  (:nicknames #:co-dictionary)
+  (:use #:cl #:colleen #:events #:alexandria))
+(in-package #:org.tymoonnext.colleen.mod.dictionary)
 
 (define-module dictionary () ()
   (:documentation "A general purpose dictionary provider."))

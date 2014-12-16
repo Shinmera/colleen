@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.welcome
-  (:nicknames :co-welcome)
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.welcome)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.welcome
+  (:nicknames #:co-welcome)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.welcome)
 
 (define-module welcome ()
     ((%might-greet :initform () :accessor might-greet))

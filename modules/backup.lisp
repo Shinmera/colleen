@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.backup
-  (:nicknames :co-backup)
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.backup)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.backup
+  (:nicknames #:co-backup)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.backup)
 
 (define-module backup ()
     ((%directory :initform NIL :accessor backup-directory))

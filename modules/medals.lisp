@@ -1,13 +1,14 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.medals
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.medals)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.medals
+  (:nicknames #:co-medals)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.medals)
 
 (defvar *save-file* (merge-pathnames "medals-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 

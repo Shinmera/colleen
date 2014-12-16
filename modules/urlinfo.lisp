@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.urlinfo
-  (:use :cl :colleen :events)
-  (:nicknames :co-urlinfo))
-(in-package :org.tymoonnext.colleen.mod.urlinfo)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.urlinfo
+  (:nicknames #:co-urlinfo)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.urlinfo)
 
 (define-module urlinfo ()
     ((streams :initform () :accessor streams))

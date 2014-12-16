@@ -1,13 +1,14 @@
 #|
-This file is a part of Colleen
-(c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
-(defpackage org.tymoonnext.colleen.mod.shiritori
-  (:use :cl :colleen :events))
-(in-package :org.tymoonnext.colleen.mod.shiritori)
+(in-package #:org.tymoonnext.colleen)
+(defpackage #:org.tymoonnext.colleen.mod.shiritori
+  (:nicknames #:co-shiritori)
+  (:use #:cl #:colleen #:events))
+(in-package #:org.tymoonnext.colleen.mod.shiritori)
 
 (define-module shiritori ()
   ((%games :initform (make-hash-table :test #'equalp) :accessor games))

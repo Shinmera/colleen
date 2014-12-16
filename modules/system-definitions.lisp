@@ -4,7 +4,7 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
+(in-package #:org.tymoonnext.colleen)
 
 (define-module-system auth ("authenticate"))
 (define-module-system backup ("backup") (:cl-fad))
