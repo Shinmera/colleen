@@ -192,28 +192,9 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
              (with-output-to-string (s) (puri:render-uri uri s))
              (lquery:$ (initialize content) "title" (text) (node)))))
 
-(defun get-ud-words ()
-  (loop with wordmap = (make-hash-table)
-        for code from (char-code #\A) to (char-code #\Z)
-        for char = (code-char code)
-        do (lquery:$ (initialize (drakma:http-request (format NIL "http://www.urbandictionary.com/popular.php?character=~a" char)))
-             "li.popular a" (text) (each #'(lambda (word)
-                                             (loop for word in (cl-ppcre:split "\\s" word)
-                                                   when (< 0 (length word))
-                                                     do (pushnew (string-capitalize word) (gethash (aref word 0) wordmap)
-                                                                 :test #'string-equal))
-                                             T)))
-        finally (return wordmap)))
-
-(defvar *ud-word-cache* (get-ud-words))
-
-(define-command expand (acronym) (:documentation "Expands an acronym using the power of the internet.")
-  (respond event "~a: ~{~a~^ ~}"
-           acronym
-           (loop for char across (cl-ppcre:regex-replace-all "\\." acronym "")
-                 when (alpha-char-p char)
-                   collect (let* ((list (gethash (char-upcase char) *ud-word-cache*)))
-                             (nth (random (length list)) list)))))
+(define-command expand (acronym) (:documentation "Expands an acronym.")
+  (respond event "~a: ~a"
+           acronym (cl-acronyms:expand acronym)))
 
 (defvar *prepositions*
   '("aboard"  "about"  "above"  "across"  "after"  "against"  "along"  "among"  "around"  "as"   "at"  "before"  "behind"   "below" "beneath" "beside"  "between"  "beyond"  "but" "except"  "by"  "concerning"  "despite"  "down"  "during"  "except" "for"  "from"  "in"  "into"  "like" "near"  "of"  "off"  "on"  "onto"  "out"  "outside"  "over"  "past"  "per"  "regarding"  "since"  "through" "throughout"  "till"  "to"  "toward"  "under" "underneath"  "until"  "up"   "upon"  "with"  "within"  "without"))

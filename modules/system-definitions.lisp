@@ -28,7 +28,7 @@
 (define-module-system rules ("rules") (:alexandria))
 (define-module-system search ("search") (:lquery :split-sequence :drakma :cl-wiki))
 (define-module-system shiritori ("shiritori"))
-(define-module-system silly ("silly") (:cl-ppcre :drakma :lquery))
+(define-module-system silly ("silly") (:cl-ppcre :drakma :lquery :cl-acronyms))
 (define-module-system stevenchan ("stevenchan") (:lquery :drakma :alexandria))
 (define-module-system syslog ("syslog"))
 (define-module-system throttle ("throttle"))
