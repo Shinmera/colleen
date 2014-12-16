@@ -5,9 +5,9 @@
 |#
 
 (in-package #:cl-user)
-(defpackage #:org.shirakumo.colleen
+(defpackage #:colleen
+  (:nicknames #:org.shirakumo.colleen)
   (:use #:cl #:split-sequence #:bordeaux-threads #:alexandria)
-  (:nicknames #:colleen)
   ;; asdf-extra.lisp
   (:export
    #:module-system
@@ -269,10 +269,10 @@
    #:users)
   (:shadow #:time #:trace))
 
-(defpackage #:org.shirakumo.colleen.commands
+(defpackage #:irc
+  (:nicknames #:org.shirakumo.colleen.commands)
   (:use #:cl)
   (:import-from #:colleen #:*privmsg-line-limit* #:*current-server* #:*irc-message-limit* #:*server-encoding* #:name #:channels #:message-too-long #:break-string)
-  (:nicknames #:irc)
   (:export
    #:send-raw
    #:pass
@@ -319,9 +319,9 @@
    #:ison)
   (:shadow #:time #:trace #:restart #:list #:error))
 
-(defpackage #:org.shirakumo.colleen.events
+(defpackage #:events
+  (:nicknames #:org.shirakumo.colleen.events)
   (:use #:cl #:colleen)
-  (:nicknames #:events)
   (:export
    ;; Event classes
    #:event

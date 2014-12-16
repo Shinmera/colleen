@@ -1,16 +1,12 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2014 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(defpackage org.tymoonnext.colleen.asdf
-  (:use :cl :asdf))
-(in-package :org.tymoonnext.colleen.asdf)
-
-(defsystem colleen
-  :name "Colleen IRC Bot"
-  :version "2.1.0"
+(in-package #:cl-user)
+(asdf:defsystem colleen
+  :version "2.2.0"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
