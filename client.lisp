@@ -4,7 +4,7 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
+(in-package :org.shirakumo.colleen)
 
 (defvar *servers* (make-hash-table) "Table containing the IRC server instances.")
 (defvar *current-server*)

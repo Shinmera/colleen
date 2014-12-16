@@ -4,11 +4,11 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.chatlog-pg
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.chatlog-pg
   (:nicknames #:co-chatlog-pg)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.chatlog-pg)
+(in-package #:org.shirakumo.colleen.mod.chatlog-pg)
 
 (define-module chatlog-pg ()
   ((%lock :initform (bordeaux-threads:make-lock "DB") :accessor lock))

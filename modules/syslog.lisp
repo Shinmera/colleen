@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.syslog
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.syslog
   (:nicknames #:co-syslog)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.syslog)
+(in-package #:org.shirakumo.colleen.mod.syslog)
 
 (define-module syslog ()
   ((%faucets :initform (make-hash-table :test 'equalp) :accessor faucets))

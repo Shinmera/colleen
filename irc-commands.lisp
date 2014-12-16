@@ -4,7 +4,7 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen.commands)
+(in-package :org.shirakumo.colleen.commands)
 
 (defun raw (server message &rest formatargs)
   "Send a raw message over the server socket."

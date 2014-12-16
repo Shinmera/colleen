@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.markov
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.markov
   (:nicknames #:co-markov)
   (:use #:cl #:colleen #:events #:alexandria))
-(in-package #:org.tymoonnext.colleen.mod.markov)
+(in-package #:org.shirakumo.colleen.mod.markov)
 
 (defvar *registry-file* (merge-pathnames "markov.registry.uc.lisp" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 

@@ -4,12 +4,12 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.eval
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.eval
   (:nicknames #:co-eval)
   (:use #:cl #:colleen #:events #:alexandria)
   (:shadow #:eval))
-(in-package #:org.tymoonnext.colleen.mod.eval)
+(in-package #:org.shirakumo.colleen.mod.eval)
 
 (defun get-all-symbols (&optional package)
   "Gets all symbols within a package."

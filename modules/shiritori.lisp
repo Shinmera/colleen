@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.shiritori
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.shiritori
   (:nicknames #:co-shiritori)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.shiritori)
+(in-package #:org.shirakumo.colleen.mod.shiritori)
 
 (define-module shiritori ()
   ((%games :initform (make-hash-table :test #'equalp) :accessor games))

@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.silly
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.silly
   (:nicknames #:co-silly)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.silly)
+(in-package #:org.shirakumo.colleen.mod.silly)
 
 (define-module silly () ()
   (:documentation "Silly things."))

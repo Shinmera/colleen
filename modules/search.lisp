@@ -4,12 +4,12 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.search
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.search
   (:nicknames #:co-search)
   (:use #:cl #:colleen #:events #:lquery #:split-sequence)
   (:shadow #:search))
-(in-package #:org.tymoonnext.colleen.mod.search)
+(in-package #:org.shirakumo.colleen.mod.search)
 
 (defun drakma-utf8 (url &rest params)
   (apply #'drakma:http-request url :external-format-in :utf-8 :external-format-out :utf-8 :user-agent :chrome params))

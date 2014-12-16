@@ -5,7 +5,7 @@
 |#
 
 (in-package #:cl-user)
-(defpackage #:org.tymoonnext.colleen
+(defpackage #:org.shirakumo.colleen
   (:use #:cl #:split-sequence #:bordeaux-threads #:alexandria)
   (:nicknames #:colleen)
   ;; asdf-extra.lisp
@@ -269,7 +269,7 @@
    #:users)
   (:shadow #:time #:trace))
 
-(defpackage #:org.tymoonnext.colleen.commands
+(defpackage #:org.shirakumo.colleen.commands
   (:use #:cl)
   (:import-from #:colleen #:*privmsg-line-limit* #:*current-server* #:*irc-message-limit* #:*server-encoding* #:name #:channels #:message-too-long #:break-string)
   (:nicknames #:irc)
@@ -319,7 +319,7 @@
    #:ison)
   (:shadow #:time #:trace #:restart #:list #:error))
 
-(defpackage #:org.tymoonnext.colleen.events
+(defpackage #:org.shirakumo.colleen.events
   (:use #:cl #:colleen)
   (:nicknames #:events)
   (:export

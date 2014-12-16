@@ -4,7 +4,7 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
+(in-package :org.shirakumo.colleen)
 
 (define-condition module-error (error) ()
   (:documentation "Condition superclass for module related errors."))

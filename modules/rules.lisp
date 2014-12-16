@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.rules
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.rules
   (:nicknames #:co-rules)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.rules)
+(in-package #:org.shirakumo.colleen.mod.rules)
 
 (define-module rules () ()
   (:documentation "Primitive rule enforcement module."))
@@ -151,7 +151,7 @@
             ((eql field :PROBATION)
              (setf value (parse-integer value :junk-allowed T))
              (assert (not (null value)) () "Probation has to be an integer.")))
-          (setf (slot-value rule (find-symbol (format NIL "%~a" field) :org.tymoonnext.colleen.mod.rules))
+          (setf (slot-value rule (find-symbol (format NIL "%~a" field) :org.shirakumo.colleen.mod.rules))
                 value)
           (respond event "Rule ~a edited." name))
         (respond event "A rule with that name does not exist!"))))

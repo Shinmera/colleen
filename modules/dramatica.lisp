@@ -4,11 +4,11 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.dramatica
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.dramatica
   (:nicknames #:co-dramatica)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.dramatica)
+(in-package #:org.shirakumo.colleen.mod.dramatica)
 
 (define-module dramatica ()
     ((%log-running :initarg :log-running :initform NIL :accessor log-running)

@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.profile
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.profile
   (:nicknames #:co-profile)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.profile)
+(in-package #:org.shirakumo.colleen.mod.profile)
 
 (defvar *nickserv-status-regex* (cl-ppcre:create-scanner "STATUS (.+) ([0-3])"))
 (defvar *pending-nickserv-ops* (make-hash-table :test 'equalp))

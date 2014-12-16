@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.medals
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.medals
   (:nicknames #:co-medals)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.medals)
+(in-package #:org.shirakumo.colleen.mod.medals)
 
 (defvar *save-file* (merge-pathnames "medals-save.json" (merge-pathnames "config/" (asdf:system-source-directory :colleen))))
 

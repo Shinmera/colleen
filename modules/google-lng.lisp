@@ -4,7 +4,7 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen.mod.google)
+(in-package #:org.shirakumo.colleen.mod.google)
 
 (defparameter *language-code-map*
   (let ((table (make-hash-table :test 'equalp)))

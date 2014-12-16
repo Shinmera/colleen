@@ -4,11 +4,11 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.counter
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.counter
   (:nicknames #:co-counter)
   (:use #:cl #:colleen #:events))
-(in-package #:org.tymoonnext.colleen.mod.counter)
+(in-package #:org.shirakumo.colleen.mod.counter)
 
 (define-module counter () ()
   (:documentation "Count objects."))

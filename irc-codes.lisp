@@ -4,7 +4,7 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
+(in-package :org.shirakumo.colleen)
 
 (defparameter *reply-code-map*
   (let ((hash-table (make-hash-table :size 207)))

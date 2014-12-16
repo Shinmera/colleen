@@ -4,12 +4,12 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package #:org.tymoonnext.colleen)
-(defpackage #:org.tymoonnext.colleen.mod.essentials
+(in-package #:org.shirakumo.colleen)
+(defpackage #:org.shirakumo.colleen.mod.essentials
   (:nicknames #:co-essentials)
   (:use #:cl #:colleen #:events #:local-time #:alexandria)
   (:shadow #:shutdown))
-(in-package #:org.tymoonnext.colleen.mod.essentials)
+(in-package #:org.shirakumo.colleen.mod.essentials)
 
 (define-module essentials ()
     ((%startup :initform (get-universal-time) :accessor startup-time))
@@ -172,7 +172,7 @@
   (format stream "~:[~a~;*~a~]" (active (get-module module-name)) module-name))
 
 (define-command (module list) () (:documentation "List available modules.")
-  (respond event "Modules [* activated]: ~{~/org.tymoonnext.colleen.mod.essentials::format-module/~^ ~}" (hash-table-keys *bot-modules*)))
+  (respond event "Modules [* activated]: ~{~/org.shirakumo.colleen.mod.essentials::format-module/~^ ~}" (hash-table-keys *bot-modules*)))
 
 (define-command (module help) (module-name) (:documentation "Show the docstring for a module.")
   (with-module (instance module-name)

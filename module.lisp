@@ -4,7 +4,7 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
+(in-package :org.shirakumo.colleen)
 
 (defvar *bot-modules* (make-hash-table) "Global module table consisting of name->instance pairs.")
 (defvar *current-module*)

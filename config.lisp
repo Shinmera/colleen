@@ -4,7 +4,7 @@
   Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
+(in-package :org.shirakumo.colleen)
 
 (defvar *config-file* NIL "Pathname pointing to the config file being used.")
 (defvar *config-directory* (merge-pathnames "config/" (asdf:system-source-directory :colleen)))

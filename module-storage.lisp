@@ -4,7 +4,7 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.tymoonnext.colleen)
+(in-package :org.shirakumo.colleen)
 
 (defmacro with-module-storage ((&optional (module '*current-module*)) &body forms)
   `(let ((uc:*config* (storage (get-module ,module))))
