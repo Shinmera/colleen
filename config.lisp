@@ -7,9 +7,12 @@
 (in-package #:org.shirakumo.colleen)
 
 (defvar *config-file* NIL "Pathname pointing to the config file being used.")
-(defvar *config-directory* (merge-pathnames "config/" (asdf:system-source-directory :colleen)))
-(defvar *default-config-file* (merge-pathnames "colleen.uc.lisp" *config-directory*))
-(defvar *sample-config-file* (merge-pathnames "sample.uc.lisp" (asdf:system-source-directory :colleen)))
+(defvar *config-directory* (merge-pathnames "config/" (asdf:system-source-directory :colleen))
+  "The directory pathname where configuration files are stored.")
+(defvar *default-config-file* (merge-pathnames "colleen.uc.lisp" *config-directory*)
+  "Pathname pointing to the default colleen central configuration file.")
+(defvar *sample-config-file* (merge-pathnames "sample.uc.lisp" (asdf:system-source-directory :colleen))
+  "Pathname pointing to the sample colleen central configuration file.")
 (defvar *config* NIL "Bot core config.")
 
 (defun load-config (&optional (config-file *config-file*))
@@ -37,6 +40,7 @@
   (v:info :colleen.main "Saved config to ~a" config-file))
 
 (defun bot-config (&rest accessors)
+  "Wrapper around UC:CONFIG-TREE that always uses the colleen central config."
   (let ((uc:*config* *config*))
     (apply #'uc:config-tree accessors)))
 

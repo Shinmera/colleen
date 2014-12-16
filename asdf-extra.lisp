@@ -6,9 +6,11 @@
 
 (in-package #:org.shirakumo.colleen)
 
-(defclass module-system (asdf:system) ())
+(defclass module-system (asdf:system) ()
+  (:documentation "ASDF system subclass for Colleen modules."))
 
 (defmacro define-module-system (name components &optional depends-on)
+  "Shorthand wrapper around ASDF:DEFSYSTEM to quickly define Colleen contrib modules."
   `(asdf:defsystem ,(intern (format NIL "CO-~a" name))
      :class :module-system
      :pathname ,(merge-pathnames "modules/" (asdf:system-source-directory :colleen))
@@ -18,6 +20,7 @@
      :depends-on ,(cons :colleen depends-on)))
 
 (defun load-module (name)
+  "Tries to find and load a module of NAME."
   (let* ((name (string-downcase name))
          (system (or (ignore-errors (asdf:find-system (format NIL "co-~a" name)))
                      (ignore-errors (asdf:find-system name))))

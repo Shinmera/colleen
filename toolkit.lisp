@@ -56,6 +56,8 @@
                                  map))
 
 (defun mirc-color->name (num)
+  "Attempts to translate an mIRC color sequence to a color name.
+Returns the colour name as a keyword or :?"
   (when (stringp num)
     (setf num (parse-integer num)))
   (gethash num *mirc-color-map* :?))
