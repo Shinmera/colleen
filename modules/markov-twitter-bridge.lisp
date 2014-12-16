@@ -15,15 +15,14 @@
 
 (defmethod start ((mod markov-twitter-bridge))
   (with-module-thread (mod)
-    (loop do (progn
-               (markov-tweet)
-               (sleep (+ (* 60 15) (random (* 8 (* 60 60)))))))))
+    (loop do (sleep (+ (* 60 15) (random (* 8 (* 60 60)))))
+             (markov-tweet))))
 
 (define-command markov-tweet () (:documentation "Tweets a markov message.")
   (respond event "The birds sing: ~a" (markov-tweet)))
 
 (defun markov-tweet ()
-  (let ((message (loop for msg = (co-markov:generate-string (get-module :markov))
+  (let ((message (loop for msg = (co-markov:generate-string)
                        until (<= (length msg) 140)
                        finally (return msg))))
     (chirp:tweet message)
