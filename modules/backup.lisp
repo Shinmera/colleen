@@ -124,5 +124,5 @@
 
 (define-command (backup restore) (&rest datestring) (:authorization T :documentation "Restore an existing backup.")
   (respond event "Restoring now. All modules will be restarted in the process.")
-  (restore (if datestring (format NIL "~{~a~^ ~}" datestring) (last-backup)))
+  (restore (if datestring (format NIL "~{~a~^ ~}" datestring) (last-backup module)))
   (respond event "Restore complete."))
