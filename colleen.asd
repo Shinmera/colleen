@@ -36,7 +36,8 @@
                (:file "asdf-extra")
                (:file "launcher")
                (:module "modules"
-                :components ((:file "system-definitions"))))
+                :components ((:file "system-definitions")
+                             (:file "core"))))
   :depends-on (:bordeaux-threads 
                :universal-config
                :verbose
