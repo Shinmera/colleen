@@ -1,10 +1,10 @@
 #|
-  This file is a part of Colleen
-  (c) 2013 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
-  Author: Nicolas Hafner <shinmera@tymoon.eu>
+ This file is a part of Colleen
+ (c) 2014 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
+ Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.shirakumo.colleen.commands)
+(in-package #:org.shirakumo.colleen.commands)
 
 (defun raw (server message &rest formatargs)
   "Send a raw message over the server socket."

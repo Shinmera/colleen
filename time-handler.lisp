@@ -4,7 +4,7 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(in-package :org.shirakumo.colleen)
+(in-package #:org.shirakumo.colleen)
 
 (defvar *timer-map* (make-hash-table)
   "Hash table mapping timer names to time-handler instances.")
