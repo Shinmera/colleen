@@ -45,28 +45,27 @@
 (define-command (twitter tweet) (&rest text) (:authorization T :documentation "Tweet on behalf of the linked user.")
   (chirp:tweet (format NIL "~{~a~^ ~}" text)))
 
+(define-condition stop-stream-error (error) ())
 (define-command (twitter stream-home) () (:authorization T :documentation "Stream the home timeline to the current channel.")
   (push (list (with-module-thread (:twitter)
-                (loop
-                  (chirp:stream/user #'(lambda (o) (stream-handler o event)))))
+                (loop until (handler-case
+                                (progn (chirp:stream/user #'(lambda (o) (stream-handler o event))) NIL)
+                              (error (err)
+                                (typep err 'stop-stream-error)))))
               (colleen:name (server event))
               (channel event))
         (streams module)))
 
 (defun stream-handler (o event)
-  (flet ((process-text (o len)
-           (cl-ppcre:regex-replace-all
-            "\\n" (chirp:xml-decode (chirp:text-with-expanded-urls o))
-            (format NIL "~%~v< ~>" len))))
+  (flet ((process-text (o)
+           (cl-ppcre:regex-replace-all "\\n" (chirp:xml-decode (chirp:text-with-expanded-urls o)) " / ")))
     (when (and o (typep o 'chirp:status))
       (let ((preamble (format NIL "[Twitter] ~a: " (chirp:screen-name (chirp:user o)))))
         (when (chirp:retweeted-status o)
           (let ((rt (chirp:statuses/show (chirp:id (chirp:retweeted-status o)))))
             (setf preamble (format NIL "~aRT ~a: " preamble (chirp:screen-name (chirp:user rt))))
             (setf o rt)))
-        (respond event "~a~a"
-                 preamble
-                 (process-text o (length preamble))))))
+        (respond event "~a~a" preamble (process-text o)))))
   (bordeaux-threads:thread-yield)
   (not (typep o 'chirp:stream-disconnect)))
 
@@ -77,7 +76,7 @@
   (let ((thread (gethash id (threads module))))
     (if thread
         (progn
-          (bordeaux-threads:interrupt-thread thread #'(lambda () (error "STOP STREAM!")))
+          (bordeaux-threads:interrupt-thread thread #'(lambda () (error 'stop-stream-error)))
           (when (bordeaux-threads:thread-alive-p thread)
             (bordeaux-threads:destroy-thread thread))
           (if (bordeaux-threads:thread-alive-p thread)
