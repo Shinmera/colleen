@@ -147,6 +147,22 @@
                 (string-equal "none" shuowen))
       (respond event "Extra credit: ~a" shuowen))))
 
+(define-command (search urban-dictionary) (&rest term) (:documentation "Search the Urban Dictionary for a definition of the given term.")
+  (let* ((term (format NIL "~{~a~^ ~}" term))
+         (drakma:*text-content-types* (list* (cons "application" "json") drakma:*text-content-types*))
+         (content (drakma:http-request "http://api.urbandictionary.com/v0/define"
+                                       :parameters `(("term" . ,term))
+                                       :external-format-out :utf-8 :external-format-in :utf-8))
+         (data (cl-json:decode-json-from-string content))
+         (def (first (cdr (assoc :list data)))))
+    (if def
+        (respond event "~a: ~a [~a]"
+                 term (cdr (assoc :definition def)) (cdr (assoc :permalink def)))
+        (respond event "No definition found."))))
+
+(define-command (search ud) (&rest term) (:documentation "Search the Urban Dictionary for a definition of the given term.")
+  (relay-command event (format NIL "search urban-dictionary ~{~a~^ ~}" term)))
+
 (defun google-term (term)
   (let ((lquery:*lquery-master-document*))
     ($ (initialize (drakma-utf8 "http://www.google.com/search" 
