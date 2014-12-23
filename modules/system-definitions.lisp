@@ -23,6 +23,7 @@
 (define-module-system markov ("markov"))
 (define-module-system medals ("medals"))
 (define-module-system notify ("notify") (:local-time))
+(define-module-system pings ("pings") (:cl-ppcre))
 (define-module-system profile ("profile") (:local-time))
 (define-module-system rss ("rss") (:lquery :drakma :cl-json))
 (define-module-system rules ("rules") (:alexandria))
