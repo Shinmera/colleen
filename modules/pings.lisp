@@ -65,8 +65,8 @@
                (respond event "~a: You have been pinged ~d time~:p by ~{~a~#[~;, and ~:;, ~]~} first at ~a"
                         (nick event) (second pings) (third pings) (format-universal-time (first pings))))
               (T
-               (v:info :pings "Clearing ping info for ~a" (id event))
-               (setf (uc:config-tree :pings (id event)) ())))))))
+               (v:info :pings "Clearing ping info for ~a" (id event))))
+        (setf (uc:config-tree :pings (id event)) ())))))
 
 (define-group pings :documentation "Change ping reminder settings.")
 
