@@ -5,19 +5,19 @@
 |#
 
 (in-package #:org.shirakumo.colleen)
-(defpackage #:org.shirakumo.colleen.mod.pings
-  (:nicknames #:co-pings)
+(defpackage #:org.shirakumo.colleen.mod.mentions
+  (:nicknames #:co-mentions)
   (:use #:cl #:colleen #:events))
-(in-package #:org.shirakumo.colleen.mod.pings)
+(in-package #:org.shirakumo.colleen.mod.mentions)
 
-(define-module pings () ())
+(define-module mentions () ())
 
-(defmethod start ((pings pings))
-  (with-module-storage (pings)
+(defmethod start ((mentions mentions))
+  (with-module-storage (mentions)
     (macrolet ((set-new (place value)
                  `(unless (uc:config-tree ,place)
                     (setf (uc:config-tree ,place) ,value))))
-      (set-new :pings (make-hash-table :test 'equalp))
+      (set-new :mentions (make-hash-table :test 'equalp))
       (set-new :delay (* 60 60))
       (set-new :active ()))))
 
@@ -29,72 +29,74 @@
           (string-trim "`-_\\" nick)))
 
 (defun format-universal-time (ut)
-  (format NIL "~:@{~4,'0d.~2,'0d.~2,'0d ~2,'0d:~2,'0d:~2,'0d~}"
-          (subseq (nreverse (multiple-value-list (decode-universal-time ut))) 3)))
+  (local-time:format-timestring
+   NIL (local-time:universal-to-timestamp ut)
+   :format '((:year 4) "." :month "." :day ", " :long-weekday " " (:hour 2) ":" (:min 2) ":" (:sec 2) " UTC")
+   :timezone local-time:+utc-zone+))
 
 (define-handler (privmsg-event event) ()
   (when (find (id event :nick "") (uc:config-tree :active) :test #'string-equal)
-    ;; Record ping
+    ;; Record mention
     (cl-ppcre:register-groups-bind (name) ("^([a-zA-Z0-9_\\-`\\[\\]\\|]+)[:,]" (message event))
       (when (and (find name (users (channel event)) :test #'string-equal)
                  (not (string-equal name (nick (server event)))))
         (let* ((id (id event :nick name))
-               (pings (uc:config-tree :pings id)))
+               (mentions (uc:config-tree :mentions id)))
           (cond
-            (pings
-             (v:info :pings "Adding ~a to ping info for ~a" (nick event) id)
-             (incf (second pings))
-             (pushnew (nick event) (third pings) :test #'string-equal))
+            (mentions
+             (v:info :mentions "Adding ~a to mention info for ~a" (nick event) id)
+             (incf (second mentions))
+             (pushnew (nick event) (third mentions) :test #'string-equal))
             (T
-             (v:info :pings "Creating new ping info for ~a by ~a" id (nick event))
-             (setf (uc:config-tree :pings id)
+             (v:info :mentions "Creating new mention info for ~a by ~a" id (nick event))
+             (setf (uc:config-tree :mentions id)
                    (list (get-universal-time)
                          1
                          (list (nick event)))))))))
-    ;; Relay ping
-    (let ((pings (uc:config-tree :pings (id event)))) 
-      (when pings
+    ;; Relay mention
+    (let ((mentions (uc:config-tree :mentions (id event)))) 
+      (when mentions
         (cond ((and
                 ;; Delay can't be overstepped.
-                (< (uc:config-tree :delay) (- (get-universal-time) (first pings)))
-                ;; The user mustn't be responding to one of his pingers.
-                (loop for pinger in (third pings)
-                      never (search pinger (message event) :test #'char-equal)))
+                (< (uc:config-tree :delay) (- (get-universal-time) (first mentions)))
+                ;; The user mustn't be responding to one of his mentioners.
+                (loop for mentioner in (third mentions)
+                      never (search mentioner (message event) :test #'char-equal)))
                ;; Ok, we hope they really didn't notice.
-               (v:info :pings "Relaying ping info for ~a" (id event))
-               (respond event "~a: You have been pinged ~d time~:p by ~{~a~#[~;, and ~:;, ~]~} first at ~a"
-                        (nick event) (second pings) (third pings) (format-universal-time (first pings))))
+               (v:info :mentions "Relaying mention info for ~a" (id event))
+               (respond event "~a: You have been mentioned ~d time~:p by ~{~a~#[~;, and ~:;, ~]~} first at ~a"
+                        (nick event) (second mentions) (third mentions) (format-universal-time (first mentions))))
               (T
-               (v:info :pings "Clearing ping info for ~a" (id event))))
-        (setf (uc:config-tree :pings (id event)) ())))))
+               (v:info :mentions "Clearing mention info for ~a" (id event))))
+        (setf (uc:config-tree :mentions (id event)) ())))))
 
-(define-group pings :documentation "Change ping reminder settings.")
+(define-group mentions :documentation "Change mention reminder settings.")
 
-(define-command (pings activate) (&optional channel server) (:authorization T :documentation "Activate ping reminding.")
+(define-command (mentions activate) (&optional channel server) (:authorization T :documentation "Activate mention reminding.")
   (let ((channel (or channel (channel event)))
         (server (or server (name (server event)))))
     (pushnew (id event :channel channel :server server :nick "")
              (uc:config-tree :active) :test #'string-equal)
-    (respond event "Ping reminding activated for ~a/~a." server channel)))
+    (respond event "Mention reminding activated for ~a/~a." server channel)))
 
-(define-command (pings deactivate) (&optional channel server) (:authorization T :documentation "Deactivate ping reminding.")
+(define-command (mentions deactivate) (&optional channel server) (:authorization T :documentation "Deactivate mention reminding.")
   (let ((channel (or channel (channel event)))
         (server (or server (name (server event)))))
     (setf (uc:config-tree :active)
           (delete (id event :channel channel :server server :nick "")
                   (uc:config-tree :active) :test #'string-equal))
-    (respond event "Ping reminding deactivated for ~a/~a." server channel)))
+    (respond event "Mention reminding deactivated for ~a/~a." server channel)))
 
-(define-command (pings delay) (&optional new-delay) (:authorization T :documentation "Show or set the necessary ping delay in seconds.")
+(define-command (mentions delay) (&optional new-delay) (:authorization T :documentation "Show or set the necessary mention delay in seconds.")
   (when new-delay
     (setf (uc:config-tree :delay) (parse-integer new-delay)))
-  (respond event "Necessary ping delay is ~a second~:p." (uc:config-tree :delay)))
+  (respond event "Necessary mention delay is ~a second~:p." (uc:config-tree :delay)))
 
-(define-command (pings clear) (id) (:authorization T :documentation "Clear pings for a certain ID (server/channel/nick).")
-  (let ((pings (uc:config-tree :pings id)))
-    (cond (pings
-           (setf (uc:config-tree :pings id) ())
-           (respond event "~a had ~d ping~:p by ~{~a~#[~;, and ~:;, ~]~} first at ~a"
-                    id (second pings) (third pings) (format-universal-time (first pings))))
+(define-command (mentions clear) (id) (:authorization T :documentation "Clear mentions for a certain ID (server/channel/nick).")
+  (let ((mentions (uc:config-tree :mentions id)))
+    (cond (mentions
+           (setf (uc:config-tree :mentions id) ())
+           (respond event "~a had ~d mention~:p by ~{~a~#[~;, and ~:;, ~]~} first at ~a"
+                    id (second mentions) (third mentions) (format-universal-time (first mentions))))
           (T
-           (respond event "No pings to clear." id)))))
+           (respond event "No mentions to clear." id)))))

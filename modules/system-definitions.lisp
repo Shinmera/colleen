@@ -22,7 +22,7 @@
 (define-module-system google ("google" "google-lng") (:split-sequence :drakma :cl-json :plump))
 (define-module-system markov ("markov"))
 (define-module-system medals ("medals"))
-(define-module-system mentions ("mentions") (:cl-ppcre))
+(define-module-system mentions ("mentions") (:cl-ppcre :local-time))
 (define-module-system notify ("notify") (:local-time))
 (define-module-system profile ("profile") (:local-time))
 (define-module-system rss ("rss") (:lquery :drakma :cl-json))
