@@ -127,10 +127,10 @@ is even on record or not."
                   :test #'string-equal))))
 
 (define-handler (events:nick-event event) (:identifier userlist-balancer-nick :priority :last)
-  (setf (users (channel event) (server event))
-        (cons (events:new-nick event)
-              (delete (nick event) (users (channel event) (server event))
-                      :test #'string-equal))))
+  (dolist (channel (channels (server event)))
+    (loop for cons on (users channel (server event))
+          do (when (string-equal (car cons) (nick event))
+               (return (setf (car cons) (events:new-nick event)))))))
 
 (defun refresh-channel-user-lists ()
   (loop for server being the hash-values of *servers*
