@@ -121,6 +121,11 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
         (sleep (/ (random 20) 10))
         (respond event "GALO SENGEN"))
 
+      (when (cl-ppcre:scan "^([1-9]\\d*(('\\d+)*(\\.\\d*))?)|0$" message)
+        (sleep (/ (random 20) 10))
+        (when (< (random 100) 50)
+          (respond event "That's Numberwang!")))
+
       (cl-ppcre:register-groups-bind (thing) ("distracted by (.+)" message)
         (sleep (/ (random 10) 20))
         (respond event "The ~a ruse was a.........." thing)
