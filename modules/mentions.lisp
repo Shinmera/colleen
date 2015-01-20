@@ -28,11 +28,20 @@
           ;; Strip common "dupe nick" pre/suffixes
           (string-trim "`-_\\" nick)))
 
+(defconstant +UNIX-EPOCH-DIFFERENCE+ (encode-universal-time 0 0 0 1 1 1970 0))
+(defun get-unix-time (&optional (time (get-universal-time)))
+  (- time +UNIX-EPOCH-DIFFERENCE+))
+
 (defun format-universal-time (ut)
   (local-time:format-timestring
    NIL (local-time:universal-to-timestamp ut)
    :format '((:year 4) "." :month "." :day ", " :long-weekday " " (:hour 2) ":" (:min 2) ":" (:sec 2) " UTC")
    :timezone local-time:+utc-zone+))
+
+(defun external-chatlog-link (server channel universal-time)
+  (when (and (find-package :co-chatlog-pg)
+             (funcall (find-symbol "ACTIVE-P" :co-chatlog-pg) server channel))
+    (funcall (find-symbol "EXTERNAL-ADDRESS" :co-chatlog-pg) server channel (get-unix-time universal-time))))
 
 (define-handler (privmsg-event event) ()
   (when (find (id event :nick "") (uc:config-tree :active) :test #'string-equal)
@@ -64,8 +73,9 @@
                       never (search mentioner (message event) :test #'char-equal)))
                ;; Ok, we hope they really didn't notice.
                (v:info :mentions "Relaying mention info for ~a" (id event))
-               (respond event "~a: You have been mentioned ~d time~:p by ~{~a~#[~;, and ~:;, ~]~} first at ~a"
-                        (nick event) (second mentions) (third mentions) (format-universal-time (first mentions))))
+               (respond event "~a: You have been mentioned ~d time~:p by ~{~a~#[~;, and ~:;, ~]~} first at ~a~@[ ~a~]"
+                        (nick event) (second mentions) (third mentions) (format-universal-time (first mentions))
+                        (external-chatlog-link (name (server event)) (channel event) (first mentions))))
               (T
                (v:info :mentions "Clearing mention info for ~a" (id event))))
         (setf (uc:config-tree :mentions (id event)) ())))))
