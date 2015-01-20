@@ -58,9 +58,11 @@
             (uc:config-tree :port) port)))
   list)
 
-(defun external-address ()
+(defun external-address (&optional server channel time)
   (with-module-storage ((module :chatlog-pg))
-    (uc:config-tree :external-address)))
+    (when (uc:config-tree :external-address)
+      (format NIL "~a~@[~(~a~)/~]~@[~(~a~)~]~@[?around=~d#~:*~d~]"
+              (uc:config-tree :external-address) server (string-trim "# " channel) time))))
 
 (defun (setf external-address) (address)
   (with-module-storage ((module :chatlog-pg))
