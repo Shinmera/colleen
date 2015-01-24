@@ -19,7 +19,9 @@
 
 (defun urlinfo (url)
   (let ((drakma:*text-content-types* (cons '("application" . "xhtml+xml") drakma:*text-content-types*)))
-    (multiple-value-bind (stream status headers uri) (drakma:http-request url :want-stream T)
+    (multiple-value-bind (stream status headers uri) (drakma:http-request url :want-stream T :connection-timeout 5)
+      
+      (unless stream (error "Timeout while connecting!"))
       (unwind-protect
            (when (= status 200)
              (let ((target-url (make-string-output-stream)))
