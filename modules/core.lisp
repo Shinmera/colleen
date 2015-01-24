@@ -40,7 +40,7 @@
   (irc:pong (events:server1 event)))
 
 (define-handler (events:nick-event event) ()
-  (when (string-equal (events:new-nick event) (nick (server event)))
+  (when (string-equal (nick event) (nick (server event)))
     (v:debug (name (server event)) "Changing nick of server to ~a due to NICK event." (events:new-nick event))
     (setf (nick (server event)) (events:new-nick event))))
 
