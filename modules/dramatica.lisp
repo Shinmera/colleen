@@ -20,16 +20,11 @@
     (setf wiki:*wiki-api* (uc:config-tree :wiki :api))
     (when (> (length (uc:config-tree :wiki :pass)) 0)
       (wiki:login (uc:config-tree :wiki :user)
-                  (uc:config-tree :wiki :pass)))
-    (when (> (length (uc:config-tree :forum :pass)) 0)
-      (xencl:initiate (uc:config-tree :forum :url)
-                      (uc:config-tree :forum :user)
-                      (uc:config-tree :forum :pass)))))
+                  (uc:config-tree :wiki :pass)))))
 
 (defmethod save-storage :before ((dramatica dramatica))
   (with-module-storage (dramatica)
-    (setf (uc:config-tree :wiki :api) wiki:*wiki-api*)
-    (setf (uc:config-tree :forum :url) xencl:*index*)))
+    (setf (uc:config-tree :wiki :api) wiki:*wiki-api*)))
 
 ;;;;;;;;;;;; RECENT CHANGES
 (define-group ed :documentation "Interact or change ED settings.")
@@ -192,33 +187,3 @@
   (setf reason (format NIL "~{~a~^ ~}" reason))
   (wiki:user-block user :expiry expiry :reason reason)
   (respond event "User blocked until ~a (~a)." expiry reason))
-
-;;;;;;;;;;;; FORUM COMMANDS
-
-(define-group edf :documentation "Commands for the Encyclopedia Dramatica Forums.")
-
-(define-command (edf url) (&optional url) (:authorization T :documentation "View or set the forum URL.")
-  (when url 
-    (setf xencl:*index* url))
-  (respond event "Used URL: ~a" xencl:*index*))
-
-(defmacro define-edf-command (name (&rest args) (&rest options) &body body)
-  `(define-command (edf ,name) ,args ,options
-     (handler-case
-         (progn ,@body)
-       (xencl:forum-error (err)
-         (respond event "Forum error: ~a (E~a) ~@[on page ~a~]" (xencl:info err) (xencl:code err) (xencl:page err))))))
-
-(define-edf-command login (&optional username password) (:authorization T :documentation "Log in to the forum.")
-  (xencl:login (make-instance 'xencl:user
-                              :title (or username (uc:config-tree :forum :user))
-                              :pass (or password (uc:config-tree :forum :pass))))
-  (respond event "Login successful."))
-
-(define-edf-command shoutbox-post (&rest message) (:authorization T :documentation "Posted a message to the shoutbox.")
-  (xencl:post (make-instance 'xencl:shoutbox) (format NIL "~{~a~^ ~}" message))
-  (respond event "Message posted."))
-
-(define-edf-command status-post (&rest message) (:authorization T :documentation "Post a status update to the bot profile.")
-  (xencl:start-thread xencl:*user* (format NIL "~{~a~^ ~}" message))
-  (respond event "Status posted."))
