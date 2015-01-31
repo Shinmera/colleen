@@ -181,7 +181,7 @@ Returns two values: how many threads were removed and how many remain."
 (defun sweep-all-module-threads ()
   "Performs SWEEP-MODULE-THREADS on all modules."
   (loop for v being the hash-values of *bot-modules*
-        do (sweep-module-threads v)))
+        summing (sweep-module-threads v)))
 
 (defgeneric to-module-name (name-object)
   (:documentation "Attempts to transform the given object into the keyword name for a module.")

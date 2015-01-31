@@ -14,7 +14,7 @@
 
 (define-timer thread-sweeper () (:type :single :documentation "Regularly performs (sweep-all-module-threads)")
   (v:info :core "Performing thread sweep.")
-  (sweep-all-module-threads))
+  (v:info :core "Sweeped ~d threads." (sweep-all-module-threads)))
 
 (defmethod stop ((core core))
   (v:info :core "Saving colleen config.")
