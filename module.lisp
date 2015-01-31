@@ -28,7 +28,10 @@
 (generalize-module-accessor threads)
 
 (defmethod print-object ((module module) stream)
-  (format stream "<[~a]>" (class-name (class-of module))))
+  (print-unreadable-object (module stream)
+    (format stream "~a :threads ~d~:[~; :started~]"
+            (symbol-name (class-name (class-of module))) (active module) (hash-table-count (threads module))))
+  module)
 
 (defgeneric start (module)
   (:documentation "Start the module and activate it for use."))
@@ -252,13 +255,13 @@ The following restarts are available:
   RETRY --- Simply retry starting."
   (dolist (module-name module-names)
     (setf module-name (to-module-name module-name))
-    (with-simple-restart (skip "Skip starting the module.")
+    (with-simple-restart (skip "Skip starting ~a." module-name)
       (let ((module (get-module module-name)))
         (assert (not (null module)) () "Module ~a not found!" module-name)
         (with-simple-restart (force "Force starting the module.")
           (assert (not (active module)) () "Module ~a already started!" module-name))
         (v:info module-name "Starting...")
-        (loop until (with-simple-restart (retry "Retry starting the module.")
+        (loop until (with-simple-restart (retry "Retry starting ~a." module-name)
                       (start module)))
         module))))
 
