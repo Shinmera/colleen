@@ -149,13 +149,16 @@ Thing can be a SERVER, STRING, or SYMBOL."
       (terminate-server-thread '%read-thread)
       (terminate-server-thread '%ping-thread))
 
-    (when (socket server)
-      (v:info (name server) "Disconnecting...")
-      (when quit
-        (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server)
-        (finish-output (socket-stream server)))
-      (close (socket-stream server))
-      (usocket:socket-close (socket server)))
+    (handler-case
+        (when (socket server)
+          (v:info (name server) "Disconnecting...")
+          (when quit
+            (irc:quit :quit-message (or quit-message "#1=(quit . #1#)") :server server)
+            (finish-output (socket-stream server)))
+          (close (socket-stream server))
+          (usocket:socket-close (socket server)))
+      (error (err)
+        (v:severe (name server) "Failed to properly close stream, discarding it instead. The encountered error was: ~a" err)))
     (setf (socket server) NIL)
     (remhash (name server) *servers*)))
 
