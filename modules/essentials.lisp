@@ -263,7 +263,7 @@
   (irc:broadcast (format NIL "~{~a~^ ~}" message)))
 
 (define-command (irc notify) (target &rest message) (:authorization T :documentation "Notify all users in the target channel with a message.")
-  (irc:privmsg target (format NIL "~{~a: ~}~{~a~^ ~}" (users (channel event) (server event)) message)))
+  (irc:privmsg target (format NIL "~{~a: ~}~{~a~^ ~}" (users target (server event)) message)))
 
 (define-irc-server-command nick (new-nick &optional server) (:documentation "Change the bot's nick.")
   (irc:nick new-nick :server serv))
