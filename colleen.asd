@@ -37,8 +37,6 @@
   :depends-on (:bordeaux-threads 
                :universal-config
                :verbose
-               :split-sequence
-               :alexandria
                :usocket
                :flexi-streams
                :uuid

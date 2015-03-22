@@ -121,6 +121,20 @@ If possible, use LATCH-CHAR to find a more apropriate breaking point within the 
 (defun escape-regex-symbols (string)
   (cl-ppcre:regex-replace-all "([\\\\\\^\\$\\.\\|\\?\\*\\+\\(\\)\\[\\]\\{\\}])" string '("\\" 0)))
 
+(defun ensure-list (a)
+  (if (listp a) a (list a)))
+
+(defmacro xor (&rest forms)
+  (let ((found (gensym "FOUND")))
+    `(let ((,found NIL))
+       (and
+        ,@(loop for form in forms
+                collect `(if ,form
+                             (unless ,found
+                               (setf ,found T))
+                             T))
+        ,found))))
+
 (defun lambda-keyword-p (symbol)
   (find symbol '(&allow-other-keys &aux &body &environment &key &optional &rest &whole)))
 

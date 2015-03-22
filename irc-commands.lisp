@@ -166,7 +166,7 @@
       (setf message (break-string message :limit length-limit)))
     (v:trace (name server) "Sending privmsg to ~a: ~a" target message)
     (colleen:dispatch (make-instance 'colleen:send-event :server server :nick (colleen:nick server) :channel target :message message))
-    (loop for message in (split-sequence:split-sequence #\Newline message)
+    (loop for message in (cl-ppcre:split "\\n" message)
           for i from 0 below line-limit
           collect (raw server "PRIVMSG ~a :~a" target message))))
 

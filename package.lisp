@@ -7,7 +7,7 @@
 (in-package #:cl-user)
 (defpackage #:colleen
   (:nicknames #:org.shirakumo.colleen)
-  (:use #:cl #:split-sequence #:bordeaux-threads #:alexandria)
+  (:use #:cl #:bordeaux-threads)
   ;; asdf-extra.lisp
   (:export
    #:module-system

@@ -26,10 +26,10 @@
 (defun shutdown ()
   "Shut down the bot: Disconnect servers, stop modules, save config."
   (v:info :shutdown "Disconnecting servers...")
-  (mapc #'disconnect (remove :null (alexandria:hash-table-values *servers*) :key #'name))
+  (mapc #'disconnect (remove :null (loop for val being the hash-values of *servers* collect val) :key #'name))
   (v:info :shutdown "Stopping modules...")
   (mapc #'(lambda (module) (ignore-errors (stop-module module)))
-        (remove-if-not #'active (remove :core (hash-table-keys *bot-modules*))))
+        (remove-if-not #'active (remove :core (loop for key being the hash-keys of *bot-modules* collect key))))
   (v:info :shutdown "Stopping core...")
   (stop-module :core)
   (v:info :shutdown "Done."))

@@ -100,8 +100,9 @@ CLASS            --- The class to make an instance of. Has to be subclass of
 (defgeneric apropos-command-handler (handler)
   (:documentation "Returns a string describing the given command handler if it exists.")
   (:method ((name symbol))
-    (when-let ((handler (command-handler name)))
-      (apropos-command-handler handler)))
+    (let ((handler (command-handler name)))
+      (when handler
+        (apropos-command-handler handler))))
 
   (:method ((command string))
     (loop for handler across *cmd-priority-array*
@@ -188,7 +189,7 @@ Unless specifically rebound, for command events the following restarts are avail
                      (when match
                        (v:trace :command "Event ~a matched ~a." event handler)
                        (setf (cancelled event) T) ; Cancel by default
-                       (let ((args (split-sequence #\Space (string-trim " " (aref groups (1- (length groups)))) :remove-empty-subseqs T)))
+                       (let ((args (cl-ppcre:split " " (string-trim " " (aref groups (1- (length groups)))))))
                          (with-repeating-restart (recheck-arguments "Try checking the arguments again.")
                            (unless (arguments-match-p (arguments handler) args)
                              (error 'invalid-arguments :argslist args :expected (arguments handler) :command (identifier handler)))

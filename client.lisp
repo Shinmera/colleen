@@ -214,7 +214,7 @@ Thing can be a SERVER, STRING, or SYMBOL."
   (with-reconnect-handler server
     (flet ((prepare-arguments (arguments)
              (let ((final-arg (search " :" arguments)))
-               (append (split-sequence #\Space arguments :remove-empty-subseqs t :end final-arg)
+               (append (cl-ppcre:split " +" arguments :end final-arg)
                        (when final-arg (list (subseq arguments (+ 2 final-arg))))))))
       (let ((name (name server)))
         (with-simple-restart (exit "<~a> Exit the receive loop." name)

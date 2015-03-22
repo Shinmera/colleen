@@ -66,8 +66,9 @@ Necessary to ensure proper event handling order."
 (defgeneric apropos-event-handler (handler)
   (:documentation "Returns a string describing the given event handler if it exists.")
   (:method ((name symbol))
-    (when-let ((handler (event-handler name)))
-      (apropos-event-handler handler)))
+    (let ((handler (event-handler name)))
+      (when handler 
+        (apropos-event-handler handler))))
   
   (:method ((handler event-handler))
     (let ((*print-pretty* NIL))
