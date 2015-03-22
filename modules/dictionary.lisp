@@ -32,7 +32,7 @@
       (when title
         (setf title (cl-ppcre:regex-replace-all " " title "_"))
         (let ((data (wiki:wiki-parse :page title :section 0)))
-          (format NIL "~a [http://en.wikipedia.org/wiki/~a]"
+          (format NIL "~a <https://en.wikipedia.org/wiki/~a>"
                   (parse-wiki-content data) title))))))
 
 (defun link-p (definition)
@@ -47,11 +47,9 @@
                            (wiki-lookup term)))
            (link (link-p definition)))
       (if link
-          (setf definition (uc:config-tree link)
-                term (format NIL "~s: ~s" term link))
-          (setf term (format NIL "~s" term)))
+          (setf definition (uc:config-tree link)))
       (if definition
-          (respond event (format-message event (format NIL "~@[~a, look at ~]~a: ~a" target term definition)))
+          (respond event (format-message event (format NIL "~@[~a: ~]~@[(~a) ~]~a" target link definition)))
           (respond event (format-message event (format NIL "~a: Sorry, I don't know anything about ~a." (or target (nick event)) term)))))))
 
 (defun define-term (module event term definition)
