@@ -31,11 +31,13 @@
                          :test #'(lambda (a b) (search b a)))
                    (let* ((text (drakma::read-body stream headers T))
                           (title (lquery:$ (initialize text) "title" (text) (node))))
-                     (if title
-                         (format NIL "Title: “~a”~:[ at ~a~;~*~]"
-                                 (string-trim " " (cl-ppcre:regex-replace-all "\\n" title "")) (string-equal target-url url) target-url)
-                         (format NIL "Invalid HTML document~:[ at ~a~;~*~]"
-                                 (string-equal target-url url) target-url)))
+                     (flet ((re (search replace target)
+                              (cl-ppcre:regex-replace-all search target replace)))
+                       (if title
+                           (format NIL "Title: “~a”~:[ at ~a~;~*~]"
+                                   (string-trim " " (re "\\s+" " " (re "\\n" "" title))) (string-equal target-url url) target-url)
+                           (format NIL "Invalid HTML document~:[ at ~a~;~*~]"
+                                   (string-equal target-url url) target-url))))
                    (format NIL "~a~:[ at ~a~;~*~]"
                            (cdr (assoc :content-type headers))
                            (string-equal target-url url) target-url))))
