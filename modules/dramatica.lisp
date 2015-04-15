@@ -108,9 +108,13 @@
                  (v:warn :dramatica.handle-log "<~a> Ban message already set!" page)
                  (handler-case
                      (progn
-                       (if (search "spam" comment :test #'char-equal)
-                           (wiki:page-edit page "{{banned}}")
-                           (wiki:page-prepend page "{{banned}}"))
+                       (cond ((search "spam" comment :test #'char-equal)
+                              (wiki:page-edit page "{{spammer}}"))
+                             ((and (not (string= comment ""))
+                                   (not (search "[[" comment)))
+                              (wiki:page-prepend page (format NIL "{{banned|~a}}" comment)))
+                             (T
+                              (wiki:page-prepend page "{{banned}}")))
                        (v:info :dramatica.handle-log "<~a> Ban page created." page))))))))
     
     ((string= logtype "newusers")
