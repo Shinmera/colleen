@@ -100,22 +100,21 @@
 (defun handle-log (logtype title comment)
   (cond
     ((string= logtype "block")
-     (let ((page title))
-       (if (cl-ppcre:scan *ip-match* page)
-           (v:info :dramatica.handle-log "<~a> Ban message skipped due to IP block." page)
-           (let ((page-content (wiki:page-get page)))
-             (if (search "{{banned}}" page-content)
-                 (v:warn :dramatica.handle-log "<~a> Ban message already set!" page)
-                 (handler-case
-                     (progn
-                       (cond ((search "spam" comment :test #'char-equal)
-                              (wiki:page-edit page "{{spammer}}"))
-                             ((and (not (string= comment ""))
-                                   (not (search "[[" comment)))
-                              (wiki:page-prepend page (format NIL "{{banned|~a}}" comment)))
-                             (T
-                              (wiki:page-prepend page "{{banned}}")))
-                       (v:info :dramatica.handle-log "<~a> Ban page created." page))))))))
+     (let* ((page title)
+            (page-content (wiki:page-get page)))
+       (cond ((cl-ppcre:scan *ip-match* page)
+              (v:info :dramatica.handle-log "<~a> Ban message skipped due to IP block." page))
+             ((search "{{banned}}" page-content)
+              (v:warn :dramatica.handle-log "<~a> Ban message already set!" page))
+             (T
+              (cond ((search "spam" comment :test #'char-equal)
+                     (wiki:page-edit page "{{spammer}}"))
+                    ((and (not (string= comment ""))
+                          (not (search "[[" comment)))
+                     (wiki:page-prepend page (format NIL "{{banned|~a}}" comment)))
+                    (T
+                     (wiki:page-prepend page "{{banned}}")))
+              (v:info :dramatica.handle-log "<~a> Ban page created." page)))))
     
     ((string= logtype "newusers")
      (let* ((page (format NIL "User_Talk:~a" (subseq title 5)))
