@@ -268,6 +268,9 @@
 (define-irc-server-command nick (new-nick &optional server) (:documentation "Change the bot's nick.")
   (irc:nick new-nick :server serv))
 
+(define-command topic (&rest new-topic) (:authorization T :documentation "Set the channel topic (if possible).")
+  (irc:topic (channel event) :topic (format NIL "~{~a~^ ~}" new-topic)))
+
 (define-command (irc topic) (channel &rest topic) (:authorization T :documentation "Change the channel topic.")
   (irc:topic channel :topic (format NIL "~{~a~^ ~}" topic)))
 
