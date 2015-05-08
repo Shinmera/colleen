@@ -105,29 +105,27 @@
           (respond event "Nothing found for ~a." query)))))
 
 (define-command (search clhs) (&rest query) (:documentation "Search the Common Lisp Hyperspec and return the short explanation.")
-  (let ((target-url (make-string-output-stream))
-        (text ""))
+  (let ((target-url (make-string-output-stream)))
     (multiple-value-bind (content status headers uri) (drakma-utf8 (format NIL "http://l1sp.org/cl/~{~a~^%20~}" query))
       (declare (ignore headers))
       (puri:render-uri uri target-url)
       (setf target-url (get-output-stream-string target-url))
       (if (= status 200)
-          (progn
-            (ignore-errors (setf text ($ (initialize content) "body>a" (eq 0) (text) (node))))
-            (respond event "~a ~a" text target-url))
+          (let ((text (ignore-errors ($ (initialize content) "body>a" (eq 0) (text) (node)))))
+            (respond event "~@[~a ~]~a" text target-url))
           (respond event "Nothing found.")))))
 
 (define-command (search mop) (&rest query) (:documentation "Search the Common Lisp MetaObject Protocol and return the short explanation.")
-  (let ((target-url (make-string-output-stream))
-        (text ""))
+  (let ((target-url (make-string-output-stream)))
     (multiple-value-bind (content status headers uri) (drakma-utf8 (format NIL "http://l1sp.org/mop/~{~a~^%20~}" query))
       (declare (ignore headers))
       (puri:render-uri uri target-url)
       (setf target-url (get-output-stream-string target-url))
       (if (= status 200)
-          (progn
-            (ignore-errors (setf text ($ (initialize content) (inline (format NIL "a[name=\"~{~a~^~}\"]" query)) (text) (node))))
-            (respond event "~a ~a" text target-url))
+          (let ((text (ignore-errors
+                       (let ((texts (lquery:$ (initialize content) (inline (format NIL "a[name=\"~{~a~^~}\"]" query)) "*" (lt 2) (text))))
+                         (format NIL "~a ~a" (aref texts 0) (aref texts 1))))))
+            (respond event "~@[~a ~]~a" text target-url))
           (respond event "Nothing found.")))))
 
 (define-command (search shorten) (&rest address) (:documentation "Create a shortened URL through bit.ly .")
