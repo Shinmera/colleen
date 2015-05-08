@@ -28,6 +28,11 @@
       (respond event "The Common Lisp Hyperspec http://www.lispworks.com/documentation/HyperSpec/Front/index.htm")
       (relay-command event (format NIL "search ~a" (message event)))))
 
+(define-command mop (&rest query) (:documentation "Look up on the MetaObject Protocol.")
+  (if (= (length query) 0)
+      (respond event "The Common Lisp Object System MetaObject Protocol http://www.alu.org/mop/index.html")
+      (relay-command event (format NIL "search ~a" (message event)))))
+
 (define-group search :documentation "Perform a search on a variety of sites.")
 
 (define-command (search lmgtfy) (&rest query) (:documentation "Return a \"Let me google that for you\" link.")
@@ -109,6 +114,19 @@
       (if (= status 200)
           (progn
             (ignore-errors (setf text ($ (initialize content) "body>a" (eq 0) (text) (node))))
+            (respond event "~a ~a" text target-url))
+          (respond event "Nothing found.")))))
+
+(define-command (search mop) (&rest query) (:documentation "Search the Common Lisp MetaObject Protocol and return the short explanation.")
+  (let ((target-url (make-string-output-stream))
+        (text ""))
+    (multiple-value-bind (content status headers uri) (drakma-utf8 (format NIL "http://l1sp.org/mop/~{~a~^%20~}" query))
+      (declare (ignore headers))
+      (puri:render-uri uri target-url)
+      (setf target-url (get-output-stream-string target-url))
+      (if (= status 200)
+          (progn
+            (ignore-errors (setf text ($ (initialize content) (inline (format NIL "a[name=\"~{~a~^~}\"]" query)) (text) (node))))
             (respond event "~a ~a" text target-url))
           (respond event "Nothing found.")))))
 
