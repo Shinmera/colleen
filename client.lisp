@@ -184,37 +184,42 @@ Thing can be a SERVER, STRING, or SYMBOL."
 
 (defmacro with-reconnect-handler (servervar &body body)
   "Handles all possible connection errors and initiates a reconnect on failure."
-  `(handler-case
-       (progn ,@body)
-     ((or usocket:ns-try-again-condition 
-       usocket:timeout-error 
-       usocket:shutdown-error
-       usocket:connection-reset-error
-       usocket:connection-aborted-error
-       ping-timeout
-       cl:end-of-file) (err)
-       (v:warn (name ,servervar) "Error encountered: ~a" err)
-      (when (not (restart-thread ,servervar))
-        (v:warn (name ,servervar) "Connection lost, attempting reconnect in ~as..." (server-config ,servervar :reconnect-cooldown))
-        (make-server-thread ,servervar '%restart-thread
+  `(call-with-reconnect-handler ,servervar (lambda () ,@body)))
+
+(defun call-with-reconnect-handler (server function)
+  (handler-case
+      (handler-bind ((error (lambda (e)
+                              (when *debugger*
+                                (invoke-debugger e)))))
+        (funcall function))
+    ((or usocket:ns-try-again-condition 
+      usocket:timeout-error 
+      usocket:shutdown-error
+      usocket:connection-reset-error
+      usocket:connection-aborted-error
+      ping-timeout
+      cl:end-of-file) (err)
+      (v:warn (name server) "Error encountered: ~a" err)
+      (when (not (restart-thread server))
+        (v:warn (name server) "Connection lost, attempting reconnect in ~as..." (server-config server :reconnect-cooldown))
+        (make-server-thread server '%restart-thread
                             #'(lambda () 
-                                (sleep (server-config ,servervar :reconnect-cooldown))
-                                (reconnect ,servervar :try-again-indefinitely T)))))
-     (disconnect (e)
-       (declare (ignore e))
-       (v:warn (name ,servervar) "Leaving reconnect-handler due to disconnect condition..."))
-     (error (e)
-       (v:severe (name ,servervar) "Uncaught error in reconnect-handler: ~a" e)
-       (when *debugger*
-         (invoke-debugger e)))))
+                                (sleep (server-config server :reconnect-cooldown))
+                                (reconnect server :try-again-indefinitely T)))))
+    (disconnect (e)
+      (declare (ignore e))
+      (v:warn (name server) "Leaving reconnect-handler due to disconnect condition..."))
+    (error (e)
+      (v:severe (name server) "Uncaught error in reconnect-handler: ~a" e))))
 
 (defvar *irc-message-regex* (cl-ppcre:create-scanner "^(:([^ ]+) +)?([^ ]+)( +(.+))?"))
 (defun read-loop (&optional (server *current-server*))
   "Continuously receives and handles a message."
   (with-reconnect-handler server
     (flet ((prepare-arguments (arguments)
-             (let ((final-arg (search " :" arguments)))
-               (append (cl-ppcre:split " +" arguments :end (or final-arg (length arguments)))
+             (let ((final-arg (search " :" arguments))
+                   (non-space (or (position #\Space arguments :test #'char/=) 0)))
+               (append (cl-ppcre:split " +" arguments :start non-space :end (or final-arg (length arguments)))
                        (when final-arg (list (subseq arguments (+ 2 final-arg))))))))
       (let ((name (name server)))
         (with-simple-restart (exit "<~a> Exit the receive loop." name)
