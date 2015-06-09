@@ -123,7 +123,7 @@
       (setf target-url (get-output-stream-string target-url))
       (if (= status 200)
           (let ((text (ignore-errors
-                       (let ((texts (lquery:$ (initialize content) (inline (format NIL "a[name=\"~{~a~^~}\"]" query)) "*" (lt 2) (text))))
+                       (let ((texts (lquery:$ (initialize content) (inline (format NIL "a[name=\"~{~a~^~}\"]" query)) (children) (lt 2) (text))))
                          (format NIL "~a ~a" (aref texts 0) (aref texts 1))))))
             (respond event "~@[~a ~]~a" text target-url))
           (respond event "Nothing found.")))))
