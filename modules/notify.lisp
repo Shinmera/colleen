@@ -51,7 +51,7 @@
 
 (defun make-note (event recipient message &rest overrides)
   (let ((args (list :message (format NIL "~{~a~^ ~}" message)
-                    :nick (normalize-reicipient recipient)
+                    :nick (normalize-recipient recipient)
                     :sender (nick event)
                     :channel (channel event)
                     :server (string-upcase (name (server event)))
@@ -76,7 +76,7 @@
   (respond event "Currently ~d notes in queue." (length (uc:config-tree :notes))))
 
 (define-command |notify @join| (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next join this channel.")
-  (let ((recipient (normalize-reicipient recipient)))
+  (let ((recipient (normalize-recipient recipient)))
     (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
     (push (make-note event recipient message :trigger :join)
           (uc:config-tree :notes))
@@ -121,7 +121,7 @@
       (respond event "Invalid date. Should be an RFC3339 compatible string like so: 16:22:43"))))
 
 (define-command notify (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next speak in this channel.")
-  (let ((recipient (normalize-reicipient recipient)))
+  (let ((recipient (normalize-recipient recipient)))
     (cond ((string-equal recipient (nick (server event)))
            (respond event "~a: I'm right here." (nick event)))
           ((string-equal recipient (nick event))
