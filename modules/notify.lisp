@@ -46,9 +46,12 @@
       (when (integerp (nick note))
         (schedule-timer 'notify :once (nick note) :arguments (list note))))))
 
+(defun normalize-recipient (recipient)
+  (remove-if-not (lambda (a) (find a "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-\\[]{}^`|")) recipient))
+
 (defun make-note (event recipient message &rest overrides)
   (let ((args (list :message (format NIL "~{~a~^ ~}" message)
-                    :nick recipient
+                    :nick (normalize-reicipient recipient)
                     :sender (nick event)
                     :channel (channel event)
                     :server (string-upcase (name (server event)))
@@ -73,10 +76,11 @@
   (respond event "Currently ~d notes in queue." (length (uc:config-tree :notes))))
 
 (define-command |notify @join| (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next join this channel.")
-  (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-  (push (make-note event recipient message :trigger :join)
-        (uc:config-tree :notes))
-  (respond event "~a: Remembered. I will remind ~a when he/she/it next joins." (nick event) recipient))
+  (let ((recipient (normalize-reicipient recipient)))
+    (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+    (push (make-note event recipient message :trigger :join)
+          (uc:config-tree :notes))
+    (respond event "~a: Remembered. I will remind ~a when he/she/it next joins." (nick event) recipient)))
 
 (define-command |notify @any| (&rest message) (:documentation "Say MESSAGE when any lines are spoken in the chatroom.")
   (v:debug :notify "Creating new note for anyone by ~a" (nick event))
@@ -117,15 +121,16 @@
       (respond event "Invalid date. Should be an RFC3339 compatible string like so: 16:22:43"))))
 
 (define-command notify (recipient &rest message) (:documentation "Notify MESSAGE to RECIPIENT when they next speak in this channel.")
-  (cond ((string-equal recipient (nick (server event)))
-         (respond event "~a: I'm right here." (nick event)))
-        ((string-equal recipient (nick event))
-         (respond event "~a: Are you feeling lonely?" (nick event)))
-        (T
-         (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
-         (push (make-note event recipient message)
-               (uc:config-tree :notes))
-         (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient))))
+  (let ((recipient (normalize-reicipient recipient)))
+    (cond ((string-equal recipient (nick (server event)))
+           (respond event "~a: I'm right here." (nick event)))
+          ((string-equal recipient (nick event))
+           (respond event "~a: Are you feeling lonely?" (nick event)))
+          (T
+           (v:debug :notify "Creating new note by ~a for ~a" (nick event) recipient)
+           (push (make-note event recipient message)
+                 (uc:config-tree :notes))
+           (respond event "~a: Remembered. I will remind ~a when he/she/it next speaks." (nick event) recipient)))))
 
 (define-handler (privmsg-event event) (:documentation "Checks for notifications to deliver to the speaker.")
   (let ((newlist ()))
