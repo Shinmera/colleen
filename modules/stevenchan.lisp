@@ -29,21 +29,6 @@
             (setf (last-id module) id)
             (irc:privmsg "#Stevenchan" (format NIL "New post: ~a by ~a: ~a" id author link))))
       (error (err)
-        (v:warn :Stevenchan "Error in checker ~a" err)))
-
-    (v:debug :stevenchan "Checking livestream...")
-    (handler-case
-        (let ((lquery:*lquery-master-document*)
-              (data (drakma:http-request (stream-api module))))
-          ($ (initialize (cl-ppcre:regex-replace-all "ls:" data "")))
-          (let ((status ($ "isLive" (text) (node))))
-            (unless (string-equal status (stream-live module))
-              (setf (stream-live module) status)
-              (when (string-equal status "true")
-                (v:debug :Stevenchan "Stream is now live!")
-                (irc:privmsg "#Stevenchan" "[livestream] Stream is now live!")
-                (irc:privmsg "#Stevenchan" (format NIL "~{~a: ~} ^" (remove (nick (server :tynet)) (users "#Stevenchan") :test #'string-equal)))))))
-      (error (err)
         (v:warn :Stevenchan "Error in checker ~a" err)))))
 
 (defgeneric most-recent (stevenchan &optional rss-url))
