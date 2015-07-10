@@ -114,6 +114,10 @@ r-'ｧ'\"´/　 /!　ﾊ 　ハ　 !　　iヾ_ﾉ　i　ｲ　iゝ、ｲ人レ�
         (sleep (/ (random 20) 10))
         (respond event "Nespresso."))
 
+      (when (cl-ppcre:scan "who else" message)
+        (sleep (/ (random 20) 10))
+        (respond event "George Clooney."))
+
       (when (cl-ppcre:scan "more" message)
         (scan-for-more (message event)))
 
