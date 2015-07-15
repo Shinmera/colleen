@@ -15,36 +15,45 @@ Author: Nicolas Hafner <shinmera@tymoon.eu>
 
 (defun template (template args)
   (cl-ppcre:regex-replace-all
-   "\\{([0-9]+)(-([0-9]+)?)?(\\|(.*?))?\\}"
+   "\\{([^{}]+)\\}"
    template
    (lambda (template start end mstart mend regs rege)
      (declare (ignore start end mstart mend))
-     (let* ((start
-              (parse-integer template :start (aref regs 0) :end (aref rege 0)))
-            (end
-              (cond ((aref regs 2)
-                     (min
-                      (length args)
-                      (parse-integer template :start (aref regs 2) :end (aref rege 2))))
-                    ((aref regs 1)
-                     (length args))
-                    (T
-                     (1+ start))))
-            (alternative
-              (when (aref regs 3)
-                (subseq template (aref regs 4) (aref rege 4)))))
-       (or
-        (when (< start (length args))
-          (format NIL "~{~a~^ ~}" (subseq args start end)))
-        alternative
-        "")))))
+     (or
+      (gethash (subseq template (aref regs 0) (aref rege 0)) args)
+      ""))))
 
-(define-command topic (&rest topicargs) (:documentation "Set the topic using the channel's template if available.")
+(defun parse-args (topicargs)
+  (let ((map (make-hash-table :test 'equalp)))
+    (setf (gethash "message" map) (reverse topicargs))
+    (loop with key = NIL
+          for arg in topicargs
+          do (cond ((and (< 1 (length arg)) (char= (char arg 0) #\:))
+                    (setf key (subseq arg 1)))
+                   (key
+                    (push arg (gethash key map)))))
+    (maphash (lambda (key val)
+               (setf (gethash key map) (format NIL "~{~a~^ ~}" (reverse val))))
+             map)
+    map))
+
+(defun merge-table-into (from to)
+  (loop for k being the hash-keys of from
+        for v being the hash-values of from
+        do (setf (gethash k to) v))
+  to)
+
+(define-command topic (&rest topicargs) (:documentation "Set the topic using the channel's template if available. Use prefix names with a colon to indicate a placeholder.")
   (let ((template (or (uc:config-tree (channel event) :template)
-                      "{0-}")))
-    (irc:topic (channel event) :topic (template template topicargs))))
+                      "{message}"))
+        (arguments (or (uc:config-tree (channel event) :arguments)
+                       (make-hash-table :test 'equalp))))
+    (merge-table-into (parse-args topicargs) arguments)
+    (irc:topic (channel event) :topic (template template arguments))))
 
-(define-command topic-template (&rest template) (:documentation "Set a template for the current topic.")
+(define-command topic-template (&rest template) (:documentation "Set a template for the current topic. Use {name} to enter placeholders.")
   (setf (uc:config-tree (channel event) :template)
-        (format NIL "~{~a~^ ~}" template))
+        (format NIL "~{~a~^ ~}" template)
+        (uc:config-tree (channel event) :arguments)
+        (make-hash-table :test 'equalp))
   (respond event "Template set."))
