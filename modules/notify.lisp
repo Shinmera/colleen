@@ -51,7 +51,7 @@
 
 (defun make-note (event recipient message &rest overrides)
   (let ((args (list :message (format NIL "~{~a~^ ~}" message)
-                    :nick (normalize-recipient recipient)
+                    :nick (normalize-recipient (princ-to-string recipient))
                     :sender (nick event)
                     :channel (channel event)
                     :server (string-upcase (name (server event)))
