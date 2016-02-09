@@ -104,7 +104,7 @@
     (:documentation "Part of the post-registration greeting. Text varies widely"))
 
 (define-event myinfo-event :RPL_MYINFO (event)
-    (target server-name version user-modes chan-modes &optional channel-modes-with-params user-modes-with-params server-modes server-modes-with-params)
+    (target server-name &optional version user-modes chan-modes channel-modes-with-params user-modes-with-params server-modes server-modes-with-params)
     (:documentation "Same as RFC2812 however with additional fields to avoid additional 005 burden."))
 
 (define-event bounce-event :RPL_BOUNCE (event)
