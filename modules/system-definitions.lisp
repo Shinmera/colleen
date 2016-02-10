@@ -36,6 +36,7 @@
 (define-module-system syslog ("syslog"))
 (define-module-system throttle ("throttle"))
 (define-module-system topic ("topic") (:cl-ppcre))
+(define-module-system twitch ("twitch") (:drakma :jsown))
 (define-module-system twitter ("twitter") (:chirp :cl-ppcre))
 (define-module-system urlinfo ("urlinfo") (:drakma :cl-ppcre :lquery))
 (define-module-system weather ("weather") (:drakma :cl-json))
