@@ -178,11 +178,14 @@
             do (when (search emote (message event) :test #'char=)
                  (case timeout
                    (:scold
+                    (v:info :twitch "[~a] Scolding ~a for using an emoticon." channel (nick event))
                     (respond event "~a: Please do not make an embarrassment of yourself by using emotes." (nick event)))
                    (:infinity
+                    (v:info :twitch "[~a] Banning ~a for using an emoticon." channel (nick event))
                     (respond event "~a: You have been banned for using an emote. Please mind the rules." (nick event))
                     (respond event ".ban ~a" (nick event)))
                    (T
+                    (v:info :twitch "[~a] Timing out ~a for using an emoticon." channel (nick event))
                     (respond event "~a: You have been timed out~@[ for ~a seconds~] for using an emote. Please mind the rules." (nick event) timeout)
                     (respond event ".timeout ~a~@[ ~a~]" timeout)))
                  (return))))))
