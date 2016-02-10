@@ -189,5 +189,5 @@
                    (T
                     (v:info :twitch "[~a] Timing out ~a for using an emoticon." channel user)
                     (respond event "~a: You have been timed out~@[ for ~a seconds~] for using an emote. Please mind the rules." user timeout)
-                    (respond event ".timeout ~a~@[ ~a~]" timeout)))
+                    (respond event ".timeout ~a~@[ ~a~]" user timeout)))
                  (return))))))
