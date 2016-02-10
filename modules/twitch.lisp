@@ -172,20 +172,22 @@
         (respond event "Emotes are now unbanned."))))
 
 (define-handler (privmsg-event event) ()
-  (let ((timeout (gethash (channel event) (uc:config-tree :emotes-banned))))
+  (let* ((user (nick event))
+         (channel (channel event))
+         (timeout (gethash channel (uc:config-tree :emotes-banned))))
     (when (and timeout (not (eql timeout :none)))
       (loop for emote in *emotes*
             do (when (search emote (message event) :test #'char=)
                  (case timeout
                    (:scold
-                    (v:info :twitch "[~a] Scolding ~a for using an emoticon." channel (nick event))
-                    (respond event "~a: Please do not make an embarrassment of yourself by using emotes." (nick event)))
+                    (v:info :twitch "[~a] Scolding ~a for using an emoticon." channel user)
+                    (respond event "~a: Please do not make an embarrassment of yourself by using emotes." user))
                    (:infinity
-                    (v:info :twitch "[~a] Banning ~a for using an emoticon." channel (nick event))
-                    (respond event "~a: You have been banned for using an emote. Please mind the rules." (nick event))
-                    (respond event ".ban ~a" (nick event)))
+                    (v:info :twitch "[~a] Banning ~a for using an emoticon." channel user)
+                    (respond event "~a: You have been banned for using an emote. Please mind the rules." user)
+                    (respond event ".ban ~a" user))
                    (T
-                    (v:info :twitch "[~a] Timing out ~a for using an emoticon." channel (nick event))
-                    (respond event "~a: You have been timed out~@[ for ~a seconds~] for using an emote. Please mind the rules." (nick event) timeout)
+                    (v:info :twitch "[~a] Timing out ~a for using an emoticon." channel user)
+                    (respond event "~a: You have been timed out~@[ for ~a seconds~] for using an emote. Please mind the rules." user timeout)
                     (respond event ".timeout ~a~@[ ~a~]" timeout)))
                  (return))))))
