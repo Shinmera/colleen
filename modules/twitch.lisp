@@ -138,6 +138,7 @@
   (respond event "User ~a has been unmodded." user))
 
 (defvar *emotes* ())
+(defvar *default-whitelist* '("Hey"))
 
 (defmethod start :after ((twitch twitch))
   (load-emotes))
@@ -171,13 +172,20 @@
         (respond event "Emotes are now banned.")
         (respond event "Emotes are now unbanned."))))
 
+(define-twitch-command whitelist-emote (name) ()
+  (pushnew name (uc:config-tree :whitelisted-emotes) :test #'string=)
+  (v:info :twitch "Whitelisting ~a" name)
+  (respond event "Emote ~s whitelisted." name))
+
 (define-handler (privmsg-event event) ()
   (let* ((user (nick event))
          (channel (channel event))
-         (timeout (gethash channel (uc:config-tree :emotes-banned))))
+         (timeout (gethash channel (uc:config-tree :emotes-banned)))
+         (whitelist (or (uc:config-tree :whitelisted-emotes) *default-whitelist*)))
     (when (and timeout (not (eql timeout :none)))
       (loop for emote in *emotes*
-            do (when (search emote (message event) :test #'char=)
+            do (when (and (not (find emote whitelist :test #'string=))
+                          (search emote (message event) :test #'char=))
                  (case timeout
                    (:scold
                     (v:info :twitch "[~a] Scolding ~a for using an emoticon." channel user)
