@@ -21,7 +21,7 @@
 (define-module-system eval ("eval"))
 (define-module-system google ("google" "google-lng") (:split-sequence :drakma :cl-json :plump))
 (define-module-system markov-twitter-bridge ("markov-twitter-bridge") (:co-markov :chirp))
-(define-module-system markov ("markov"))
+(define-module-system markov ("markov") (:split-sequence))
 (define-module-system medals ("medals"))
 (define-module-system mentions ("mentions") (:cl-ppcre :local-time))
 (define-module-system notify ("notify") (:local-time))
