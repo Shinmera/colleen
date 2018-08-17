@@ -10,7 +10,9 @@
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
-  :homepage "http://github.com/Shinmera/colleen"
+  :homepage "https://Shinmera.github.io/colleen/"
+  :bug-tracker "https://github.com/Shinmera/colleen/issues"
+  :source-control (:git "https://github.com/Shinmera/colleen.git")
   :description "IRC bot with a modular framework."
   :serial T
   :components ((:file "package")
