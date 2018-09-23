@@ -2,6 +2,8 @@ About Colleen
 -------------
 Colleen is a relatively large IRC bot framework with support for event handling, encapsulation through modules, command parsing, threading and more. However, it is also usable as a direct IRC bot straight away thanks to a plethora of modules that are included by default and should provide most of the functionality you might want out of a bot.
 
+**Colleen is no longer maintained and has been superseded by [Maiden](https://shinmera.github.io/maiden).**
+
 How to Use Colleen as a Bot
 ---------------------------
 Load Colleen through Quicklisp or ASDF:
